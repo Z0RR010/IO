@@ -1,11 +1,41 @@
 ﻿@page "/map"
 @rendermode InteractiveServer
 
+@inject IJSRuntime JSRuntime
+
 <PageTitle>Map</PageTitle>
 
+<script src="scripts/maps.js"></script>
+
 <h1>Map</h1>
+<div id="map01" style="width: 100%; height: 500px;"></div>
+<div id="map02" style="width: 100%; height: 500px;"></div>
 
 
 @code {
+
+    public struct Coordinates
+    {
+        public double Lat { get; set; }
+        public double Lng { get; set; }
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var latlng = await JSRuntime.InvokeAsync<Coordinates>("geocode", "1600 Amphitheatre Parkway, Mountain View, CA");
+            
+            await JSRuntime.InvokeVoidAsync("initMap", "map01", latlng.Lat, latlng.Lng);
+            await JSRuntime.InvokeVoidAsync("addMarker", "map01", latlng.Lat, latlng.Lng, "Some place");
+            
+            var latlng2 = await JSRuntime.InvokeAsync<Coordinates>("geocode", "Wólczańska 215C, 90-515 Łódź, Polska");
+            
+            await JSRuntime.InvokeVoidAsync("initMap", "map02", latlng2.Lat, latlng2.Lng);
+            await JSRuntime.InvokeVoidAsync("addMarker", "map02", latlng2.Lat, latlng2.Lng, "Another place");
+            await JSRuntime.InvokeVoidAsync("addMarker", "map02", 51.744765, 19.46287, "Yet another place");
+            
+        }
+    }
     
 }
