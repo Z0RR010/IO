@@ -6,18 +6,17 @@
 
 <PageTitle>Map</PageTitle>
 
-<script src="scripts/maps.js"></script>
-
 <h1>Map</h1>
 <div id="map01" style="width: 100%; height: 500px;"></div>
-
 
 @code {
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            MapController map01 = new MapController(GoogleMaps, "map01");
+            await GoogleMaps.InitializeApi("pl");
+            
+            MapController map01 = new(GoogleMaps, "map01");
             map01.Address = "Wólczańska 215C, 90-515 Łódź, Polska";
             await map01.DrawMap();
         }
