@@ -1,4 +1,5 @@
 using IO.Components;
+using IO.Modules.MapLibrary;
 
 namespace IO
 {
@@ -11,6 +12,8 @@ namespace IO
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
+
+            builder.Services.AddScoped<GoogleMapsClient>();
 
             var app = builder.Build();
 

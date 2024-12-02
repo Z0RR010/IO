@@ -39,9 +39,9 @@ async function geocode(address) {
         geocoder.geocode({ address: address }, (results, status) => {
             if (status === "OK") {
                 const location = results[0].geometry.location;
-                resolve({ lat: location.lat(), lng: location.lng() });
+                resolve({ Latitude: location.lat(), Longitude: location.lng() });
             } else {
-                reject(null);
+                reject("Google Maps API Geocoding: " + status);
             }
         });
     });

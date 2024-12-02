@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Modules\MapLibrary\" />
+    <Content Include="Modules\MapLibrary\MapLibrary.csproj" />
   </ItemGroup>
 
 </Project>
