@@ -1,0 +1,42 @@
+Jeżeli moduł nie jest zdolny się podłączyć do bazy danych, to prawdopodobnie to dlatego, że nie macie zainstalowanego MySQL server. niestety, na razie nie mamy dedykowanego servera, więc musimy się bawić tym, co mamy.
+
+Należy pobrać MySQL ze strony: https://dev.mysql.com/downloads/file/?id=536355
+
+następnie zainstalować go z domyślnymi ustawieniami oraz 
+login: root
+hasło: root
+
+(możecie to zauważyć nawet w kodzie)
+
+jeśli nadal nie działa, to trzeba dodać bazy danych wraz z ich tabelami (OBOWIĄZKOWO pilnować rozmiar wpisywanych literek w nazwy BD i tabwli):
+
+create database resourceBase
+
+use resourceBase
+
+create table resources (
+hashcode_id INT PRIMARY KEY,
+resource JSON NOT NULL
+)
+
+
+
+create database userDatabase
+
+use userDatabase
+
+create table users (
+email VARCHAR(50) PRIMARY KEY,
+user JSON NOT NULL,
+encryptionKey VARCHAR(256),
+password VARCHAR(256)
+)
+
+
+do sprawdzenia zawartości:
+select * from nazwa_tablicy
+
+usunięcie:
+	treści tablicy: delete from nazwa_tablicy
+	samej tablicy: drop table nazwa
+	bazy danych: drop database nazwa

@@ -1,0 +1,182 @@
+﻿using System.Data;
+using MySql.Data.MySqlClient;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace ResourceManager;
+
+/// <summary>
+/// Class for managing user accounts
+/// </summary>
+public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
+{
+    private readonly MySqlConnection _userConnection;
+
+    //If connection is not established try downloading mySQL server so far
+    public UserExecuter()
+    {
+        try
+        {
+            _userConnection =
+                new MySqlConnection("Server=localhost;Port=3306;Database=userDatabase;User Id=root;Password=root;");
+            _userConnection.Open();
+            //Diagnostics stuff
+            Console.WriteLine(_userConnection.Database);
+        }
+        catch (MySqlException ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Get the password of the concrete user
+    /// </summary>
+    /// <param name="email">an email of requested user</param>
+    /// <returns>String containing password. Otherwise, empty string</returns>
+    private string GetPasswordFromDataBase(string email)
+    {
+        string query = "SELECT password FROM users WHERE email = @email";
+
+        using (var command = new MySqlCommand(query, _userConnection))
+        {
+            command.Parameters.AddWithValue("@email", email);
+            
+            string input = command.ExecuteScalar()?.ToString();
+
+            if (input != null)
+            {
+                return input;
+            }
+
+            return "";
+        }
+    }
+
+    /// <summary>
+    /// Looks for user and checks if it's stored in user database
+    /// </summary>
+    /// <param name="email">Email of requested user</param>
+    /// <returns>True if user was found in database. Otherwise, false</returns>
+    public bool IsUserInDataBase(string email)
+    {
+        string query = "SELECT * FROM users WHERE email = @email";
+
+        using (var command = new MySqlCommand(query, _userConnection))
+        {
+            command.Parameters.AddWithValue("@email", email);
+            return command.ExecuteScalar()?.ToString() != null;
+        }
+
+        // connection closes automatically as this class implements IDisposable interface
+    }
+    
+    /// <summary>
+    /// Get a concrete individual user from database as only they have PESEL
+    /// </summary>
+    /// <param name="email">Email of requested user</param>
+    /// <returns>User of type Individual if found in DB. Otherwise, NULL</returns>
+    public Individual GetUserFromDataBase(string email)
+    {
+        //FIXME
+        if (IsUserInDataBase(email))
+        {
+            string query = "SELECT user FROM users WHERE email = @email";
+
+            using (var command = new MySqlCommand(query, _userConnection))
+            {
+                command.Parameters.AddWithValue("@email", email);
+                
+                var input = command.ExecuteScalar()?.ToString();
+                if (input != null)
+                {
+                    return JsonSerializer.Deserialize<Individual>(input);
+                }
+
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    // Changes: added feature to add password. Troubles with serializing inherited classes
+    /// <summary>
+    /// Add user to data base
+    /// </summary>
+    /// <param name="user">Object of type User. It'll be serialised in JSON and sent</param>
+    /// <param name="encryptionKey">Key for security purposes</param>
+    /// <param name="password">Password of the new user</param>>
+    /// <returns>True if operation was successful. Otherwise, false</returns>
+    public bool SendToDataBase(Individual user, string encryptionKey, string password)
+    {
+        //FIXME
+        // var options = new JsonSerializerOptions
+        // {
+        //     WriteIndented = true,
+        //     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        // }
+        
+        var packedUser = JsonSerializer.Serialize(user);
+        string query =
+            "INSERT INTO users(email, user, encryptionKey, password) VALUES(@email, @packedUser, @encryptionKey, @password)";
+        try
+        {
+            using (var command = new MySqlCommand(query, _userConnection))
+            {
+                command.Parameters.AddWithValue("@email", user.EmailAddress);
+                command.Parameters.AddWithValue("@packedUser", packedUser);
+                command.Parameters.AddWithValue("@encryptionKey", encryptionKey);
+                command.Parameters.AddWithValue("@password", password);
+                
+                int rowsAffected = command.ExecuteNonQuery();
+                return rowsAffected > 0;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Checks the validality of password
+    /// </summary>
+    /// <param name="email">Email of requested user</param>
+    /// <param name="password">Provided password</param>
+    /// <returns>True if password is valid. Otherwise, false</returns>
+    public bool IsPasswordCorrect(string email, string password)
+    {
+        return password.Equals(GetPasswordFromDataBase(email));
+    }
+
+    /// <summary>
+    /// Get user PESEL (individual number) providing their Email
+    /// </summary>
+    /// <param name="email">Email of user</param>
+    /// <returns>String PESEL of user if it's in database or is individual person. Otherwise, empty string</returns>
+    public string GetUserPESEL(string email)
+    {
+        Individual user = GetUserFromDataBase(email);
+        if (user != null && user.GetType().IsSubclassOf(typeof(User)))
+        {
+            Individual output = user;
+            return output.Pesel;
+        }
+
+        return "";
+    }
+
+    public void Dispose()
+    {
+        _userConnection.Close();
+        _userConnection.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _userConnection.DisposeAsync();
+    }
+}
