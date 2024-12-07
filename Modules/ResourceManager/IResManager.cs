@@ -16,4 +16,6 @@ public interface IResManager
     public bool ChangeItemStatus(string name, bool newStatus);
 
     public bool ChangeItemAmount(string name, int newAmount);
+    
+    
 }

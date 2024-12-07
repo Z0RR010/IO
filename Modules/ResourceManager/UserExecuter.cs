@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Text;
 using MySql.Data.MySqlClient;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -159,14 +160,60 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
     /// <returns>String PESEL of user if it's in database or is individual person. Otherwise, empty string</returns>
     public string GetUserPESEL(string email)
     {
-        Individual user = GetUserFromDataBase(email);
+        User user = GetUserFromDataBase(email);
         if (user != null && user.GetType().IsSubclassOf(typeof(User)))
         {
-            Individual output = user;
+            Individual output = (Individual) user;
             return output.Pesel;
         }
 
         return "";
+    }
+
+    /// <summary>
+    /// Make your own query if you dislike our functions
+    /// </summary>
+    /// <param name="query">Command</param>
+    /// <returns>Result of command execution</returns>
+    public string CustromQuery(string query)
+    {
+        if (query.Contains("DROP DATABASE".ToLower()) || query.Contains("DROP TABLE".ToLower()))
+        {
+            throw new Exception("Are you dumb? What are you trying to do?");
+        }
+
+        try
+        {
+            using (var command = new MySqlCommand(query, _userConnection))
+            using (var reader = command.ExecuteReader())
+            {
+                var result = new StringBuilder();
+
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    result.Append(reader.GetName(i));
+                    if (i < reader.FieldCount - 1) result.Append(", ");
+                }
+                result.AppendLine();
+
+                while (reader.Read())
+                {
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        result.Append(reader.GetValue(i));
+                        if (i < reader.FieldCount - 1) result.Append(", ");
+                    }
+                    result.AppendLine();
+                }
+
+                return result.ToString();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public void Dispose()

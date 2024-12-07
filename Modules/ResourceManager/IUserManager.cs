@@ -14,4 +14,6 @@ public interface IUserManager
     public bool IsPasswordCorrect(string email, string password);
     
     public string GetUserPESEL(string email);
+
+    public string CustromQuery(string query);
 }

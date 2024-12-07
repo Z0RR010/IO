@@ -106,4 +106,14 @@ public class Executor : IResManager
     {
         return _handler.SetNewAmount(name, newAmount);
     }
+
+    /// <summary>
+    /// Make your own query if you dislike our functions
+    /// </summary>
+    /// <param name="query">Command</param>
+    /// <returns>Result of command execution</returns>
+    public string CustomQuery(string query)
+    {
+        return _handler.CustromQuery(query);
+    }
 }
