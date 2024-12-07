@@ -1,4 +1,5 @@
-Jeżeli moduł nie jest zdolny się podłączyć do bazy danych, to prawdopodobnie to dlatego, że nie macie zainstalowanego MySQL server. niestety, na razie nie mamy dedykowanego servera, więc musimy się bawić tym, co mamy.
+Jeżeli moduł nie jest zdolny się podłączyć do bazy danych, to prawdopodobnie to dlatego, że nie macie zainstalowanego MySQL server.
+Niestety, na razie nie mamy dedykowanego servera, więc musimy się bawić tym, co mamy.
 
 Należy pobrać MySQL ze strony: https://dev.mysql.com/downloads/file/?id=536355
 
@@ -8,7 +9,8 @@ hasło: root
 
 (możecie to zauważyć nawet w kodzie)
 
-jeśli nadal nie działa, to trzeba dodać bazy danych wraz z ich tabelami (OBOWIĄZKOWO pilnować rozmiar wpisywanych literek w nazwy BD i tabwli):
+jeśli nadal nie działa, to trzeba dodać bazy danych wraz z ich tabelami 
+(OBOWIĄZKOWO pilnować rozmiar wpisywanych literek w nazwy BD i tabeli):
 
 create database resourceBase
 
@@ -29,7 +31,9 @@ create table users (
 email VARCHAR(50) PRIMARY KEY,
 user JSON NOT NULL,
 encryptionKey VARCHAR(256),
-password VARCHAR(256)
+password VARCHAR(256),
+emailVerified BOOL,
+token VARCHAR(256)
 )
 
 
@@ -40,3 +44,12 @@ usunięcie:
 	treści tablicy: delete from nazwa_tablicy
 	samej tablicy: drop table nazwa
 	bazy danych: drop database nazwa
+	
+rozszerzanie pewnej tabilcy:
+    alter table nazwa_tablicy
+    add nazwa_nowej_kolumny typ
+usunięcie kolumny:    
+    alter table nazwa_tablicy
+    drop column nazwa_kolumny
+    
+	

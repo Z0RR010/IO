@@ -80,7 +80,6 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
     /// <returns>User of type Individual if found in DB. Otherwise, NULL</returns>
     public Individual GetUserFromDataBase(string email)
     {
-        //FIXME
         if (IsUserInDataBase(email))
         {
             string query = "SELECT user FROM users WHERE email = @email";
@@ -101,16 +100,16 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
 
         return null;
     }
-
-    // Changes: added feature to add password. Troubles with serializing inherited classes
+    
     /// <summary>
     /// Add user to data base
     /// </summary>
     /// <param name="user">Object of type User. It'll be serialised in JSON and sent</param>
     /// <param name="encryptionKey">Key for security purposes</param>
     /// <param name="password">Password of the new user</param>>
+    /// <param name="token">Token that is supposed to be stored</param>>
     /// <returns>True if operation was successful. Otherwise, false</returns>
-    public bool SendToDataBase(Individual user, string encryptionKey, string password)
+    public bool SendToDataBase(Individual user, string encryptionKey, string password, string token)
     {
         //FIXME
         // var options = new JsonSerializerOptions
@@ -121,7 +120,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
         
         var packedUser = JsonSerializer.Serialize(user);
         string query =
-            "INSERT INTO users(email, user, encryptionKey, password) VALUES(@email, @packedUser, @encryptionKey, @password)";
+            "INSERT INTO users(email, user, encryptionKey, password, emailVerified, token) VALUES(@email, @packedUser, @encryptionKey, @password, @emailVerified, @token)";
         try
         {
             using (var command = new MySqlCommand(query, _userConnection))
@@ -130,6 +129,8 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
                 command.Parameters.AddWithValue("@packedUser", packedUser);
                 command.Parameters.AddWithValue("@encryptionKey", encryptionKey);
                 command.Parameters.AddWithValue("@password", password);
+                command.Parameters.AddWithValue("@emailVerified", false);
+                command.Parameters.AddWithValue("@token", token);
                 
                 int rowsAffected = command.ExecuteNonQuery();
                 return rowsAffected > 0;
@@ -175,7 +176,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
     /// </summary>
     /// <param name="query">Command</param>
     /// <returns>Result of command execution</returns>
-    public string CustromQuery(string query)
+    public string CustomQuery(string query)
     {
         if (query.Contains("DROP DATABASE".ToLower()) || query.Contains("DROP TABLE".ToLower()))
         {
@@ -207,6 +208,85 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
                 }
 
                 return result.ToString();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+    
+    /// <summary>
+    /// Gain encryption key of a user by given email
+    /// </summary>
+    /// <param name="email">Email of requested user</param>
+    /// <returns>String containing encryption key (AES, whatever)</returns>
+    public string GetEncryptionKey(string email)
+    {
+        if (IsUserInDataBase(email))
+        {
+            string query = "SELECT encryptionKey FROM users WHERE email = @email";
+
+            using (var command = new MySqlCommand(query, _userConnection))
+            {
+                command.Parameters.AddWithValue("@email", email);
+                
+                string input = command.ExecuteScalar()?.ToString();
+                
+                return input;
+            }
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    /// <summary>
+    /// Gain token of a user by given email
+    /// </summary>
+    /// <param name="email">Email of requested user</param>
+    /// <returns>String containing token</returns>
+    public string GetToken(string email)
+    {
+        if (IsUserInDataBase(email))
+        {
+            string query = "SELECT token FROM users WHERE email = @email";
+
+            using (var command = new MySqlCommand(query, _userConnection))
+            {
+                command.Parameters.AddWithValue("@email", email);
+                
+                string input = command.ExecuteScalar()?.ToString();
+                
+                return input;
+            }
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    /// <summary>
+    /// Updates user's email verification status
+    /// </summary>
+    /// <param name="email">Email of requested user</param>
+    /// <param name="value">New status of email verification</param>
+    /// <returns>True if operation was successful. Otherwise, false</returns>
+    public bool UpdateEmailVerified(string email, bool value)
+    {
+        string query = "UPDATE users SET emailVerified = @value WHERE email = @email";
+        try
+        {
+            using (var command = new MySqlCommand(query, _userConnection))
+            {
+                command.Parameters.AddWithValue("@email", email);
+                command.Parameters.AddWithValue("@value", value);
+                
+                int rowsAffected = command.ExecuteNonQuery();
+                return rowsAffected > 0;
             }
         }
         catch (Exception e)
