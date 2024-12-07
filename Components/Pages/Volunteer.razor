@@ -72,7 +72,7 @@
             <option value="">Select an organisation</option>
             @foreach (var org in organisationList)
             {
-                <option value="@org.getOrganisationID()">@org.getOrganisationName()</option>
+                <option value="@org.OrganisationID">@org.OrganisationName</option>
             }
         </select>
 
@@ -83,10 +83,10 @@
     </div>
 }
 
-@if(whichForm == 2)
+@if (whichForm == 2)
 {
     <h1>Organisation Application</h1>
-    
+
     <div>
 
 
@@ -132,7 +132,7 @@
     private int? selectedOrganisationID;
 
     private string selectedOrganisationName =>
-        organisationList.FirstOrDefault(o => o.getOrganisationID() == selectedOrganisationID)?.getOrganisationName() ?? "None";
+        organisationList.FirstOrDefault(o => o.OrganisationID == selectedOrganisationID)?.OrganisationName ?? "None";
 
     IO.Modules.Volunteer.VolunteerManager volunteerManager = new IO.Modules.Volunteer.VolunteerManager();
 
@@ -185,10 +185,10 @@
             additionalInfo,
             skills,
             availability,
-            organisationList.FirstOrDefault(o => o.getOrganisationID() == selectedOrganisationID)
+            organisationList.FirstOrDefault(o => o.OrganisationID == selectedOrganisationID)
         );
 
-        volunteerManager.addVolunteer(vol);
+        volunteerManager.AddVolunteer(vol);
     }
 
     private void createOrganisation()
@@ -199,7 +199,7 @@
             address
         );
 
-        volunteerManager.addOrganisation(org);
+        volunteerManager.AddOrganisation(org);
     }
 
     private void save()
@@ -207,18 +207,18 @@
         string filePath = "volunteersData";
         using (StreamWriter writer = new StreamWriter(filePath, append: false))
         {
-            writer.Write(volunteerManager.saveManagerToFile());
+            writer.Write(volunteerManager.SaveManagerToFile());
         }
-        volunteerCount = volunteerManager.getVolunteerCount();
-        organisationCount = volunteerManager.getOrganisationCount();
+        volunteerCount = volunteerManager.VolunteerCount;
+        organisationCount = volunteerManager.OrganisationCount;
     }
 
     private void load()
     {
         string filePath = "volunteersData";
-        volunteerManager.loadManagerFromFile(filePath);
-        volunteerCount = volunteerManager.getVolunteerCount();
-        organisationCount = volunteerManager.getOrganisationCount();
-        organisationList = volunteerManager.getOrganisationList();
+        volunteerManager.LoadManagerFromFile(filePath);
+        volunteerCount = volunteerManager.VolunteerCount;
+        organisationCount = volunteerManager.OrganisationCount;
+        organisationList = volunteerManager.OrganisationList;
     }
 }
