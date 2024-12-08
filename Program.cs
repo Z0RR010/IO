@@ -1,4 +1,6 @@
 using IO.Components;
+using IO.Modules.MapLibrary;
+using Microsoft.JSInterop;
 
 namespace IO
 {
@@ -30,6 +32,14 @@ namespace IO
                 });
             });
 
+
+            builder.Services.AddScoped<GoogleMapsClient>(provider =>
+            {
+                string apiKey = "AIzaSyCaEHkCZC5zP2OjibM8Ri2I7D-1UoZLU8M";
+                var jsRuntime = provider.GetRequiredService<IJSRuntime>();
+
+                return new GoogleMapsClient(jsRuntime, apiKey);
+            });
 
             var app = builder.Build();
 
