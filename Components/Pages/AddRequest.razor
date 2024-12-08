@@ -1,5 +1,6 @@
 @page "/requests/add"
 @inject RequestModule.IRequestService RequestService
+@inject Security.AuthenticationService AuthenticationService
 
 @code {
     private RequestModule.Request newRequest = new RequestModule.Request
@@ -8,13 +9,20 @@
         Status = RequestModule.RequestStatus.New // Ustawienie domyślnego statusu na New
     };
 
+    protected override async Task OnInitializedAsync()
+    {
+        var loggedInUser = await AuthenticationService.GetLoggedInUserAsync();
+        newRequest.User = loggedInUser;
+    }
+
     private async Task AddRequest()
     {
         await RequestService.AddRequestAsync(newRequest);
         newRequest = new RequestModule.Request
         {
             Address = new RequestModule.Address(),
-            Status = RequestModule.RequestStatus.New // Ustawienie domyślnego statusu na New
+            Status = RequestModule.RequestStatus.New,
+            User = await AuthenticationService.GetLoggedInUserAsync() // Przypisanie zalogowanego użytkownika
         };
     }
 }
@@ -32,10 +40,6 @@
     <div class="form-group">
         <label for="description">Description</label>
         <InputTextArea id="description" class="form-control" @bind-Value="newRequest.Description" />
-    </div>
-    <div class="form-group">
-        <label for="userId">User ID</label>
-        <InputNumber id="userId" class="form-control" @bind-Value="newRequest.UserId" />
     </div>
     <div class="form-group">
         <label for="street">Street</label>

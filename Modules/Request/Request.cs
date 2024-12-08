@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ResourceManager;
+using Security;
 
 namespace RequestModule
 {
@@ -12,7 +13,7 @@ namespace RequestModule
         public DateTime CreatedAt { get; set; }
         public DateTime? DateUpdated { get; set; }
         public RequestStatus Status { get; set; }
-        public int UserId { get; set; }
+        public User User { get; set; }
         public Address Address { get; set; }
         public ICollection<Resource> ResourcesRequired { get; set; } = new List<Resource>();
         public bool IsVerified { get; set; }

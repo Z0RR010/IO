@@ -26,7 +26,7 @@ else
         <p>Status: @request.Status</p>
         <p>Created At: @request.CreatedAt</p>
         <p>Updated At: @request.DateUpdated</p>
-        <p>User ID: @request.UserId</p>
+        <p>User: @request.User.Name (@request.User.Email)</p>
         <p>Address: @request.Address.Street, @request.Address.City, @request.Address.State, @request.Address.PostalCode, @request.Address.Country</p>
         <p>Resources Required: @string.Join(", ", request.ResourcesRequired.Select(r => r.Name))</p>
         <p>Is Verified: @request.IsVerified</p>
