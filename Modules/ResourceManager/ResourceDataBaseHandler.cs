@@ -266,7 +266,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
     /// <returns>Result of command execution</returns>
     public string CustromQuery(string query)
     {
-        if (query.Contains("DROP DATABASE".ToLower()) || query.Contains("DROP TABLE".ToLower()))
+        if (query.ToLower().Contains("DROP DATABASE".ToLower()) || query.ToLower().Contains("DROP TABLE".ToLower()))
         {
             throw new Exception("Are you dumb? What are you trying to do?");
         }
