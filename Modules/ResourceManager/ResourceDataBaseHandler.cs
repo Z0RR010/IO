@@ -264,7 +264,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
     /// </summary>
     /// <param name="query">Command</param>
     /// <returns>Result of command execution</returns>
-    public string CustromQuery(string query)
+    public string CustomQuery(string query)
     {
         if (query.ToLower().Contains("DROP DATABASE".ToLower()) || query.ToLower().Contains("DROP TABLE".ToLower()))
         {

@@ -17,5 +17,5 @@ public interface IResManager
 
     public bool ChangeItemAmount(string name, int newAmount);
     
-    
+    public string CustomQuery(string query);
 }
