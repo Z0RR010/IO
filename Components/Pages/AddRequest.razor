@@ -1,35 +1,24 @@
 @page "/requests/add"
 @inject RequestModule.IRequestService RequestService
-@inject Security.AuthenticationService AuthenticationService
 
 @code {
     private RequestModule.Request newRequest = new RequestModule.Request
     {
-        Address = new RequestModule.Address(),
         Status = RequestModule.RequestStatus.New // Ustawienie domyślnego statusu na New
     };
 
-    protected override async Task OnInitializedAsync()
+    private void AddNewRequest()
     {
-        var loggedInUser = await AuthenticationService.GetLoggedInUserAsync();
-        newRequest.User = loggedInUser;
-    }
-
-    private async Task AddRequest()
-    {
-        await RequestService.AddRequestAsync(newRequest);
         newRequest = new RequestModule.Request
         {
-            Address = new RequestModule.Address(),
             Status = RequestModule.RequestStatus.New,
-            User = await AuthenticationService.GetLoggedInUserAsync() // Przypisanie zalogowanego użytkownika
         };
     }
 }
 
 <h3>Add Request</h3>
 
-<EditForm Model="newRequest" OnValidSubmit="AddRequest">
+<EditForm Model="newRequest" OnValidSubmit="AddNewRequest">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -42,29 +31,29 @@
         <InputTextArea id="description" class="form-control" @bind-Value="newRequest.Description" />
     </div>
     <div class="form-group">
-        <label for="street">Street</label>
-        <InputText id="street" class="form-control" @bind-Value="newRequest.Address.Street" />
-    </div>
-    <div class="form-group">
         <label for="city">City</label>
         <InputText id="city" class="form-control" @bind-Value="newRequest.Address.City" />
     </div>
     <div class="form-group">
-        <label for="state">State</label>
-        <InputText id="state" class="form-control" @bind-Value="newRequest.Address.State" />
+        <label for="state">Street</label>
+        <InputText id="state" class="form-control" @bind-Value="newRequest.Address.Street" />
     </div>
     <div class="form-group">
-        <label for="postalCode">Postal Code</label>
-        <InputText id="postalCode" class="form-control" @bind-Value="newRequest.Address.PostalCode" />
+        <label for="postalCode">Street Number</label>
+        <InputText id="postalCode" class="form-control" @bind-Value="newRequest.Address.StreetNumber" />
     </div>
     <div class="form-group">
-        <label for="country">Country</label>
-        <InputText id="country" class="form-control" @bind-Value="newRequest.Address.Country" />
+        <label for="country">Apartment</label>
+        <InputText id="country" class="form-control" @bind-Value="newRequest.Address.Apartment" />
     </div>
     <div class="form-group">
+        <label for="country">Zip code</label>
+        <InputText id="country" class="form-control" @bind-Value="newRequest.Address.ZipCode" />
+    </div>
+    @* <div class="form-group">
         <label for="resourcesRequired">Resources Required</label>
         <InputText id="resourcesRequired" class="form-control" @bind-Value="newRequest.ResourcesRequired" />
-    </div>
+    </div> *@
     <div class="form-group">
         <label for="isVerified">Is Verified</label>
         <InputCheckbox id="isVerified" class="form-control" @bind-Value="newRequest.IsVerified" />
@@ -73,9 +62,9 @@
         <label for="handlingOrganization">Handling Organization</label>
         <InputText id="handlingOrganization" class="form-control" @bind-Value="newRequest.HandlingOrganization" />
     </div>
-    <div class="form-group">
+    @* <div class="form-group">
         <label for="categories">Categories</label>
         <InputText id="categories" class="form-control" @bind-Value="newRequest.Categories" />
-    </div>
+    </div> *@
     <button type="submit" class="btn btn-primary">Add</button>
 </EditForm>

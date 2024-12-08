@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using RequestModule.IR
+using RequestModule;
 
 namespace RequestModule
 {
@@ -37,7 +37,7 @@ namespace RequestModule
                 existingRequest.Description = request.Description;
                 existingRequest.Status = request.Status;
                 existingRequest.DateUpdated = DateTime.Now;
-                existingRequest.UserId = request.UserId;
+                existingRequest.User = request.User;
                 existingRequest.Address = request.Address;
                 existingRequest.ResourcesRequired = request.ResourcesRequired;
                 existingRequest.IsVerified = request.IsVerified;
