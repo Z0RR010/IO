@@ -1,4 +1,5 @@
 using IO.Components;
+using IO.Modules.Communication;
 
 namespace IO
 {
@@ -13,6 +14,8 @@ namespace IO
                 .AddInteractiveServerComponents();
 
             builder.Services.AddControllers();
+
+            builder.Services.AddSingleton<Communicator>();
 
             builder.Services.AddHttpClient();
             builder.Services.AddScoped(sp => new HttpClient

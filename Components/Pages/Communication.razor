@@ -1,0 +1,114 @@
+﻿@page "/communication"
+@rendermode InteractiveServer
+
+@using IO.Modules.Communication
+@inject Communicator CommunicatorService
+
+<div class="container">
+    <!-- Sekcja 1: Tworzenie konwersacji -->
+    <h2>Tworzenie konwersacji</h2>
+    <div>
+        <label for="userIdToAdd">ID użytkownika: </label>
+        <input type="number" id="userIdToAdd" @bind="userIdToAdd" />
+        <button @onclick="AddUserToChat">Dodaj użytkownika</button>
+    </div>
+    <div>
+        <h4>Dodani użytkownicy:</h4>
+        <ul>
+            @foreach (var id in userIds) {
+                <li>ID: @id</li>
+            }
+        </ul>
+    </div>
+    <div>
+        <button @onclick="CreateConversation">Utwórz konwersację</button>
+    </div>
+    <h3>Aktywne konwersacje:</h3>
+    <ul>
+        @foreach (var chat in CommunicatorService.testServer.ActiveChats) {
+            <li>
+                <strong>ID Konwersacji:</strong> @chat.ChatId, <strong>Uczestnicy:</strong> @string.Join(", ", chat.UserIds)
+            </li>
+        }
+    </ul>
+
+    <!-- Sekcja 2: Wysyłanie wiadomości -->
+    <h2>Wysyłanie wiadomości</h2>
+    <div>
+        <label for="chatIdToSend">ID konwersacji: </label>
+        <input type="number" id="chatIdToSend" @bind="chatIdToSend" />
+        <label for="senderUserId">ID użytkownika: </label>
+        <input type="number" id="senderUserId" @bind="senderUserId" />
+        <label for="messageContent">Treść wiadomości: </label>
+        <input type="text" id="messageContent" @bind="messageContent" />
+        <button @onclick="SendMessage">Wyślij wiadomość</button>
+    </div>
+
+    <!-- Sekcja 3: Odczytywanie wiadomości -->
+    <h2>Odczytywanie wiadomości</h2>
+    <div>
+        <label for="userIdToRead">ID użytkownika: </label>
+        <input type="number" id="userIdToRead" @bind="userIdToRead" />
+        <button @onclick="GetUserChats">Pobierz konwersacje</button>
+    </div>
+    <h3>Konwersacje użytkownika:</h3>
+    <ul>
+        @foreach (var chat in userChats) {
+            <li>
+                <strong>ID Konwersacji:</strong> @chat.ChatId
+                <button @onclick="() => SelectChat(chat.ChatId)">Pokaż wiadomości</button>
+            </li>
+        }
+    </ul>
+    @if (selectedChatMessages != null) {
+        <h4>Wiadomości w konwersacji:</h4>
+        <ul>
+            @foreach (var message in selectedChatMessages) {
+                <li><strong>Od:</strong> @message.UserId, <strong>Treść:</strong> @message.content</li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    private int userIdToAdd;
+    private List<int> userIds = new();
+    private int chatIdToSend;
+    private int senderUserId;
+    private string messageContent;
+    private int userIdToRead;
+    private List<Chat> userChats = new();
+    private List<Message> selectedChatMessages = new();
+
+    private void AddUserToChat() {
+        if (!userIds.Contains(userIdToAdd) && userIdToAdd > 0) {
+            userIds.Add(userIdToAdd);
+        }
+        userIdToAdd = 0;
+    }
+
+    private void CreateConversation() {
+        if (userIds.Count > 0) {
+            CommunicatorService.CreateChat(Permission.System, userIds.ToArray());
+            userIds.Clear();
+        }
+    }
+
+    private void SendMessage() {
+        if (chatIdToSend > 0 && senderUserId > 0 && !string.IsNullOrWhiteSpace(messageContent)) {
+            CommunicatorService.SendMessage(chatIdToSend, messageContent, senderUserId);
+            messageContent = string.Empty;
+        }
+    }
+
+    private void GetUserChats() {
+        if (userIdToRead > 0) {
+            userChats = CommunicatorService.GetUserChats(userIdToRead);
+        }
+    }
+
+    private void SelectChat(int chatId) {
+        var chat = CommunicatorService.testServer.ActiveChats.FirstOrDefault(c => c.ChatId == chatId);
+        selectedChatMessages = chat?.Messages ?? new List<Message>();
+    }
+}
