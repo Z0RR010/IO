@@ -1,0 +1,36 @@
+@page "/requests/details/{Id:int}"
+@inject RequestModule.IRequestService RequestService
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private RequestModule.Request request;
+
+    protected override async Task OnInitializedAsync()
+    {
+        request = await RequestService.GetRequestByIdAsync(Id);
+    }
+}
+
+<h3>Request Details</h3>
+
+@if (request == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div>
+        <h4>@request.Title</h4>
+        <p>@request.Description</p>
+        <p>Status: @request.Status</p>
+        <p>Created At: @request.CreatedAt</p>
+        <p>Updated At: @request.DateUpdated</p>
+        <p>User ID: @request.UserId</p>
+        <p>Address: @request.Address.Street, @request.Address.City, @request.Address.State, @request.Address.PostalCode, @request.Address.Country</p>
+        <p>Resources Required: @string.Join(", ", request.ResourcesRequired.Select(r => r.Name))</p>
+        <p>Is Verified: @request.IsVerified</p>
+        <p>Handling Organization: @request.HandlingOrganization</p>
+        <p>Categories: @string.Join(", ", request.Categories)</p>
+    </div>
+}
