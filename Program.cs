@@ -13,6 +13,8 @@ namespace IO
                 .AddInteractiveServerComponents();
 
             builder.Services.AddControllers();
+            
+            builder.Services.AddScoped<RequestModule.IRequestService, RequestModule.RequestService>();
 
             builder.Services.AddHttpClient();
             builder.Services.AddScoped(sp => new HttpClient
