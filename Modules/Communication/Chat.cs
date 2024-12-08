@@ -3,13 +3,13 @@ namespace IO.Modules.Communication;
 
 public class Chat
 {
-    public Chat(int chatId, List<int> userIds)
+    public Chat(int chatId, List<string> emails)
     {
         this.ChatId = chatId;
-        this.UserIds = userIds;
+        this.Emails = emails;
         Messages = new List<Message>();
     }
     public int ChatId;
     public List<Message> Messages;
-    public List<int> UserIds;
+    public List<string> Emails;
 }

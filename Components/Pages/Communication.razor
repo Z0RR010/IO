@@ -8,26 +8,29 @@
     <!-- Sekcja 1: Tworzenie konwersacji -->
     <h2>Tworzenie konwersacji</h2>
     <div>
-        <label for="userIdToAdd">ID użytkownika: </label>
-        <input type="number" id="userIdToAdd" @bind="userIdToAdd" />
+        <label for="emailToAdd">E-mail użytkownika: </label>
+        <input type="email" id="emailToAdd" @bind="emailToAdd" />
         <button @onclick="AddUserToChat">Dodaj użytkownika</button>
     </div>
     <div>
         <h4>Dodani użytkownicy:</h4>
         <ul>
-            @foreach (var id in userIds) {
-                <li>ID: @id</li>
+            @foreach (var email in userEmails) {
+                <li>@email</li>
             }
         </ul>
     </div>
     <div>
         <button @onclick="CreateConversation">Utwórz konwersację</button>
+        @if (!string.IsNullOrEmpty(createChatStatus)) {
+            <p>@createChatStatus</p>
+        }
     </div>
     <h3>Aktywne konwersacje:</h3>
     <ul>
         @foreach (var chat in CommunicatorService.testServer.ActiveChats) {
             <li>
-                <strong>ID Konwersacji:</strong> @chat.ChatId, <strong>Uczestnicy:</strong> @string.Join(", ", chat.UserIds)
+                <strong>ID Konwersacji:</strong> @chat.ChatId, <strong>Uczestnicy:</strong> @string.Join(", ", chat.Emails)
             </li>
         }
     </ul>
@@ -37,18 +40,21 @@
     <div>
         <label for="chatIdToSend">ID konwersacji: </label>
         <input type="number" id="chatIdToSend" @bind="chatIdToSend" />
-        <label for="senderUserId">ID użytkownika: </label>
-        <input type="number" id="senderUserId" @bind="senderUserId" />
+        <label for="senderEmail">E-mail nadawcy: </label>
+        <input type="email" id="senderEmail" @bind="senderEmail" />
         <label for="messageContent">Treść wiadomości: </label>
         <input type="text" id="messageContent" @bind="messageContent" />
         <button @onclick="SendMessage">Wyślij wiadomość</button>
+        @if (!string.IsNullOrEmpty(sendMessageStatus)) {
+            <p>@sendMessageStatus</p>
+        }
     </div>
 
     <!-- Sekcja 3: Odczytywanie wiadomości -->
     <h2>Odczytywanie wiadomości</h2>
     <div>
-        <label for="userIdToRead">ID użytkownika: </label>
-        <input type="number" id="userIdToRead" @bind="userIdToRead" />
+        <label for="userEmailToRead">E-mail użytkownika: </label>
+        <input type="email" id="userEmailToRead" @bind="userEmailToRead" />
         <button @onclick="GetUserChats">Pobierz konwersacje</button>
     </div>
     <h3>Konwersacje użytkownika:</h3>
@@ -64,46 +70,54 @@
         <h4>Wiadomości w konwersacji:</h4>
         <ul>
             @foreach (var message in selectedChatMessages) {
-                <li><strong>Od:</strong> @message.UserId, <strong>Treść:</strong> @message.content</li>
+                <li><strong>Od:</strong> @message.Email, <strong>Treść:</strong> @message.content</li>
             }
         </ul>
     }
 </div>
 
 @code {
-    private int userIdToAdd;
-    private List<int> userIds = new();
+    private string emailToAdd;
+    private List<string> userEmails = new();
+    private string createChatStatus;
     private int chatIdToSend;
-    private int senderUserId;
+    private string senderEmail;
     private string messageContent;
-    private int userIdToRead;
+    private string sendMessageStatus;
+    private string userEmailToRead;
     private List<Chat> userChats = new();
     private List<Message> selectedChatMessages = new();
 
     private void AddUserToChat() {
-        if (!userIds.Contains(userIdToAdd) && userIdToAdd > 0) {
-            userIds.Add(userIdToAdd);
+        if (!string.IsNullOrWhiteSpace(emailToAdd) && !userEmails.Contains(emailToAdd)) {
+            userEmails.Add(emailToAdd);
         }
-        userIdToAdd = 0;
+        emailToAdd = string.Empty;
     }
 
     private void CreateConversation() {
-        if (userIds.Count > 0) {
-            CommunicatorService.CreateChat(Permission.System, userIds.ToArray());
-            userIds.Clear();
+        if (userEmails.Count > 0) {
+            bool result = CommunicatorService.CreateChat(Permission.System, userEmails.ToArray());
+            createChatStatus = result ? "Utworzono czat" : "Nie udało się utworzyć czatu";
+            if (result) {
+                userEmails.Clear();
+            }
         }
     }
 
     private void SendMessage() {
-        if (chatIdToSend > 0 && senderUserId > 0 && !string.IsNullOrWhiteSpace(messageContent)) {
-            CommunicatorService.SendMessage(chatIdToSend, messageContent, senderUserId);
-            messageContent = string.Empty;
+        if (chatIdToSend > 0 && !string.IsNullOrWhiteSpace(senderEmail) && !string.IsNullOrWhiteSpace(messageContent)) {
+            bool result = CommunicatorService.SendMessage(chatIdToSend, messageContent, senderEmail);
+            sendMessageStatus = result ? "Wiadomość wysłana" : "Nie udało się wysłać wiadomości";
+            if (result) {
+                messageContent = string.Empty;
+            }
         }
     }
 
     private void GetUserChats() {
-        if (userIdToRead > 0) {
-            userChats = CommunicatorService.GetUserChats(userIdToRead);
+        if (!string.IsNullOrWhiteSpace(userEmailToRead)) {
+            userChats = CommunicatorService.GetUserChats(userEmailToRead);
         }
     }
 

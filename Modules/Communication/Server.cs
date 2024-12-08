@@ -17,13 +17,13 @@ public class Server
     public List<Chat> Notyfications;
     public List<string> Reports;
 
-    public bool CheckPermission(int userId,Permission permission)
-    {
-        if (userId > Permissions.Count)
-        {
-            return false;
-        }
-        return permission == Permissions[userId];
-    }
+    //public bool CheckPermission(int userId,Permission permission)
+    //{
+    //    if (userId > Permissions.Count)
+    //    {
+    //        return false;
+    //    }
+    //    return permission == Permissions[userId];
+    //}
     
 }

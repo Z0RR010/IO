@@ -1,5 +1,9 @@
 ﻿namespace IO.Modules.Communication;
+
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using ResourceManager;
+
 public class Communicator : ICommunication
 {
     public Server testServer { get; private set;}
@@ -23,12 +27,18 @@ public class Communicator : ICommunication
         return true;
     }
 
-    public bool CreateChat(Permission permission, int[] userIds)
+    public bool CreateChat(Permission permission, string[] emails)
     {
+        //UserExecuter userExecuter = new UserExecuter();
         if (permission != Permission.System)
         {
             return false;
         }
+        //foreach (string email in emails) {
+        //    if (!userExecuter.IsUserInDataBase(email)) {
+        //        return false;
+        //    }
+        //}
         int chatId;
         if (testServer.ActiveChats.Count == 0)
         {
@@ -38,18 +48,18 @@ public class Communicator : ICommunication
         {
             chatId = testServer.ActiveChats.Max(x => x.ChatId) + 1;
         }
-        Chat newChat =new Chat(chatId,userIds.OfType<int>().ToList());
+        Chat newChat =new Chat(chatId,emails.OfType<string>().ToList());
         testServer.ActiveChats.Add(newChat);
 
         Log("Creation of a chat " + Convert.ToString(chatId));
         return true;
     }
 
-    public bool SendMessage(int chatId, string message,int userId)
+    public bool SendMessage(int chatId, string message,string email)
     {
         var activeChat  = testServer.ActiveChats.Find(x => x.ChatId == chatId);
         if(activeChat == null) return false;
-        Message messageToSend = new Message(message,userId,chatId);
+        Message messageToSend = new Message(message,email,chatId);
         activeChat.Messages.Add(messageToSend);
         return true;
     }
@@ -68,12 +78,12 @@ public class Communicator : ICommunication
         return true;
     }
 
-    public List<Chat> GetUserChats(int userId)
+    public List<Chat> GetUserChats(string email)
     {
         List<Chat> userChats = new List<Chat>();
         for (int i = 0; i < testServer.ActiveChats.Count; i++)
         {
-            if (testServer.ActiveChats[i].UserIds.Contains(userId))
+            if (testServer.ActiveChats[i].Emails.Contains(email))
             userChats.Add(testServer.ActiveChats[i]);
         }
         return userChats;

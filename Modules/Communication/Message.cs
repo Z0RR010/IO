@@ -2,14 +2,14 @@
 
 public class Message
 {
-    public Message(string content, int userId, int chatId)
+    public Message(string content, string email, int chatId)
     {
         this.content = content;
-        this.UserId = userId;
+        this.Email = email;
         this.ChatId = chatId;
 
     }
     public string content;
-    public int UserId;
+    public string Email;
     public int ChatId;
 }
