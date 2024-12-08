@@ -35,7 +35,7 @@ export function loadGoogleMapsAPI(options) {
         }));
 
     if (mapsNamespace[l]) {
-        console.warn(`${p} only loads once. Ignoring:`, options);
+        console.warn(`${p} only loads once. Ignoring:`);
     } else {
         mapsNamespace[l] = (feature, ...params) => {
             r.add(feature);
