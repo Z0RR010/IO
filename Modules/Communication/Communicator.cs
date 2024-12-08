@@ -29,16 +29,19 @@ public class Communicator : ICommunication
 
     public bool CreateChat(Permission permission, string[] emails)
     {
-        //UserExecuter userExecuter = new UserExecuter();
+        UserExecuter userExecuter = new UserExecuter();
         if (permission != Permission.System)
         {
             return false;
         }
-        //foreach (string email in emails) {
-        //    if (!userExecuter.IsUserInDataBase(email)) {
-        //        return false;
-        //    }
-        //}
+        if (emails.Length == 0) {
+            return false;
+        }
+        foreach (string email in emails) {
+            if (!userExecuter.IsUserInDataBase(email)) {
+                return false;
+            }
+        }
         int chatId;
         if (testServer.ActiveChats.Count == 0)
         {

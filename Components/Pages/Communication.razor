@@ -5,6 +5,11 @@
 @inject Communicator CommunicatorService
 
 <div class="container">
+    @if (!string.IsNullOrEmpty(status)) {
+        <p>@status</p>
+    } else {
+        <p></p>
+    }
     <!-- Sekcja 1: Tworzenie konwersacji -->
     <h2>Tworzenie konwersacji</h2>
     <div>
@@ -22,9 +27,10 @@
     </div>
     <div>
         <button @onclick="CreateConversation">Utwórz konwersację</button>
-        @if (!string.IsNullOrEmpty(createChatStatus)) {
-            <p>@createChatStatus</p>
-        }
+        <button @onclick="ClearUserTable">Wyczyść listę użytkowników</button>
+        
+        
+
     </div>
     <h3>Aktywne konwersacje:</h3>
     <ul>
@@ -34,6 +40,28 @@
             </li>
         }
     </ul>
+    <h2>Archiwizacja konwersacji</h2>
+    <div>
+        <label for="chatIdToArchive">ID konwersacji: </label>
+        <input type="number" id="chatIdToArchive" @bind="chatIdToArchive" />
+        <button @onclick="ArchiveConversation">Archiwizuj konwersację</button>
+    </div>
+
+    <h3>Konwersacje w archiwum:</h3>
+    <ul>
+        @foreach (var chat in CommunicatorService.testServer.ArchivalChats) {
+            <li>
+                <strong>ID Konwersacji:</strong> @chat.ChatId, <strong>Uczestnicy:</strong> @string.Join(", ", chat.Emails)
+            </li>
+        }
+    </ul>
+
+    <h2>Cofnięcie archiwizacji</h2>
+    <div>
+        <label for="chatIdToBringBack">ID konwersacji: </label>
+        <input type="number" id="chatIdToBringBack" @bind="chatIdToBringBack" />
+        <button @onclick="BringBackConversation">Cofnij archiwizację</button>
+    </div>
 
     <!-- Sekcja 2: Wysyłanie wiadomości -->
     <h2>Wysyłanie wiadomości</h2>
@@ -45,9 +73,6 @@
         <label for="messageContent">Treść wiadomości: </label>
         <input type="text" id="messageContent" @bind="messageContent" />
         <button @onclick="SendMessage">Wyślij wiadomość</button>
-        @if (!string.IsNullOrEmpty(sendMessageStatus)) {
-            <p>@sendMessageStatus</p>
-        }
     </div>
 
     <!-- Sekcja 3: Odczytywanie wiadomości -->
@@ -79,11 +104,12 @@
 @code {
     private string emailToAdd;
     private List<string> userEmails = new();
-    private string createChatStatus;
+    private string status;
     private int chatIdToSend;
+    private int chatIdToArchive;
+    private int chatIdToBringBack;
     private string senderEmail;
     private string messageContent;
-    private string sendMessageStatus;
     private string userEmailToRead;
     private List<Chat> userChats = new();
     private List<Message> selectedChatMessages = new();
@@ -96,19 +122,27 @@
     }
 
     private void CreateConversation() {
-        if (userEmails.Count > 0) {
-            bool result = CommunicatorService.CreateChat(Permission.System, userEmails.ToArray());
-            createChatStatus = result ? "Utworzono czat" : "Nie udało się utworzyć czatu";
-            if (result) {
-                userEmails.Clear();
-            }
+        bool result = CommunicatorService.CreateChat(Permission.System, userEmails.ToArray());
+        status = result ? "Utworzono czat" : "Nie udało się utworzyć czatu";
+        if (result) {
+            ClearUserTable();
         }
+    }
+
+    private void ArchiveConversation() {
+        bool result = CommunicatorService.ArchiveChat(Permission.System, chatIdToArchive);
+        status = result ? "Zarchiwizowano czat" : "Nie udało się zarchiwizować czatu";
+    }
+
+    private void BringBackConversation() {
+        bool result = CommunicatorService.BringBackChat(Permission.System, chatIdToBringBack);
+        status = result ? "Cofnięto archiwizację" : "Nie cofnięto archiwizacji";
     }
 
     private void SendMessage() {
         if (chatIdToSend > 0 && !string.IsNullOrWhiteSpace(senderEmail) && !string.IsNullOrWhiteSpace(messageContent)) {
             bool result = CommunicatorService.SendMessage(chatIdToSend, messageContent, senderEmail);
-            sendMessageStatus = result ? "Wiadomość wysłana" : "Nie udało się wysłać wiadomości";
+            status = result ? "Wiadomość wysłana" : "Nie udało się wysłać wiadomości";
             if (result) {
                 messageContent = string.Empty;
             }
@@ -124,5 +158,9 @@
     private void SelectChat(int chatId) {
         var chat = CommunicatorService.testServer.ActiveChats.FirstOrDefault(c => c.ChatId == chatId);
         selectedChatMessages = chat?.Messages ?? new List<Message>();
+    }
+
+    private void ClearUserTable() {
+        userEmails.Clear();
     }
 }
