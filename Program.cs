@@ -12,6 +12,25 @@ namespace IO
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
+            builder.Services.AddControllers();
+
+            builder.Services.AddHttpClient();
+            builder.Services.AddScoped(sp => new HttpClient
+            {
+                BaseAddress = new Uri("http://localhost:5236")
+            });
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
+
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -29,6 +48,7 @@ namespace IO
 
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
+            app.MapControllers();
 
             app.Run();
         }
