@@ -1,0 +1,361 @@
+﻿@page "/signUp"
+@rendermode InteractiveServer
+
+@using System.Text.Json  
+@using System.Text
+@using MailKit.Net.Smtp;
+@using MimeKit;
+@using IO.Modules.Security;
+@using ResourceManager;
+@using System.Text.RegularExpressions;
+@using System.Security.Cryptography;
+
+<h3>Rejestracja</h3>
+
+@if (errorMessage != null)
+{
+	<p class="error-message">@errorMessage</p>
+}
+
+@if (registered)
+{
+	<p class="success-message">Pomyślnie zarejestrowano. Zweryfikuj swój email poprzez przesłany na niego link.</p>
+}
+
+<div class="form-container">
+	<div class="form-group">
+		<label for="userType">Typ użytkownika</label>
+		<select id="userType" @bind="userType">
+			<option>Darczyńca</option>
+			<option>Przedstawiciel władz</option>
+			<option>Poszkodowany</option>
+			<option>Wolontariusz</option>
+			<option>Organizacja pomocowa</option>
+		</select>
+	</div>
+	<div class="form-group">
+		<label for="email">Email:</label>
+		<input id="email" type="text" @bind="email" />
+	</div>
+	<div class="form-group">
+		<label for="password">Hasło:</label>
+		<input id="password" type="password" @bind="password" />
+	</div>
+	@if (userType == "Organizacja pomocowa")
+	{
+		<div class="form-group">
+			<label for="name">Nazwa:</label>
+			<input id="name" type="text" @bind="name" />
+		</div>
+	}
+	else
+	{
+		<div class="form-group">
+			<label for="name">Imię:</label>
+			<input id="name" type="text" @bind="name" />
+		</div>
+	}
+	@if (userType == "Darczyńca" ||
+		userType == "Przedstawiciel władz" ||
+		userType == "Poszkodowany" ||
+		userType == "Wolontariusz")
+	{
+		<div class="form-group">
+			<label for="surname">Nazwisko:</label>
+			<input type="text" id="surname" @bind="surname" />
+		</div>
+	}
+	<div class="form-group">
+		<label for="phoneNumber">Nr telefonu:</label>
+		<input id="phoneNumber" @bind="phoneNumber" />
+	</div>
+	<div class="form-group">
+		<label for="address">Adres zamieszkania:</label>
+		<input id="address" @bind="address" />
+	</div>
+	@if (userType == "Darczyńca" ||
+		userType == "Przedstawiciel władz" ||
+		userType == "Poszkodowany" ||
+		userType == "Wolontariusz")
+	{
+		<div class="form-group">
+			<label for="pesel">PESEL:</label>
+			<input id="pesel" @bind="pesel" />
+		</div>
+		<div class="form-group">
+			<label for="birthDate">Data urodzenia:</label>
+			<input id="birthDate" type="date" @bind="birthDate" />
+		</div>
+	}
+	@if (userType == "Organizacja pomocowa")
+	{
+		<div class="form-group">
+			<label for="website">Strona internetowa:</label>
+			<input id="website" @bind="website" />
+		</div>
+		<div class="form-group">
+			<label for="krs">KRS:</label>
+			<input id="krs" @bind="krs" />
+		</div>
+	}
+	@if (userType == "Przedstawiciel władz")
+	{
+		<div class="form-group">
+			<label for="institution">Instytucja:</label>
+			<input id="institution" @bind="institution" />
+		</div>
+	}
+	<div class="form-group">
+		<input type="submit" value="Zarejestruj się" @onclick="HandleSignUp" />
+	</div>
+</div>
+
+<style>
+	.form-container {
+	display: flex;
+	flex-direction: column;
+	gap: 15px; 
+	width: 100%;
+	max-width: 500px;
+	margin: 0 auto; 
+	padding: 15px;
+	box-sizing: border-box;
+	background-color: #f9f9f9;
+	border: 1px solid #ccc; 
+	border-radius: 8px; 
+}
+
+.form-group {
+	display: flex;
+	flex-direction: column;
+	gap: 5px; 
+}
+
+label {
+	font-weight: bold;
+	margin-bottom: 3px;
+}
+
+input, select {
+	width: 100%; 
+	max-width: 100%;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
+	font-size: 1rem;
+}
+
+.error-message {
+	color: red;
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+
+.success-message {
+	color: green;
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+
+input[type="submit"] {
+	background-color: #007bff;
+	color: white;
+	border: none;
+	padding: 12px;
+	border-radius: 4px;
+	cursor: pointer;
+	text-align: center;
+	font-size: 1rem;
+}
+
+input[type="submit"]:hover {
+	background-color: #0056b3;
+}
+</style>
+
+@code {
+	private string userType = "Darczyńca";
+	private string email;
+	private string password;
+	private string name;
+	private string surname;
+	private string phoneNumber;
+	private string address;
+	private string pesel;
+	private DateTime birthDate = DateTime.Now;
+	private string website;
+	private string krs;
+	private string institution;
+	private string errorMessage;
+	private string hashedPassword;
+	private bool registered = false;
+
+	private async Task HandleSignUp()
+	{
+		if (string.IsNullOrWhiteSpace(email) ||
+		!Regex.IsMatch(email, @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"))
+		{
+			registered = false;
+			errorMessage = "Podaj poprawny adres e-mail.";
+			return;
+		}
+
+		if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
+		{
+			registered = false;
+			errorMessage = "Hasło powinno mieć co najmniej 8 znaków.";
+			return;
+		}
+
+		if (string.IsNullOrWhiteSpace(name) ||
+			!Regex.IsMatch(name, @"^[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż\s]+$"))
+		{
+			registered = false;
+			errorMessage = "Imię może zawierać tylko litery i spacje.";
+			return;
+		}
+
+		if (string.IsNullOrWhiteSpace(surname) ||
+			!Regex.IsMatch(surname, @"^[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż\s]+$"))
+		{
+			registered = false;
+			errorMessage = "Nazwisko może zawierać tylko litery i spacje.";
+			return;
+		}
+
+		if (string.IsNullOrWhiteSpace(phoneNumber) ||
+			!Regex.IsMatch(phoneNumber, @"^\+?[0-9]{9,15}$"))
+		{
+			registered = false;
+			errorMessage = "Podaj poprawny numer telefonu (np. +48123123123).";
+			return;
+		}
+
+		if (string.IsNullOrWhiteSpace(address))
+		{
+			registered = false;
+			errorMessage = "Podaj poprawny adres zamieszkania.";
+			return;
+		}
+
+		if (string.IsNullOrWhiteSpace(pesel) ||
+			!Regex.IsMatch(pesel, @"^\d{11}$"))
+		{
+			registered = false;
+			errorMessage = "Podaj poprawny PESEL (11 cyfr).";
+			return;
+		}
+
+		if (birthDate == default(DateTime) || birthDate > DateTime.Now)
+		{
+			registered = false;
+			errorMessage = "Podaj poprawną datę urodzenia.";
+			return;
+		}
+
+		if (userType == "Organizacja pomocowa")
+		{
+			if (string.IsNullOrWhiteSpace(website) ||
+				!Regex.IsMatch(website, @"^(http|https):\/\/[a-zA-Z0-9.-]+$"))
+			{
+				registered = false;
+				errorMessage = "Podaj poprawną stronę internetową (np. https://example.com).";
+				return;
+			}
+
+			if (string.IsNullOrWhiteSpace(krs) ||
+				!Regex.IsMatch(krs, @"^\d{10}$"))
+			{
+				registered = false;
+				errorMessage = "Podaj poprawny numer KRS (10 cyfr).";
+				return;
+			}
+		}
+
+		if (userType == "Przedstawiciel władz" && string.IsNullOrWhiteSpace(institution))
+		{
+			errorMessage = "Podaj nazwę instytucji.";
+			return;
+		}
+
+		errorMessage = null;
+
+		hashedPassword = Security.hashData(password);
+		switch (userType)
+		{
+			case "Darczyńca":
+				Donor donor = new Donor(surname, pesel, email, name, phoneNumber, address, true);
+				break;
+			case "Przedstawiciel władz":
+				Authority authority = new Authority(institution, surname, pesel, email, name, phoneNumber, address, true);
+				break;
+			case "Poszkodowany":
+				Affected affected = new Affected(surname, pesel, email, name, phoneNumber, address, false);
+				break;
+			case "Wolontariusz":
+				Volunteer volunteer = new Volunteer(surname, pesel, email, name, phoneNumber, address, true);
+				break;
+			case "Organizacja pomocowa":
+				Charity charity = new Charity(website, krs, email, name, phoneNumber, address, true);
+				break;
+		}
+		User user = new User(email, name, phoneNumber, address, true);
+		Individual individual = new Individual(surname, pesel, email, name, phoneNumber, address, true);
+
+		var registerRequest = new RegisterRequest() { Surname = surname, Pesel = pesel, Email = email, Name = name, PhoneNumber = phoneNumber, Address = address };
+		using (var client = new HttpClient())
+		{
+			try
+			{
+				var response = await client.PostAsJsonAsync("http://localhost:5236/api/SignUp/SignUp", registerRequest);
+				Console.WriteLine(response.StatusCode);
+				if (response.IsSuccessStatusCode)
+				{
+					registered = true;
+
+					UserExecuter userExecuter = new UserExecuter();
+
+					Aes aes = Aes.Create();
+					aes.KeySize = 256;
+					aes.GenerateKey();
+					string key = BitConverter.ToString(aes.Key);
+					Guid tokenGUID = Guid.NewGuid();
+					string token = tokenGUID.ToString();
+
+					userExecuter.SendToDataBase(individual, key, hashedPassword, token);
+					var emailMessage = new MimeMessage();
+					emailMessage.From.Add(new MailboxAddress("SKPH", "skph.no.reply@interia.pl"));
+					emailMessage.To.Add(new MailboxAddress("User", email));
+					emailMessage.Subject = "Potwierdzenie rejestracji";
+					string link = "http://localhost:5236/verify/" + token;
+					emailMessage.Body = new TextPart("html")
+					{
+						Text = $@"
+						<p>Witaj,</p>
+						<p>Kliknij poniższy link, aby zweryfikować swój adres e-mail:</p>
+						<p><a href='{link}'>Zweryfikuj e-mail</a></p>
+						<p>Jeśli to nie Ty inicjowałeś tę akcję, zignoruj tę wiadomość.</p>"
+					};
+
+					using (var smtp = new SmtpClient())
+					{
+						smtp.Connect("poczta.interia.pl", 587, false);
+						smtp.Authenticate("skph.no.reply@interia.pl", "ioponiedzialek10151234");
+						smtp.Send(emailMessage);
+						smtp.Disconnect(true);
+					}
+				}
+				else
+				{
+					registered = false;
+					errorMessage = "Taki użytkownik już istnieje.";
+				}
+			}
+			catch (Exception ex)
+			{
+
+			}
+		}
+	}
+}

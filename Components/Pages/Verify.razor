@@ -1,0 +1,22 @@
+﻿@page "/verify/{token}"
+@rendermode InteractiveServer
+
+@using ResourceManager;
+
+<h1>Pomyślnie zweryfikowano adres email</h1>
+
+@code{
+    [Parameter]
+    public string token { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserExecuter userExecuter = new UserExecuter();
+        string email = userExecuter.CustomQuery("SELECT email FROM users WHERE token = " + "\"" + token + "\";");
+        
+        string[] queryResult = email.Split("\n");
+        email = queryResult[1].Trim();
+
+        userExecuter.UpdateEmailVerified(email, true);
+    }
+}

@@ -1,0 +1,114 @@
+﻿@page "/signIn"
+@rendermode InteractiveServer
+
+@using System.Text.Json  
+@using System.Text
+@using IO.Modules.Security
+
+<h3>Logowanie</h3>
+
+@if (errorMessage != null)
+{
+    @if (success)
+    {
+        <p style="color:green">@errorMessage</p>
+    } else {
+        <p style="color:red">@errorMessage</p>
+    }
+}
+
+<div class="form-container">
+    <div class="form-group">
+        <label for="username">E-mail:</label>
+        <input id="username" @bind="username" />
+    </div>
+    <div class="form-group">
+        <label for="password">Hasło:</label>
+        <input id="password" type="password" @bind="password" />
+    </div>
+    <div class="form-group">
+        <button @onclick="HandleSignIn">Zaloguj się</button>
+    </div>
+</div>
+
+<style>
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%; 
+    max-width: 400px;
+    margin: 0 auto; 
+    padding: 10px;
+    box-sizing: border-box; 
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column; 
+    gap: 5px;
+}
+
+input {
+    width: 100%; 
+    max-width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+</style>
+
+@code {
+    private string username;
+    private string password;
+    private string errorMessage;
+    private bool success = false;
+
+    private async Task HandleSignIn()
+    {
+        if (username != null || password != null)
+        {
+            using (var client = new HttpClient())
+            {
+                var loginRequest = new LoginRequest() { Username = username, Password = Security.hashData(password) };
+
+                try
+                {
+                    Console.WriteLine($"Zawartość loginRequest: Username={loginRequest.Username}, Password={loginRequest.Password}");
+                    var response = await client.PostAsJsonAsync("http://localhost:5236/api/SignIn/SignIn", loginRequest);
+                    Console.WriteLine(response.StatusCode);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        success = true;
+                        errorMessage = "Poprawnie zalogowano.";
+                    }
+                    else
+                    {
+                        success = false;
+                        errorMessage = "Nieprawidłowe dane logowania.";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = "Wystąpił błąd podczas logowania.";
+                }
+            }
+        }
+    }
+}
