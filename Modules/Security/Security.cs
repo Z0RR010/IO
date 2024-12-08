@@ -1,10 +1,14 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using ResourceManager;
 
 namespace IO.Modules.Security
 {
     public static class Security
     {
+
+		private static byte[] customIV = {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
+
         public static string hashData(string input)
         {
             using (SHA256 sha256 = SHA256.Create())
@@ -16,24 +20,37 @@ namespace IO.Modules.Security
             }
         }
 
+		private static byte[] stringKeyToBytes(string key)
+		{
+            byte[] keyBytes = key
+               .Split('-')
+               .Select(hex => Convert.ToByte(hex, 16)) 
+               .ToArray();
+			return keyBytes;
+        }
+
         public static string encryptPESEL(string input, User user)
         {
 			using (Aes myAes = Aes.Create())
 			{
+				UserExecuter userExecuter = new UserExecuter();
 				myAes.KeySize = 256;
-				// myAes.Key = to do
+				myAes.IV = customIV;
+				myAes.Key = stringKeyToBytes(userExecuter.GetEncryptionKey(user.Email));
 				byte[] encrypted = EncryptStringToBytes_Aes(input, myAes.Key, myAes.IV);
 				return BitConverter.ToString(encrypted);
 			}
         }
 
-		public static string decryptPESEL(string input, User user)
+        public static string decryptPESEL(string input, User user)
 		{
 			using (Aes myAes = Aes.Create())
 			{
-				myAes.KeySize = 256;
-                // myAes.Key = to do
-                byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+                UserExecuter userExecuter = new UserExecuter();
+                myAes.KeySize = 256;
+                myAes.IV = customIV;
+                myAes.Key = stringKeyToBytes(userExecuter.GetEncryptionKey(user.Email));
+                byte[] inputBytes = stringKeyToBytes(input);
 				return DecryptStringFromBytes_Aes(inputBytes, myAes.Key, myAes.IV);
 			}
 		}
