@@ -3,6 +3,7 @@ using System.Text;
 using MySql.Data.MySqlClient;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using IO.Modules.Security;
 
 namespace ResourceManager;
 
@@ -125,7 +126,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
         {
             using (var command = new MySqlCommand(query, _userConnection))
             {
-                command.Parameters.AddWithValue("@email", user.EmailAddress);
+                command.Parameters.AddWithValue("@email", user.Email);
                 command.Parameters.AddWithValue("@packedUser", packedUser);
                 command.Parameters.AddWithValue("@encryptionKey", encryptionKey);
                 command.Parameters.AddWithValue("@password", password);

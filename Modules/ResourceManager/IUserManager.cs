@@ -1,4 +1,6 @@
-﻿namespace ResourceManager;
+﻿using IO.Modules.Security;
+
+namespace ResourceManager;
 
 /// <summary>
 /// API for working with user databases

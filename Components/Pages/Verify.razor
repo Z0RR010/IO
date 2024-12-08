@@ -1,0 +1,9 @@
+﻿@page "/verify/{token}"
+@rendermode InteractiveServer
+
+<h1>Pomyślnie zweryfikowano adres email</h1>
+
+@code{
+	[Parameter]
+	public string token { get; set; }
+}
