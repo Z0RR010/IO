@@ -7,14 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Modules\ResourceManager\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <_ContentIncludedByDefault Remove="Modules\ResourceManager\ResourceManager\bin\Debug\net9.0\ResourceManager.deps.json" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.8.0" />
     <PackageReference Include="MySql.Data" Version="9.1.0" />
   </ItemGroup>
 

@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using MySql.Data.MySqlClient;
 
 namespace ResourceManager;
@@ -218,5 +219,51 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
         }
 
         return items;
+    }
+    
+    /// <summary>
+    /// Make your own query if you dislike our functions
+    /// </summary>
+    /// <param name="query">Command</param>
+    /// <returns>Result of command execution</returns>
+    public string CustromQuery(string query)
+    {
+        if (query.Contains("DROP DATABASE".ToLower()) || query.Contains("DROP TABLE".ToLower()))
+        {
+            throw new Exception("Are you dumb? What are you trying to do?");
+        }
+
+        try
+        {
+            using (var command = new MySqlCommand(query, _resourceConnection))
+            using (var reader = command.ExecuteReader())
+            {
+                var result = new StringBuilder();
+
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    result.Append(reader.GetName(i));
+                    if (i < reader.FieldCount - 1) result.Append(", ");
+                }
+                result.AppendLine();
+
+                while (reader.Read())
+                {
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        result.Append(reader.GetValue(i));
+                        if (i < reader.FieldCount - 1) result.Append(", ");
+                    }
+                    result.AppendLine();
+                }
+
+                return result.ToString();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 }
