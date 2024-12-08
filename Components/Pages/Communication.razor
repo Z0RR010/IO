@@ -1,0 +1,166 @@
+﻿@page "/communication"
+@rendermode InteractiveServer
+
+@using IO.Modules.Communication
+@inject Communicator CommunicatorService
+
+<div class="container">
+    @if (!string.IsNullOrEmpty(status)) {
+        <p>@status</p>
+    } else {
+        <p></p>
+    }
+    <!-- Sekcja 1: Tworzenie konwersacji -->
+    <h2>Tworzenie konwersacji</h2>
+    <div>
+        <label for="emailToAdd">E-mail użytkownika: </label>
+        <input type="email" id="emailToAdd" @bind="emailToAdd" />
+        <button @onclick="AddUserToChat">Dodaj użytkownika</button>
+    </div>
+    <div>
+        <h4>Dodani użytkownicy:</h4>
+        <ul>
+            @foreach (var email in userEmails) {
+                <li>@email</li>
+            }
+        </ul>
+    </div>
+    <div>
+        <button @onclick="CreateConversation">Utwórz konwersację</button>
+        <button @onclick="ClearUserTable">Wyczyść listę użytkowników</button>
+        
+        
+
+    </div>
+    <h3>Aktywne konwersacje:</h3>
+    <ul>
+        @foreach (var chat in CommunicatorService.testServer.ActiveChats) {
+            <li>
+                <strong>ID Konwersacji:</strong> @chat.ChatId, <strong>Uczestnicy:</strong> @string.Join(", ", chat.Emails)
+            </li>
+        }
+    </ul>
+    <h2>Archiwizacja konwersacji</h2>
+    <div>
+        <label for="chatIdToArchive">ID konwersacji: </label>
+        <input type="number" id="chatIdToArchive" @bind="chatIdToArchive" />
+        <button @onclick="ArchiveConversation">Archiwizuj konwersację</button>
+    </div>
+
+    <h3>Konwersacje w archiwum:</h3>
+    <ul>
+        @foreach (var chat in CommunicatorService.testServer.ArchivalChats) {
+            <li>
+                <strong>ID Konwersacji:</strong> @chat.ChatId, <strong>Uczestnicy:</strong> @string.Join(", ", chat.Emails)
+            </li>
+        }
+    </ul>
+
+    <h2>Cofnięcie archiwizacji</h2>
+    <div>
+        <label for="chatIdToBringBack">ID konwersacji: </label>
+        <input type="number" id="chatIdToBringBack" @bind="chatIdToBringBack" />
+        <button @onclick="BringBackConversation">Cofnij archiwizację</button>
+    </div>
+
+    <!-- Sekcja 2: Wysyłanie wiadomości -->
+    <h2>Wysyłanie wiadomości</h2>
+    <div>
+        <label for="chatIdToSend">ID konwersacji: </label>
+        <input type="number" id="chatIdToSend" @bind="chatIdToSend" />
+        <label for="senderEmail">E-mail nadawcy: </label>
+        <input type="email" id="senderEmail" @bind="senderEmail" />
+        <label for="messageContent">Treść wiadomości: </label>
+        <input type="text" id="messageContent" @bind="messageContent" />
+        <button @onclick="SendMessage">Wyślij wiadomość</button>
+    </div>
+
+    <!-- Sekcja 3: Odczytywanie wiadomości -->
+    <h2>Odczytywanie wiadomości</h2>
+    <div>
+        <label for="userEmailToRead">E-mail użytkownika: </label>
+        <input type="email" id="userEmailToRead" @bind="userEmailToRead" />
+        <button @onclick="GetUserChats">Pobierz konwersacje</button>
+    </div>
+    <h3>Konwersacje użytkownika:</h3>
+    <ul>
+        @foreach (var chat in userChats) {
+            <li>
+                <strong>ID Konwersacji:</strong> @chat.ChatId
+                <button @onclick="() => SelectChat(chat.ChatId)">Pokaż wiadomości</button>
+            </li>
+        }
+    </ul>
+    @if (selectedChatMessages != null) {
+        <h4>Wiadomości w konwersacji:</h4>
+        <ul>
+            @foreach (var message in selectedChatMessages) {
+                <li><strong>Od:</strong> @message.Email, <strong>Treść:</strong> @message.content</li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    private string emailToAdd;
+    private List<string> userEmails = new();
+    private string status;
+    private int chatIdToSend;
+    private int chatIdToArchive;
+    private int chatIdToBringBack;
+    private string senderEmail;
+    private string messageContent;
+    private string userEmailToRead;
+    private List<Chat> userChats = new();
+    private List<Message> selectedChatMessages = new();
+
+    private void AddUserToChat() {
+        if (!string.IsNullOrWhiteSpace(emailToAdd) && !userEmails.Contains(emailToAdd)) {
+            userEmails.Add(emailToAdd);
+        }
+        emailToAdd = string.Empty;
+    }
+
+    private void CreateConversation() {
+        bool result = CommunicatorService.CreateChat(Permission.System, userEmails.ToArray());
+        status = result ? "Utworzono czat" : "Nie udało się utworzyć czatu";
+        if (result) {
+            ClearUserTable();
+        }
+    }
+
+    private void ArchiveConversation() {
+        bool result = CommunicatorService.ArchiveChat(Permission.System, chatIdToArchive);
+        status = result ? "Zarchiwizowano czat" : "Nie udało się zarchiwizować czatu";
+    }
+
+    private void BringBackConversation() {
+        bool result = CommunicatorService.BringBackChat(Permission.System, chatIdToBringBack);
+        status = result ? "Cofnięto archiwizację" : "Nie cofnięto archiwizacji";
+    }
+
+    private void SendMessage() {
+        if (chatIdToSend > 0 && !string.IsNullOrWhiteSpace(senderEmail) && !string.IsNullOrWhiteSpace(messageContent)) {
+            bool result = CommunicatorService.SendMessage(chatIdToSend, messageContent, senderEmail);
+            status = result ? "Wiadomość wysłana" : "Nie udało się wysłać wiadomości";
+            if (result) {
+                messageContent = string.Empty;
+            }
+        }
+    }
+
+    private void GetUserChats() {
+        if (!string.IsNullOrWhiteSpace(userEmailToRead)) {
+            userChats = CommunicatorService.GetUserChats(userEmailToRead);
+        }
+    }
+
+    private void SelectChat(int chatId) {
+        var chat = CommunicatorService.testServer.ActiveChats.FirstOrDefault(c => c.ChatId == chatId);
+        selectedChatMessages = chat?.Messages ?? new List<Message>();
+    }
+
+    private void ClearUserTable() {
+        userEmails.Clear();
+    }
+}
