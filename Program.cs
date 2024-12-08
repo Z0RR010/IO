@@ -31,7 +31,7 @@ namespace IO
                           .AllowAnyHeader();
                 });
             });
-
+            
 
             builder.Services.AddScoped<GoogleMapsClient>(provider =>
             {
@@ -40,6 +40,8 @@ namespace IO
 
                 return new GoogleMapsClient(jsRuntime, apiKey);
             });
+
+            builder.Services.AddScoped<RequestModule.IRequestService, RequestModule.RequestService>();
 
             var app = builder.Build();
 
