@@ -17,6 +17,8 @@ namespace IO.Modules.Volunteer
         public List<DateTime> Availability { get; set; }
         public Organisation Organisation { get; set; }
 
+        public Volunteer() { }
+
         public Volunteer(
             string firstName,
             string lastName,

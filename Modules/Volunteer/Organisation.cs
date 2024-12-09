@@ -11,6 +11,8 @@ namespace IO.Modules.Volunteer
         public char[] PhoneNumber { get; set; }
         public string Address { get; set; }
 
+        public Organisation() { }
+
         public Organisation(string organisationName, char[] phoneNumber, string address)
         {
             OrganisationName = organisationName;

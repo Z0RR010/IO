@@ -1,4 +1,7 @@
 using IO.Components;
+using IO.Modules.Communication;
+using IO.Modules.MapLibrary;
+using Microsoft.JSInterop;
 
 namespace IO
 {
@@ -13,6 +16,8 @@ namespace IO
                 .AddInteractiveServerComponents();
 
             builder.Services.AddControllers();
+
+            builder.Services.AddSingleton<Communicator>();
 
             builder.Services.AddHttpClient();
             builder.Services.AddScoped(sp => new HttpClient
@@ -29,7 +34,17 @@ namespace IO
                           .AllowAnyHeader();
                 });
             });
+            
 
+            builder.Services.AddScoped<GoogleMapsClient>(provider =>
+            {
+                string apiKey = "AIzaSyCaEHkCZC5zP2OjibM8Ri2I7D-1UoZLU8M";
+                var jsRuntime = provider.GetRequiredService<IJSRuntime>();
+
+                return new GoogleMapsClient(jsRuntime, apiKey);
+            });
+
+            builder.Services.AddScoped<RequestModule.IRequestService, RequestModule.RequestService>();
 
             var app = builder.Build();
 

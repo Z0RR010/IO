@@ -8,6 +8,7 @@
 @using IO.Modules.Security;
 @using ResourceManager;
 @using System.Text.RegularExpressions;
+@using System.Security.Cryptography;
 
 <h3>Rejestracja</h3>
 
@@ -315,13 +316,18 @@ input[type="submit"]:hover {
 
 					UserExecuter userExecuter = new UserExecuter();
 
-					userExecuter.SendToDataBase(individual, "test", hashedPassword, "token");
+					Aes aes = Aes.Create();
+					aes.KeySize = 256;
+					aes.GenerateKey();
+					string key = BitConverter.ToString(aes.Key);
+					Guid tokenGUID = Guid.NewGuid();
+					string token = tokenGUID.ToString();
+
+					userExecuter.SendToDataBase(individual, key, hashedPassword, token);
 					var emailMessage = new MimeMessage();
 					emailMessage.From.Add(new MailboxAddress("SKPH", "skph.no.reply@interia.pl"));
 					emailMessage.To.Add(new MailboxAddress("User", email));
 					emailMessage.Subject = "Potwierdzenie rejestracji";
-					Guid tokenGUID = Guid.NewGuid();
-					string token = tokenGUID.ToString();
 					string link = "http://localhost:5236/verify/" + token;
 					emailMessage.Body = new TextPart("html")
 					{
@@ -335,7 +341,7 @@ input[type="submit"]:hover {
 					using (var smtp = new SmtpClient())
 					{
 						smtp.Connect("poczta.interia.pl", 587, false);
-						smtp.Authenticate("skph.no.reply@interia.pl", "ioponiedzialek1015");
+						smtp.Authenticate("skph.no.reply@interia.pl", "ioponiedzialek10151234");
 						smtp.Send(emailMessage);
 						smtp.Disconnect(true);
 					}

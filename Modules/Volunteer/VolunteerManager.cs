@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using IO.Modules.Security;
+using ResourceManager;
 
 namespace IO.Modules.Volunteer
 {
@@ -32,6 +34,19 @@ namespace IO.Modules.Volunteer
             }
 
             organisationList.Add(organisation);
+
+            var executor = new VolunteerExecuter();
+
+            if (executor.AddOrganisationToDatabase(organisation))
+            {
+                Console.WriteLine("Organisation added or updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to add or update organisation.");
+            }
+            executor.Dispose();
+
         }
 
         public void AddVolunteer(Volunteer volunteer)
@@ -59,6 +74,18 @@ namespace IO.Modules.Volunteer
 
             volunteer.Organisation.AddVolunteer(volunteer);
             volunteerList.Add(volunteer);
+
+            var executor = new VolunteerExecuter();
+
+            if (executor.AddVolunteerToDatabase(volunteer, volunteer.Organisation))
+            {
+                Console.WriteLine("Organisation added or updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to add or update organisation.");
+            }
+            executor.Dispose();
         }
 
         public Organisation FindOrganisationByID(int organisationID)
@@ -84,7 +111,32 @@ namespace IO.Modules.Volunteer
         public int VolunteerCount => volunteerList.Count;
         public int OrganisationCount => organisationList.Count;
         public List<Organisation> OrganisationList => organisationList;
+        public List<Volunteer> VolunteerList => volunteerList;
 
+
+
+
+
+
+        public void Load()
+        {
+            var executor = new VolunteerExecuter();
+            organisationList = executor.LoadOrganisationList();
+            volunteerList = executor.LoadVolunteerList(organisationList);
+
+            executor.Dispose();
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         public string SaveManagerToFile()
         {
             string all = string.Empty, volunteers = string.Empty, organisations = string.Empty;
@@ -214,11 +266,13 @@ namespace IO.Modules.Volunteer
                         currentVolunteer.Skills = trimmedLine.Substring(8);
                     else if (trimmedLine.StartsWith("Availability:"))
                     {
-                        var times = trimmedLine.Substring(14)
-                            .Split(", ")
-                            .Select(time => DateTime.ParseExact(time, @"hh\:mm\:ss", null))
-                            .ToList();
-                        currentVolunteer.Availability = times;
+                        //var times = trimmedLine.Substring(14)
+                        //    .Split(", ")
+                        //    .Select(time => DateTime.ParseExact(time, @"hh\:mm\:ss", null))
+                        //    .ToList();
+                        //currentVolunteer.Availability = times;
+                        var dates = trimmedLine.Substring(14).Split(", ").Select(DateTime.Parse).ToList();
+                        currentVolunteer.Availability = dates;
                     }
                     else if (trimmedLine.StartsWith("Organisation ID:"))
                     {

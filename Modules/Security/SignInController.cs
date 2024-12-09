@@ -20,6 +20,12 @@ public class SignInController : ControllerBase
 			return Unauthorized(new { Message = "Nieprawidłowy login lub hasło." });
 		}
 
+        if(userExecuter.CustomQuery("SELECT emailVerified FROM users WHERE email=" + "\"" + request.Username + "\"")
+                       .Split('\n')[1].Trim() == "False")
+        {
+            return Unauthorized(new { Message = "Użytkownik nie potwierdził rejestracji przez email." });
+        }
+
         if(userExecuter.IsPasswordCorrect(request.Username, request.Password))
         {
 			return Ok(new { Message = "Zalogowano pomyślnie!" });

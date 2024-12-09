@@ -1,0 +1,61 @@
+@page "/requests"
+@inject RequestModule.IRequestService RequestService
+@using IO.Modules.Security
+
+<h3>Requests</h3>
+
+@if (requests == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var request in requests)
+            {
+                <tr>
+                    <td>@request.Title</td>
+                    <td>@request.Description</td>
+                    <td>@request.Status</td>
+                    <td>
+                        <a href="/requests/details/@request.Id">Details</a>
+                        <a href="/requests/edit/@request.Id">Edit</a>
+                        <button @onclick="() => DeleteRequest(request.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<RequestModule.Request> requests;
+
+    protected override async Task OnInitializedAsync()
+    {
+        requests = await RequestService.GetRequestsAsync();
+    }
+
+    private async Task DeleteRequest(int id)
+    {
+        try
+        {
+            await RequestService.DeleteRequestAsync(id);
+            requests = await RequestService.GetRequestsAsync();
+        }
+        catch (Exception ex)
+        {
+            // Log the exception (ex) if necessary
+            Console.WriteLine($"Error deleting request: {ex.Message}");
+        }
+    }
+}

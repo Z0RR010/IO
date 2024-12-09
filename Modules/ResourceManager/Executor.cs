@@ -114,6 +114,6 @@ public class Executor : IResManager
     /// <returns>Result of command execution</returns>
     public string CustomQuery(string query)
     {
-        return _handler.CustromQuery(query);
+        return _handler.CustomQuery(query);
     }
 }
