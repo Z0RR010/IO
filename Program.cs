@@ -1,4 +1,5 @@
 using IO.Components;
+using IO.Modules.Communication;
 using IO.Modules.MapLibrary;
 using Microsoft.JSInterop;
 
@@ -15,6 +16,8 @@ namespace IO
                 .AddInteractiveServerComponents();
 
             builder.Services.AddControllers();
+
+            builder.Services.AddSingleton<Communicator>();
 
             builder.Services.AddHttpClient();
             builder.Services.AddScoped(sp => new HttpClient
