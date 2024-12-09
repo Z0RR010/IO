@@ -37,6 +37,34 @@ token VARCHAR(256)
 )
 
 
+create database volunteerDatabase;
+
+use volunteerDatabase;
+
+CREATE TABLE organisations (
+    OrganisationID INT PRIMARY KEY,
+    OrganisationName VARCHAR(255),
+    PhoneNumber VARCHAR(20),
+    Address VARCHAR(255)
+);
+
+CREATE TABLE volunteers (
+    VolunteerID INT PRIMARY KEY,
+    FirstName VARCHAR(100),
+    LastName VARCHAR(100),
+    Email VARCHAR(100),
+    Gender VARCHAR(10),
+    PhoneNumber VARCHAR(20),
+    Address VARCHAR(255),
+    Experience TEXT,
+    AdditionalInfo TEXT,
+    Skills TEXT,
+    Availability TEXT,
+    OrganisationID INT,
+    FOREIGN KEY (OrganisationID) REFERENCES Organisations(OrganisationID)
+);
+
+
 do sprawdzenia zawartości:
 select * from nazwa_tablicy
 
