@@ -1,9 +1,13 @@
+<<<<<<< Updated upstream
 ﻿using System.Data;
 using System.Text;
+=======
+﻿using IO.Modules.Security;
+>>>>>>> Stashed changes
 using MySql.Data.MySqlClient;
+using System.Data.SQLite;
+using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using IO.Modules.Security;
 
 namespace ResourceManager;
 
@@ -20,7 +24,13 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
         try
         {
             _userConnection =
+<<<<<<< Updated upstream
                 new MySqlConnection("Server=localhost;Port=3306;Database=userDatabase;User Id=root;Password=root;");
+=======
+                //new MySqlConnection("Server=localhost;Port=3306;Database=userDatabase;User Id=root;Password=root;");
+                new SQLiteConnection("Data Source=Modules/ResourceManager/databases/userDatabase.db;Version=3;FailIfMissing=True;");
+            //new SQLiteConnection("Data Source=Modules/ResourceManager/databases/userDatabase.db;Version=3;FailIfMissing=True;Pooling=true;");
+>>>>>>> Stashed changes
             _userConnection.Open();
             //Diagnostics stuff
             Console.WriteLine(_userConnection.Database);
@@ -44,7 +54,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
         using (var command = new MySqlCommand(query, _userConnection))
         {
             command.Parameters.AddWithValue("@email", email);
-            
+
             string input = command.ExecuteScalar()?.ToString();
 
             if (input != null)
@@ -73,7 +83,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
 
         // connection closes automatically as this class implements IDisposable interface
     }
-    
+
     /// <summary>
     /// Get a concrete individual user from database as only they have PESEL
     /// </summary>
@@ -88,7 +98,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
             using (var command = new MySqlCommand(query, _userConnection))
             {
                 command.Parameters.AddWithValue("@email", email);
-                
+
                 var input = command.ExecuteScalar()?.ToString();
                 if (input != null)
                 {
@@ -101,7 +111,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
 
         return null;
     }
-    
+
     /// <summary>
     /// Add user to data base
     /// </summary>
@@ -118,7 +128,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
         //     WriteIndented = true,
         //     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         // }
-        
+
         var packedUser = JsonSerializer.Serialize(user);
         string query =
             "INSERT INTO users(email, user, encryptionKey, password, emailVerified, token) VALUES(@email, @packedUser, @encryptionKey, @password, @emailVerified, @token)";
@@ -132,7 +142,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
                 command.Parameters.AddWithValue("@password", password);
                 command.Parameters.AddWithValue("@emailVerified", false);
                 command.Parameters.AddWithValue("@token", token);
-                
+
                 int rowsAffected = command.ExecuteNonQuery();
                 return rowsAffected > 0;
             }
@@ -165,7 +175,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
         User user = GetUserFromDataBase(email);
         if (user != null && user.GetType().IsSubclassOf(typeof(User)))
         {
-            Individual output = (Individual) user;
+            Individual output = (Individual)user;
             return output.Pesel;
         }
 
@@ -217,7 +227,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
             throw;
         }
     }
-    
+
     /// <summary>
     /// Gain encryption key of a user by given email
     /// </summary>
@@ -232,9 +242,9 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
             using (var command = new MySqlCommand(query, _userConnection))
             {
                 command.Parameters.AddWithValue("@email", email);
-                
+
                 string input = command.ExecuteScalar()?.ToString();
-                
+
                 return input;
             }
         }
@@ -258,9 +268,9 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
             using (var command = new MySqlCommand(query, _userConnection))
             {
                 command.Parameters.AddWithValue("@email", email);
-                
+
                 string input = command.ExecuteScalar()?.ToString();
-                
+
                 return input;
             }
         }
@@ -285,7 +295,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
             {
                 command.Parameters.AddWithValue("@email", email);
                 command.Parameters.AddWithValue("@value", value);
-                
+
                 int rowsAffected = command.ExecuteNonQuery();
                 return rowsAffected > 0;
             }

@@ -34,7 +34,7 @@ namespace IO
                           .AllowAnyHeader();
                 });
             });
-            
+
 
             builder.Services.AddScoped<GoogleMapsClient>(provider =>
             {

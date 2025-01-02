@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ConsoleApp1
+﻿namespace IO.Modules.DonorLibrary
 {
     public class DonationManager
     {
@@ -15,16 +9,22 @@ namespace ConsoleApp1
             donations = new List<Donation>();
         }
 
-        public void AddDonation(Donation donation)
+        public void AddDonation(string itemName, int quantity, string date)
         {
-            if (donation == null)
-                throw new ArgumentNullException(nameof(donation), "Donation cannot be null.");
-
-            if (donations.Any(d => d.DonationID == donation.DonationID))
-                throw new InvalidOperationException($"Darowizna o ID {donation.DonationID} już istnieje w systemie.");
-
+            int newId = GetNextId();
+            var donation = new Donation(newId, itemName, quantity, date);
             donations.Add(donation);
         }
+
+        private int GetNextId()
+        {
+            return donations.Count == 0 ? 0 : donations.Max(d => d.DonationID) + 1;
+        }
+        public List<Donation> GetAllDonations()
+        {
+            return donations;
+        }
+
         public void RemoveDonation(int donationID)
         {
             var donation = donations.FirstOrDefault(d => d.DonationID == donationID);

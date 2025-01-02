@@ -1,8 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using IO.Modules.Security;
-using RequestModule;
 using ResourceManager;
 
 namespace RequestModule
@@ -11,7 +7,7 @@ namespace RequestModule
     {
         private readonly List<Request> _requests = new List<Request>()
         {
-    
+
             new Request
             {
                 Id = 1,

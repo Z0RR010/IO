@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-
-namespace ConsoleApp1
+﻿namespace IO.Modules.DonorLibrary
 {
     public class Donor
     {
         public int donorID { get; private set; }
-        private IDonorType donorType { get; set; }
+        public IDonorType donorType { get; set; }
         public List<Donation> donations { get; private set; }
 
         public Donor(int donorID, IDonorType donorType)
@@ -19,12 +12,9 @@ namespace ConsoleApp1
             this.donorType = donorType;
             donations = new List<Donation>();
         }
-        public void Donate(int donationID, string item, int quantity, string date, DonationManager donationManager)
+        public void Donate(string item, int quantity, string date, DonationManager donationManager)
         {
-            var donation = new Donation(donationID, item, quantity, date);
-            donationManager.AddDonation(donation);
-            donations.Add(donation);
-            donation.AssignDonor(this);
+            donationManager.AddDonation(item, quantity, date);
         }
 
         public Donation GetDonationById(int donationID)
@@ -36,10 +26,6 @@ namespace ConsoleApp1
             }
             throw new KeyNotFoundException($"Donation with ID: {donationID} not found.");
         }
-        //public List<Donation> getDonations()
-        //{
-        //    return donations;
-        //}
 
         public string getDonorInfo()
         {

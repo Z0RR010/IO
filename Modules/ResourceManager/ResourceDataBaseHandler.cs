@@ -1,6 +1,10 @@
-﻿using System.Text;
+﻿using System.Data.SQLite;
+using System.Text;
 using System.Text.Json;
+<<<<<<< Updated upstream
 using MySql.Data.MySqlClient;
+=======
+>>>>>>> Stashed changes
 
 namespace ResourceManager;
 
@@ -130,14 +134,14 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
     public bool SetNewAmount(string name, int newAmount)
     {
         List<Resource> items = GetAllItems();
-        
+
         foreach (Resource res in items)
         {
             if (res.Name.Equals(name))
             {
                 int hash = res.GetHashCode();
                 res.Amount = newAmount;
-                
+
                 string query = "UPDATE resources SET resource = @resource WHERE hashcode_id = @hashcode";
 
                 try
@@ -147,7 +151,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
                         command.Parameters.AddWithValue("@hashcode", hash);
                         command.Parameters.AddWithValue("@resource", JsonSerializer.Serialize(res));
                         int rowsAffected = command.ExecuteNonQuery();
-                    
+
                         return rowsAffected > 0;
                     }
                 }

@@ -33,6 +33,58 @@
 			<option>Organizacja pomocowa</option>
 		</select>
 	</div>
+	@if (userType == "Darczyńca")
+	{
+		<div class="form-group">
+			<label for="donorType">Typ darczyńcy</label>
+			<select id="donorType" @bind="donorType">
+				<option>Osoba indywidualna</option>
+				<option>Firma</option>
+			</select>
+		</div>
+		@if (donorType == "Firma")
+		{
+			<div class="form-group">
+				<label for="companyName">Nazwa firmy:</label>
+				<input id="companyName" @bind="companyName" />
+			</div>
+			<div class="form-group">
+				<label for="phoneNumber">Nr telefonu:</label>
+				<input id="phoneNumber" @bind="phoneNumber" />
+			</div>
+			<div class="form-group">
+				<label for="address">Adres firmy:</label>
+				<input id="address" @bind="address" />
+			</div>
+			<div class="form-group">
+				<label for="NIP">NIP:</label>
+				<input id="NIP" @bind="NIP" />
+			</div>
+		}
+		@if (donorType == "Osoba indywidualna")
+		{
+			<div class="form-group">
+				<label for="name">Imie:</label>
+				<input id="name" @bind="name" />
+			</div>
+			<div class="form-group">
+				<label for="surname">Nazwisko:</label>
+				<input id="surname" @bind="surname" />
+			</div>
+			<div class="form-group">
+				<label for="phoneNumber">Nr telefonu:</label>
+				<input id="phoneNumber" @bind="phoneNumber" />
+			</div>
+			<div class="form-group">
+				<label for="address">Adres zamieszkania:</label>
+				<input id="address" @bind="address" />
+			</div>
+			<div class="form-group">
+				<label for="pesel">PESEL:</label>
+				<input id="pesel" @bind="pesel" />
+			</div>
+		}
+	}
 	<div class="form-group">
 		<label for="email">Email:</label>
 		<input id="email" type="text" @bind="email" />
@@ -41,12 +93,16 @@
 		<label for="password">Hasło:</label>
 		<input id="password" type="password" @bind="password" />
 	</div>
+	
 	@if (userType == "Organizacja pomocowa")
 	{
 		<div class="form-group">
 			<label for="name">Nazwa:</label>
 			<input id="name" type="text" @bind="name" />
 		</div>
+	}
+	else if (userType == "Darczyńca")
+	{
 	}
 	else
 	{
@@ -55,8 +111,7 @@
 			<input id="name" type="text" @bind="name" />
 		</div>
 	}
-	@if (userType == "Darczyńca" ||
-		userType == "Przedstawiciel władz" ||
+	@if (userType == "Przedstawiciel władz" ||
 		userType == "Poszkodowany" ||
 		userType == "Wolontariusz")
 	{
@@ -65,16 +120,18 @@
 			<input type="text" id="surname" @bind="surname" />
 		</div>
 	}
-	<div class="form-group">
-		<label for="phoneNumber">Nr telefonu:</label>
-		<input id="phoneNumber" @bind="phoneNumber" />
-	</div>
-	<div class="form-group">
-		<label for="address">Adres zamieszkania:</label>
-		<input id="address" @bind="address" />
-	</div>
-	@if (userType == "Darczyńca" ||
-		userType == "Przedstawiciel władz" ||
+	@if (userType != "Darczyńca")
+	{
+		<div class="form-group">
+			<label for="phoneNumber">Nr telefonu:</label>
+			<input id="phoneNumber" @bind="phoneNumber" />
+		</div>
+		<div class="form-group">
+			<label for="address">Adres zamieszkania:</label>
+			<input id="address" @bind="address" />
+		</div>
+	}
+	@if (userType == "Przedstawiciel władz" ||
 		userType == "Poszkodowany" ||
 		userType == "Wolontariusz")
 	{
@@ -176,6 +233,9 @@ input[type="submit"]:hover {
 
 @code {
 	private string userType = "Darczyńca";
+	private string donorType = "Osoba indywidualna";
+	private string companyName;
+	private string NIP;
 	private string email;
 	private string password;
 	private string name;
@@ -285,7 +345,14 @@ input[type="submit"]:hover {
 		switch (userType)
 		{
 			case "Darczyńca":
-				Donor donor = new Donor(surname, pesel, email, name, phoneNumber, address, true);
+				if (donorType == "Firma")
+				{
+					Donor donor = new Donor(surname, pesel, email, name, phoneNumber, address, true);
+				}
+				if (donorType == "Osoba indywidualna")
+				{
+					Donor donor = new Donor(surname, pesel, email, name, phoneNumber, address, true);
+				}
 				break;
 			case "Przedstawiciel władz":
 				Authority authority = new Authority(institution, surname, pesel, email, name, phoneNumber, address, true);

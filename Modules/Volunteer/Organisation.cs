@@ -1,6 +1,4 @@
-﻿using IO.Components.Pages;
-
-namespace IO.Modules.Volunteer
+﻿namespace IO.Modules.Volunteer
 {
     public class Organisation
     {
