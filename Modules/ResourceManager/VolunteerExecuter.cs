@@ -1,10 +1,19 @@
 ﻿using IO.Modules.Volunteer;
+<<<<<<< Updated upstream
 using MySql.Data.MySqlClient;
+=======
+using System.Data.SQLite;
+>>>>>>> Stashed changes
 
 public class VolunteerExecuter : IDisposable, IAsyncDisposable
 {
     private readonly string _connectionString =
+<<<<<<< Updated upstream
         "Server=localhost;Port=3306;Database=volunteerDatabase;User Id=root;Password=root;";
+=======
+        "Data Source=Modules/ResourceManager/databases/volunteerDatabase.db;Version=3;FailIfMissing=True;";
+    //"Data Source=Modules/ResourceManager/databases/volunteerDatabase.db;Version=3;FailIfMissing=True;Pooling=true;";
+>>>>>>> Stashed changes
 
     public bool AddOrganisationToDatabase(Organisation organisation)
     {
@@ -162,11 +171,19 @@ public class VolunteerExecuter : IDisposable, IAsyncDisposable
             {
                 var organisation = new Organisation();
 
+<<<<<<< Updated upstream
                 organisation.OrganisationID = reader.GetInt32("OrganisationID");
                 organisation.OrganisationName = reader.GetString("OrganisationName");
                 organisation.PhoneNumber = reader.GetString("PhoneNumber").ToCharArray();
                 organisation.Address = reader.GetString("Address");
                 
+=======
+                organisation.OrganisationID = reader.GetInt32(0);//"OrganisationID");
+                organisation.OrganisationName = reader.GetString(1);//"OrganisationName");
+                organisation.PhoneNumber = reader.GetString(2).ToCharArray();//"PhoneNumber").ToCharArray();
+                organisation.Address = reader.GetString(3);//"Address");
+
+>>>>>>> Stashed changes
 
                 organisations.Add(organisation);
             }

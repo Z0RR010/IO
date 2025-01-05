@@ -5,11 +5,11 @@ namespace ResourceManager;
 public class Resource
 {
     public String Name { get; set; }
-    
+
     public Category Category { get; set; }
-    
+
     public int Amount { get; set; }
-    
+
     public bool Status { get; set; }
 
     public Resource(string name, Category category, int amount)
@@ -33,5 +33,5 @@ public class Resource
     {
         Amount = amount;
     }
-    
+
 }

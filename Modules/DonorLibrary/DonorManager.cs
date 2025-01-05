@@ -1,4 +1,4 @@
-﻿using ConsoleApp1;
+﻿using IO.Modules.DonorLibrary;
 
 public class DonorManager
 {
@@ -46,7 +46,7 @@ public class DonorManager
 
         currentDonor = null;
     }
-    
+
     public void RemoveDonor(int donorID)
     {
         var donorToRemove = donors.FirstOrDefault(d => d.donorID == donorID);

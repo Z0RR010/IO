@@ -17,5 +17,5 @@ public class RaportManager : IReporting
         usedServer.Reports.Add(raport);
         activeReport = "";
     }
-    
+
 }

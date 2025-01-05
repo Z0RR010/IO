@@ -7,7 +7,7 @@ namespace IO.Modules.MapLibrary
         private readonly IJSRuntime _jsRuntime;
         private readonly string _apiKey;
         private IJSObjectReference _module;
-        
+
         public GoogleMapsClient(IJSRuntime jsRuntime, string apiKey)
         {
             _jsRuntime = jsRuntime;
@@ -21,29 +21,29 @@ namespace IO.Modules.MapLibrary
             options.Add("v", "weekly");
             await _module.InvokeVoidAsync("loadGoogleMapsAPI", options);
         }
-        
+
         public async Task InitializeApi(string language)
         {
             await InitializeApi(new Dictionary<string, object> { { "language", language } });
         }
-        
+
         public async Task<Coordinates> GetCoordinates(string address)
         {
             Console.WriteLine($"Geocoding address: {address}");
             return await _module.InvokeAsync<Coordinates>("geocode", address);
         }
-        
+
         public async Task DrawMap(MapController map, Coordinates center)
         {
             Console.WriteLine($"Drawing map with center at {center.Latitude}, {center.Longitude}");
             await _module.InvokeVoidAsync("initMap", map.id, center.Latitude, center.Longitude);
         }
-        
+
         public async Task AddMarker(MapController map, Coordinates position, string title)
         {
             Console.WriteLine($"Adding marker at {position.Latitude}, {position.Longitude}");
             await _module.InvokeVoidAsync("addMarker", map.id, position.Latitude, position.Longitude, title);
         }
-        
+
     }
 }

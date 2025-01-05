@@ -1,9 +1,9 @@
 ﻿namespace IO.Modules.Security
 {
-	public class Charity : User
-	{
-		private string website;
-		private string krs;
+    public class Charity : User
+    {
+        private string website;
+        private string krs;
 
         public Charity(string website, string krs, string email, string name, string phoneNumber, string address, bool isVerified) : base(email, name, phoneNumber, address, isVerified)
         {

@@ -13,7 +13,7 @@ public class Executor : IResManager
     {
         return new Resource(name, category, amount);
     }
-    
+
     /// <summary>
     /// Add new resource item to database
     /// </summary>
@@ -34,7 +34,7 @@ public class Executor : IResManager
             case "transport": output = Category.Transport; break;
             default: throw new AggregateException("Unknown category");
         }
-        
+
         return _handler.AddItem(CreateResource(name, output, amount));
     }
 
@@ -46,9 +46,9 @@ public class Executor : IResManager
     /// <returns>True string info operation was successful. Otherwise, null</returns>
     public string GetItem(string name, int amount)
     {
-        return _handler.GetItem(name , amount).ToString();
+        return _handler.GetItem(name, amount).ToString();
     }
-    
+
     /// <summary>
     /// Get amount of items of concrete category
     /// </summary>
@@ -67,10 +67,10 @@ public class Executor : IResManager
             case "transport": output = Category.Transport; break;
             default: throw new AggregateException("Unknown category");
         }
-        
+
         return _handler.GetItemsByCategory(output);
     }
-    
+
     /// <summary>
     /// Get string info about all resources stored in resource databse
     /// </summary>
@@ -78,8 +78,9 @@ public class Executor : IResManager
     public List<string> GetAllAvailableItems()
     {
         List<string> output = new List<string>();
-        
-        foreach (Resource item in _handler.GetAllItems()) {
+
+        foreach (Resource item in _handler.GetAllItems())
+        {
             output.Add(item.Name + " - " + item.Category + " - " + item.Amount);
         }
         return output;
