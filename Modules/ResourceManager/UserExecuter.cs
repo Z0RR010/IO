@@ -22,7 +22,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
         {
             _userConnection =
                 //new MySqlConnection("Server=localhost;Port=3306;Database=userDatabase;User Id=root;Password=root;");
-                new SQLiteConnection("Data Source=Modules/ResourceManager/databases/userDatabase.db;Version=3;FailIfMissing=True;");
+                new SQLiteConnection("Data Source=../../../Modules/ResourceManager/databases/userDatabase.db;Version=3;FailIfMissing=True;");
                 //new SQLiteConnection("Data Source=Modules/ResourceManager/databases/userDatabase.db;Version=3;FailIfMissing=True;Pooling=true;");
             _userConnection.Open();
             //Diagnostics stuff
