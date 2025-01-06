@@ -1,9 +1,6 @@
-<<<<<<< Updated upstream
-﻿using System.Data;
+using System.Data;
 using System.Text;
-=======
-﻿using IO.Modules.Security;
->>>>>>> Stashed changes
+using IO.Modules.Security;
 using MySql.Data.MySqlClient;
 using System.Data.SQLite;
 using System.Text;
@@ -16,7 +13,8 @@ namespace ResourceManager;
 /// </summary>
 public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
 {
-    private readonly MySqlConnection _userConnection;
+    //private readonly MySqlConnection _userConnection;
+    private readonly SQLiteConnection _userConnection;
 
     //If connection is not established try downloading mySQL server so far
     public UserExecuter()
@@ -24,13 +22,9 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
         try
         {
             _userConnection =
-<<<<<<< Updated upstream
-                new MySqlConnection("Server=localhost;Port=3306;Database=userDatabase;User Id=root;Password=root;");
-=======
                 //new MySqlConnection("Server=localhost;Port=3306;Database=userDatabase;User Id=root;Password=root;");
-                new SQLiteConnection("Data Source=Modules/ResourceManager/databases/userDatabase.db;Version=3;FailIfMissing=True;");
+                new SQLiteConnection("Data Source=../../../../ResourceManager/databases/userDatabase.db;Version=3;FailIfMissing=True;");
             //new SQLiteConnection("Data Source=Modules/ResourceManager/databases/userDatabase.db;Version=3;FailIfMissing=True;Pooling=true;");
->>>>>>> Stashed changes
             _userConnection.Open();
             //Diagnostics stuff
             Console.WriteLine(_userConnection.Database);
@@ -51,7 +45,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
     {
         string query = "SELECT password FROM users WHERE email = @email";
 
-        using (var command = new MySqlCommand(query, _userConnection))
+        using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
         {
             command.Parameters.AddWithValue("@email", email);
 
@@ -75,7 +69,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
     {
         string query = "SELECT * FROM users WHERE email = @email";
 
-        using (var command = new MySqlCommand(query, _userConnection))
+        using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
         {
             command.Parameters.AddWithValue("@email", email);
             return command.ExecuteScalar()?.ToString() != null;
@@ -95,7 +89,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
         {
             string query = "SELECT user FROM users WHERE email = @email";
 
-            using (var command = new MySqlCommand(query, _userConnection))
+            using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
             {
                 command.Parameters.AddWithValue("@email", email);
 
@@ -134,7 +128,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
             "INSERT INTO users(email, user, encryptionKey, password, emailVerified, token) VALUES(@email, @packedUser, @encryptionKey, @password, @emailVerified, @token)";
         try
         {
-            using (var command = new MySqlCommand(query, _userConnection))
+            using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
             {
                 command.Parameters.AddWithValue("@email", user.Email);
                 command.Parameters.AddWithValue("@packedUser", packedUser);
@@ -196,7 +190,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
 
         try
         {
-            using (var command = new MySqlCommand(query, _userConnection))
+            using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
             using (var reader = command.ExecuteReader())
             {
                 var result = new StringBuilder();
@@ -206,6 +200,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
                     result.Append(reader.GetName(i));
                     if (i < reader.FieldCount - 1) result.Append(", ");
                 }
+
                 result.AppendLine();
 
                 while (reader.Read())
@@ -215,6 +210,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
                         result.Append(reader.GetValue(i));
                         if (i < reader.FieldCount - 1) result.Append(", ");
                     }
+
                     result.AppendLine();
                 }
 
@@ -239,7 +235,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
         {
             string query = "SELECT encryptionKey FROM users WHERE email = @email";
 
-            using (var command = new MySqlCommand(query, _userConnection))
+            using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
             {
                 command.Parameters.AddWithValue("@email", email);
 
@@ -265,7 +261,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
         {
             string query = "SELECT token FROM users WHERE email = @email";
 
-            using (var command = new MySqlCommand(query, _userConnection))
+            using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
             {
                 command.Parameters.AddWithValue("@email", email);
 
@@ -291,7 +287,7 @@ public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
         string query = "UPDATE users SET emailVerified = @value WHERE email = @email";
         try
         {
-            using (var command = new MySqlCommand(query, _userConnection))
+            using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
             {
                 command.Parameters.AddWithValue("@email", email);
                 command.Parameters.AddWithValue("@value", value);

@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using System.Data.SQLite;
 using MySql.Data.MySqlClient;
 
 namespace ResourceManager;
@@ -10,14 +11,15 @@ namespace ResourceManager;
 /// </summary>
 public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
 {
-    private readonly MySqlConnection _resourceConnection;
+    //private readonly MySqlConnection _resourceConnection;
+    private readonly SQLiteConnection _resourceConnection;
 
     public ResourceDataBaseHandler(string connectionString)
     {
         try
         {
             //If connection is not established try downloading mySQL server so far
-            _resourceConnection = new MySqlConnection(connectionString);
+            _resourceConnection = new SQLiteConnection(connectionString); //MySqlConnection(connectionString);
             _resourceConnection.Open();
             //Diagnostics stuff
             Console.WriteLine(_resourceConnection.Database);
@@ -39,7 +41,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
         string query = "INSERT INTO resources(hashcode_id, resource) VALUES(@hashcode, @packedResource)";
         try
         {
-            using (var command = new MySqlCommand(query, _resourceConnection))
+            using (var command = new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
             {
                 command.Parameters.AddWithValue("@hashcode", item.GetHashCode());
                 command.Parameters.AddWithValue("@packedResource", JsonSerializer.Serialize(item));
@@ -65,7 +67,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
         string query = "DELETE FROM resources WHERE hashcode_id = @hashcode";
         try
         {
-            using (var command = new MySqlCommand(query, _resourceConnection))
+            using (var command = new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
             {
                 command.Parameters.AddWithValue("@hashcode", item.GetHashCode());
                 int rowsAffected = command.ExecuteNonQuery();
@@ -100,7 +102,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
 
                 try
                 {
-                    using (var command = new MySqlCommand(query, _resourceConnection))
+                    using (var command = new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
                     {
                         command.Parameters.AddWithValue("@hashcode", hash);
                         command.Parameters.AddWithValue("@resource", JsonSerializer.Serialize(res));
@@ -142,7 +144,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
 
                 try
                 {
-                    using (var command = new MySqlCommand(query, _resourceConnection))
+                    using (var command = new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
                     {
                         command.Parameters.AddWithValue("@hashcode", hash);
                         command.Parameters.AddWithValue("@resource", JsonSerializer.Serialize(res));
@@ -183,7 +185,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
                 string query = "UPDATE resources SET resource = @newResAmount WHERE hashcode_id = @hashcode";
                 try
                 {
-                    using (var command = new MySqlCommand(query, _resourceConnection))
+                    using (var command = new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
                     {
                         command.Parameters.AddWithValue("@newResAmount", JsonSerializer.Serialize(res));
                         command.Parameters.AddWithValue("@hashcode", hash);
@@ -226,6 +228,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
 
     public void Dispose()
     {
+        _resourceConnection.Close();
         _resourceConnection.Dispose();
     }
 
@@ -243,7 +246,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
         string query = "SELECT * FROM resources";
         List<Resource> items = new List<Resource>();
 
-        using (var command = new MySqlCommand(query, _resourceConnection))
+        using (var command = new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
         {
             using (var reader = command.ExecuteReader())
             {
@@ -273,7 +276,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
 
         try
         {
-            using (var command = new MySqlCommand(query, _resourceConnection))
+            using (var command = new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
             using (var reader = command.ExecuteReader())
             {
                 var result = new StringBuilder();
