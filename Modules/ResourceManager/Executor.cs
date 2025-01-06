@@ -6,7 +6,8 @@ public class Executor : IResManager
 
     public Executor()
     {
-        _handler = new ResourceDataBaseHandler("Server=localhost;Port=3306;Database=resourceBase;User Id=root;Password=root;");
+        _handler = new ResourceDataBaseHandler("Data Source=../../../Modules/ResourceManager/databases/resourceBase.db;Version=3;FailIfMissing=True;");
+        //_handler = new ResourceDataBaseHandler("Data Source=Modules/ResourceManager/databases/resourceBase.db;Version=3;Pooling=true;FailIfMissing=True;");
     }
 
     private Resource CreateResource(string name, Category category, int amount)
