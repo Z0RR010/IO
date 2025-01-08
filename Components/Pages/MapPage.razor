@@ -1,7 +1,5 @@
 ﻿@page "/map"
 @using IO.Modules.MapLibrary
-@using ResourceManager
-@using Individual = IO.Modules.Security.Individual
 @rendermode InteractiveServer
 
 @inject GoogleMapsClient GoogleMaps;
@@ -9,18 +7,22 @@
 <PageTitle>Map</PageTitle>
 
 <h1>Map</h1>
-<p>@i1.Address</p>
 <div id="map01" style="width: 100%; height: 500px;"></div>
 
 @code {
-    Individual i1;
     MapController map01;
+
+    Address _address = new(
+        "Łódź",
+        "Wólczańska",
+        "215C",
+        "",
+        "93-005"
+    );
     
     protected override void OnInitialized()
     {
         map01 = new(GoogleMaps, "map01");
-        UserExecuter userExecuter = new();
-        i1 = userExecuter.GetUserFromDataBase("e@ma.il");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -29,7 +31,7 @@
         {
             await GoogleMaps.InitializeApi("pl");
             
-            map01.Address = i1.Address;
+            map01.Address = _address;
             await map01.DrawMap();
         }
     }
