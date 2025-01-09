@@ -1,4 +1,6 @@
-﻿namespace IO.Modules.Volunteer
+﻿using IO.Modules.ResourceManager;
+
+namespace IO.Modules.Volunteer
 {
     public class VolunteerManager
     {
