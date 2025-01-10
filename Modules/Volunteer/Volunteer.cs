@@ -14,6 +14,7 @@
         public string Skills { get; set; }
         public List<DateTime> Availability { get; set; }
         public Organisation Organisation { get; set; }
+        public List<Task> TaskList { get; private set; } = new List<Task>();
 
         public Volunteer() { }
 
@@ -41,6 +42,11 @@
             Skills = skills;
             Availability = availability;
             Organisation = organisation;
+        }
+
+        public void AddTask(Task task)
+        {
+            TaskList.Add(task);
         }
     }
 }
