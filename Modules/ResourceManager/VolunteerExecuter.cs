@@ -7,8 +7,7 @@ namespace IO.Modules.ResourceManager
     public class VolunteerExecuter : IDisposable, IAsyncDisposable
     {
         private readonly string _connectionString =
-            "Data Source=../../../Modules/ResourceManager/databases/volunteerDatabase.db;Version=3;FailIfMissing=True;";
-        //"Data Source=Modules/ResourceManager/databases/volunteerDatabase.db;Version=3;FailIfMissing=True;Pooling=true;";
+            "Data Source=./Modules/ResourceManager/databases/volunteerDatabase.db;Version=3;FailIfMissing=True;";
 
         public bool AddOrganisationToDatabase(Organisation organisation)
         {
@@ -18,7 +17,7 @@ namespace IO.Modules.ResourceManager
             {
                 using var connection = new SQLiteConnection(_connectionString); //MySqlConnection(_connectionString);
                 connection.Open();
-
+                Console.WriteLine("Connection to " + connection.FileName + " established");
                 string orgQuery = @"
             INSERT INTO Organisations (OrganisationID, OrganisationName, PhoneNumber, Address)
             VALUES (@id, @name, @phone, @address)
