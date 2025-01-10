@@ -1,4 +1,4 @@
-﻿using ResourceManager;
+﻿using IO.Modules.ResourceManager;
 using System.Security.Cryptography;
 using System.Text;
 
