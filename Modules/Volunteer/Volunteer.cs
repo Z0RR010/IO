@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace IO.Modules.Volunteer
+﻿namespace IO.Modules.Volunteer
 {
     public class Volunteer
     {

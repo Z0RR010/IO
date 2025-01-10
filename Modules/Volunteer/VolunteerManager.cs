@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using IO.Modules.Security;
-using ResourceManager;
-
-namespace IO.Modules.Volunteer
+﻿namespace IO.Modules.Volunteer
 {
     public class VolunteerManager
     {
@@ -126,17 +119,17 @@ namespace IO.Modules.Volunteer
 
             executor.Dispose();
         }
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
         public string SaveManagerToFile()
         {
             string all = string.Empty, volunteers = string.Empty, organisations = string.Empty;

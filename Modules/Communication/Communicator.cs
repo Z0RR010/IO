@@ -1,15 +1,15 @@
 ﻿namespace IO.Modules.Communication;
 
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using ResourceManager;
+using System.Linq;
 
 public class Communicator : ICommunication
 {
-    public Server testServer { get; private set;}
+    public Server testServer { get; private set; }
     RaportManager manager = new RaportManager();
 
-    public Communicator() {
+    public Communicator()
+    {
         testServer = new Server();
     }
 
@@ -19,8 +19,8 @@ public class Communicator : ICommunication
         {
             return false;
         }
-        var archivalChat  = testServer.ActiveChats.Find(x => x.ChatId == chatId);
-        if(archivalChat == null) return false;
+        var archivalChat = testServer.ActiveChats.Find(x => x.ChatId == chatId);
+        if (archivalChat == null) return false;
         testServer.ArchivalChats.Add(archivalChat);
         testServer.ActiveChats.Remove(archivalChat);
         Log("Chat" + Convert.ToString(chatId) + " archived ");
@@ -34,11 +34,14 @@ public class Communicator : ICommunication
         {
             return false;
         }
-        if (emails.Length == 0) {
+        if (emails.Length == 0)
+        {
             return false;
         }
-        foreach (string email in emails) {
-            if (!userExecuter.IsUserInDataBase(email)) {
+        foreach (string email in emails)
+        {
+            if (!userExecuter.IsUserInDataBase(email))
+            {
                 return false;
             }
         }
@@ -51,18 +54,18 @@ public class Communicator : ICommunication
         {
             chatId = testServer.ActiveChats.Max(x => x.ChatId) + 1;
         }
-        Chat newChat =new Chat(chatId,emails.OfType<string>().ToList());
+        Chat newChat = new Chat(chatId, emails.OfType<string>().ToList());
         testServer.ActiveChats.Add(newChat);
 
         Log("Creation of a chat " + Convert.ToString(chatId));
         return true;
     }
 
-    public bool SendMessage(int chatId, string message,string email)
+    public bool SendMessage(int chatId, string message, string email)
     {
-        var activeChat  = testServer.ActiveChats.Find(x => x.ChatId == chatId);
-        if(activeChat == null) return false;
-        Message messageToSend = new Message(message,email,chatId);
+        var activeChat = testServer.ActiveChats.Find(x => x.ChatId == chatId);
+        if (activeChat == null) return false;
+        Message messageToSend = new Message(message, email, chatId);
         activeChat.Messages.Add(messageToSend);
         return true;
     }
@@ -73,8 +76,8 @@ public class Communicator : ICommunication
         {
             return false;
         }
-        var archivalChat  = testServer.ArchivalChats.Find(x => x.ChatId == chatId);
-        if(archivalChat == null) return false;
+        var archivalChat = testServer.ArchivalChats.Find(x => x.ChatId == chatId);
+        if (archivalChat == null) return false;
         testServer.ActiveChats.Add(archivalChat);
         testServer.ArchivalChats.Remove(archivalChat);
         Log("Chat brought back" + Convert.ToString(chatId));
@@ -87,7 +90,7 @@ public class Communicator : ICommunication
         for (int i = 0; i < testServer.ActiveChats.Count; i++)
         {
             if (testServer.ActiveChats[i].Emails.Contains(email))
-            userChats.Add(testServer.ActiveChats[i]);
+                userChats.Add(testServer.ActiveChats[i]);
         }
         return userChats;
     }
@@ -97,6 +100,6 @@ public class Communicator : ICommunication
         manager.activeReport += log + "     " + DateTime.Now.ToShortTimeString() + "\n";
     }
 
-    
-    
+
+
 }

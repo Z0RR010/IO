@@ -1,13 +1,14 @@
-﻿namespace IO.Modules.MapLibrary {
-    
+﻿namespace IO.Modules.MapLibrary
+{
+
     public class MapController
     {
-        
+
         private readonly GoogleMapsClient client;
         public readonly string id;
-        
+
         public string Address { get; set; } = "";
-        
+
         public MapController(GoogleMapsClient client, string id)
         {
             this.client = client;
@@ -28,5 +29,5 @@
             }
         }
     }
-    
+
 }
