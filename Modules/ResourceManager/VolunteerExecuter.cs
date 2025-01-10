@@ -96,6 +96,12 @@ public class VolunteerExecuter : IDisposable, IAsyncDisposable
         }
     }
 
+    public bool AddTaskToDatabase(IO.Modules.Volunteer.Task task)
+    {
+        if(task == null) throw new ArgumentNullException(nameof(task));
+        return false;
+    }
+
 
     public List<Volunteer> LoadVolunteerList(List<Organisation> organisationList)
     {

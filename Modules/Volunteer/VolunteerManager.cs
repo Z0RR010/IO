@@ -1,15 +1,26 @@
-﻿namespace IO.Modules.Volunteer
+﻿using System.Collections.Specialized;
+
+namespace IO.Modules.Volunteer
 {
     public class VolunteerManager
     {
         private List<Volunteer> volunteerList;
         private List<Organisation> organisationList;
+        private List<Task> taskList;
 
         public VolunteerManager()
         {
             volunteerList = new List<Volunteer>();
             organisationList = new List<Organisation>();
+            taskList = new List<Task>();
         }
+
+        public int VolunteerCount => volunteerList.Count;
+        public int OrganisationCount => organisationList.Count;
+        public int TaskCount => taskList.Count;
+        public List<Organisation> OrganisationList => organisationList;
+        public List<Volunteer> VolunteerList => volunteerList;
+        public List<Task> TaskList => taskList;
 
         public void AddOrganisation(Organisation organisation)
         {
@@ -81,6 +92,78 @@
             executor.Dispose();
         }
 
+        public void AddTask(Task task)
+        {
+            if (task == null)
+                throw new ArgumentNullException(nameof(task), "Task cannot be null.");
+
+            if (task.TaskID == 0 && taskList.Count != 0)
+            {
+                task.TaskID = taskList.Last().TaskID + 1;
+            }
+
+            if (taskList.Any(t => t.TaskID == task.TaskID))
+            {
+                throw new InvalidOperationException($"Task with ID {task.TaskID} already exists.");
+            }
+
+            taskList.Add(task);
+
+            var executor = new VolunteerExecuter();
+
+            if (executor.AddTaskToDatabase(task))
+            {
+                Console.WriteLine("Task added or updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to add or update task.");
+            }
+            executor.Dispose();
+        }
+
+        public void AssignOrganisationToTask(int taskID, int organisationID)
+        {
+            var task = taskList.FirstOrDefault(t => t.TaskID == taskID);
+            var organisation = organisationList.FirstOrDefault(o => o.OrganisationID == organisationID);
+
+            if (task == null)
+                throw new KeyNotFoundException($"Task with ID {taskID} not found.");
+
+            if (organisation == null)
+                throw new KeyNotFoundException($"Organisation with ID {organisationID} not found.");
+
+            task.AssignOrganisation(organisation);
+        }
+
+
+        public void AssignVolunteerToTask(int taskID, int volunteerID)
+        {
+            var task = taskList.FirstOrDefault(t => t.TaskID == taskID);
+            var volunteer = volunteerList.FirstOrDefault(v => v.VolunteerID == volunteerID);
+
+            if (task == null)
+                throw new KeyNotFoundException($"Task with ID {taskID} not found.");
+
+            if (volunteer == null)
+                throw new KeyNotFoundException($"Volunteer with ID {volunteerID} not found.");
+
+            task.AssignVolunteer(volunteer);
+        }
+
+        public void AddRateToTask(int taskID, Rate rate)
+        {
+            var task = taskList.FirstOrDefault(t => t.TaskID == taskID);
+
+            if (task == null)
+                throw new KeyNotFoundException($"Task with ID {taskID} not found.");
+
+            task.AddRate(rate);
+        }
+
+
+
+
         public Organisation FindOrganisationByID(int organisationID)
         {
             return organisationList.FirstOrDefault(o => o.OrganisationID == organisationID);
@@ -101,13 +184,6 @@
             return volunteerList.FirstOrDefault(v => v.VolunteerID == volunteerID);
         }
 
-        public int VolunteerCount => volunteerList.Count;
-        public int OrganisationCount => organisationList.Count;
-        public List<Organisation> OrganisationList => organisationList;
-        public List<Volunteer> VolunteerList => volunteerList;
-
-
-
 
 
 
@@ -116,7 +192,6 @@
             var executor = new VolunteerExecuter();
             organisationList = executor.LoadOrganisationList();
             volunteerList = executor.LoadVolunteerList(organisationList);
-
             executor.Dispose();
         }
 
@@ -130,161 +205,166 @@
 
 
 
-        public string SaveManagerToFile()
-        {
-            string all = string.Empty, volunteers = string.Empty, organisations = string.Empty;
 
-            foreach (var org in organisationList)
-            {
-                organisations += $"Organisation Details:\n" +
-                                 $"ID: {org.OrganisationID}\n" +
-                                 $"Name: {org.OrganisationName}\n" +
-                                 $"Phone: {new string(org.PhoneNumber)}\n" +
-                                 $"Address: {org.Address}\n\n";
 
-                foreach (var vol in org.VolunteerList)
-                {
-                    volunteers += $"Volunteer Details:\n" +
-                                  $"ID: {vol.VolunteerID}\n" +
-                                  $"First Name: {vol.FirstName}\n" +
-                                  $"Last Name: {vol.LastName}\n" +
-                                  $"Email: {vol.Email}\n" +
-                                  $"Gender: {vol.Gender}\n" +
-                                  $"Phone: {new string(vol.PhoneNumber)}\n" +
-                                  $"Address: {vol.Address}\n" +
-                                  $"Experience: {vol.Experience}\n" +
-                                  $"Additional Info: {vol.AdditionalInfo}\n" +
-                                  $"Skills: {vol.Skills}\n" +
-                                  $"Availability: {string.Join(", ", vol.Availability.Select(a => a.ToString("yyyy-MM-dd")))}\n" +
-                                  $"Organisation ID: {org.OrganisationID}\n\n";
-                }
-            }
 
-            return organisations + volunteers;
-        }
+        //public string SaveManagerToFile()
+        //{
+        //    string all = string.Empty, volunteers = string.Empty, organisations = string.Empty;
 
-        public void LoadManagerFromFile(string filePath)
-        {
-            if (!File.Exists(filePath))
-                throw new FileNotFoundException($"The file at {filePath} does not exist.");
+        //    foreach (var org in organisationList)
+        //    {
+        //        organisations += $"Organisation Details:\n" +
+        //                         $"ID: {org.OrganisationID}\n" +
+        //                         $"Name: {org.OrganisationName}\n" +
+        //                         $"Phone: {new string(org.PhoneNumber)}\n" +
+        //                         $"Address: {org.Address}\n\n";
 
-            var lines = File.ReadAllLines(filePath);
+        //        foreach (var vol in org.VolunteerList)
+        //        {
+        //            volunteers += $"Volunteer Details:\n" +
+        //                          $"ID: {vol.VolunteerID}\n" +
+        //                          $"First Name: {vol.FirstName}\n" +
+        //                          $"Last Name: {vol.LastName}\n" +
+        //                          $"Email: {vol.Email}\n" +
+        //                          $"Gender: {vol.Gender}\n" +
+        //                          $"Phone: {new string(vol.PhoneNumber)}\n" +
+        //                          $"Address: {vol.Address}\n" +
+        //                          $"Experience: {vol.Experience}\n" +
+        //                          $"Additional Info: {vol.AdditionalInfo}\n" +
+        //                          $"Skills: {vol.Skills}\n" +
+        //                          $"Availability: {string.Join(", ", vol.Availability.Select(a => a.ToString("yyyy-MM-dd")))}\n" +
+        //                          $"Organisation ID: {org.OrganisationID}\n\n";
+        //        }
+        //    }
 
-            List<Organisation> tempOrganisations = new List<Organisation>();
-            List<Volunteer> tempVolunteers = new List<Volunteer>();
+        //    return organisations + volunteers;
+        //}
 
-            Organisation currentOrganisation = null;
-            Volunteer currentVolunteer = null;
 
-            foreach (var line in lines)
-            {
-                var trimmedLine = line.Trim();
 
-                if (trimmedLine.StartsWith("Volunteer Details:"))
-                {
-                    break;
-                }
-                if (trimmedLine.StartsWith("Organisation Details:"))
-                {
-                    // Save the current organisation, if any
-                    if (currentOrganisation != null)
-                        tempOrganisations.Add(currentOrganisation);
+        //public void LoadManagerFromFile(string filePath)
+        //{
+        //    if (!File.Exists(filePath))
+        //        throw new FileNotFoundException($"The file at {filePath} does not exist.");
 
-                    currentOrganisation = new Organisation("", new char[] { }, "");
-                }
-                else if (currentOrganisation != null)
-                {
-                    if (trimmedLine.StartsWith("ID:"))
-                        currentOrganisation.OrganisationID = int.Parse(trimmedLine.Substring(4));
-                    else if (trimmedLine.StartsWith("Name:"))
-                        currentOrganisation.OrganisationName = trimmedLine.Substring(6);
-                    else if (trimmedLine.StartsWith("Phone:"))
-                        currentOrganisation.PhoneNumber = trimmedLine.Substring(7).ToCharArray();
-                    else if (trimmedLine.StartsWith("Address:"))
-                        currentOrganisation.Address = trimmedLine.Substring(9);
-                }
-            }
+        //    var lines = File.ReadAllLines(filePath);
 
-            // Add the last organisation if not already added
-            if (currentOrganisation != null)
-                tempOrganisations.Add(currentOrganisation);
+        //    List<Organisation> tempOrganisations = new List<Organisation>();
+        //    List<Volunteer> tempVolunteers = new List<Volunteer>();
 
-            // Add organisations to the manager
-            foreach (var org in tempOrganisations)
-                AddOrganisation(org);
+        //    Organisation currentOrganisation = null;
+        //    Volunteer currentVolunteer = null;
 
-            currentOrganisation = null;
+        //    foreach (var line in lines)
+        //    {
+        //        var trimmedLine = line.Trim();
 
-            bool flag = true;
-            foreach (var line in lines)
-            {
-                var trimmedLine = line.Trim();
-                if (trimmedLine.StartsWith("Organisation Details:"))
-                {
-                    flag = false;
-                }
+        //        if (trimmedLine.StartsWith("Volunteer Details:"))
+        //        {
+        //            break;
+        //        }
+        //        if (trimmedLine.StartsWith("Organisation Details:"))
+        //        {
+        //            // Save the current organisation, if any
+        //            if (currentOrganisation != null)
+        //                tempOrganisations.Add(currentOrganisation);
 
-                if (trimmedLine.StartsWith("Volunteer Details:"))
-                {
-                    // Save the current volunteer, if any
-                    if (currentVolunteer != null)
-                        tempVolunteers.Add(currentVolunteer);
-                    flag = true;
-                    currentVolunteer = new Volunteer("", "", "", Gender.Female, new char[] { }, "", "", "", "", new List<DateTime>(), null);
-                }
-                else if (currentVolunteer != null && flag)
-                {
-                    if (trimmedLine.StartsWith("ID:"))
-                        currentVolunteer.VolunteerID = int.Parse(trimmedLine.Substring(4));
-                    else if (trimmedLine.StartsWith("First Name:"))
-                        currentVolunteer.FirstName = trimmedLine.Substring(12);
-                    else if (trimmedLine.StartsWith("Last Name:"))
-                        currentVolunteer.LastName = trimmedLine.Substring(11);
-                    else if (trimmedLine.StartsWith("Email:"))
-                        currentVolunteer.Email = trimmedLine.Substring(7);
-                    else if (trimmedLine.StartsWith("Gender:"))
-                    {
-                        Enum.TryParse(trimmedLine.Substring(8), out Gender gender);
-                        currentVolunteer.Gender = gender;
-                    }
-                    else if (trimmedLine.StartsWith("Phone:"))
-                        currentVolunteer.PhoneNumber = trimmedLine.Substring(7).ToCharArray();
-                    else if (trimmedLine.StartsWith("Address:"))
-                        currentVolunteer.Address = trimmedLine.Substring(9);
-                    else if (trimmedLine.StartsWith("Experience:"))
-                        currentVolunteer.Experience = trimmedLine.Substring(12);
-                    else if (trimmedLine.StartsWith("Additional Info:"))
-                        currentVolunteer.AdditionalInfo = trimmedLine.Substring(17);
-                    else if (trimmedLine.StartsWith("Skills:"))
-                        currentVolunteer.Skills = trimmedLine.Substring(8);
-                    else if (trimmedLine.StartsWith("Availability:"))
-                    {
-                        //var times = trimmedLine.Substring(14)
-                        //    .Split(", ")
-                        //    .Select(time => DateTime.ParseExact(time, @"hh\:mm\:ss", null))
-                        //    .ToList();
-                        //currentVolunteer.Availability = times;
-                        var dates = trimmedLine.Substring(14).Split(", ").Select(DateTime.Parse).ToList();
-                        currentVolunteer.Availability = dates;
-                    }
-                    else if (trimmedLine.StartsWith("Organisation ID:"))
-                    {
-                        int organisationID = int.Parse(trimmedLine.Substring(16));
-                        var organisation = organisationList.FirstOrDefault(org => org.OrganisationID == organisationID);
-                        if (organisation != null)
-                            currentVolunteer.Organisation = organisation;
-                    }
-                }
-            }
+        //            currentOrganisation = new Organisation("", new char[] { }, "");
+        //        }
+        //        else if (currentOrganisation != null)
+        //        {
+        //            if (trimmedLine.StartsWith("ID:"))
+        //                currentOrganisation.OrganisationID = int.Parse(trimmedLine.Substring(4));
+        //            else if (trimmedLine.StartsWith("Name:"))
+        //                currentOrganisation.OrganisationName = trimmedLine.Substring(6);
+        //            else if (trimmedLine.StartsWith("Phone:"))
+        //                currentOrganisation.PhoneNumber = trimmedLine.Substring(7).ToCharArray();
+        //            else if (trimmedLine.StartsWith("Address:"))
+        //                currentOrganisation.Address = trimmedLine.Substring(9);
+        //        }
+        //    }
 
-            // Add the last volunteer if not already added
-            if (currentVolunteer != null)
-                tempVolunteers.Add(currentVolunteer);
+        //    // Add the last organisation if not already added
+        //    if (currentOrganisation != null)
+        //        tempOrganisations.Add(currentOrganisation);
 
-            // Add volunteers to the manager
-            foreach (var vol in tempVolunteers)
-                AddVolunteer(vol);
-        }
+        //    // Add organisations to the manager
+        //    foreach (var org in tempOrganisations)
+        //        AddOrganisation(org);
+
+        //    currentOrganisation = null;
+
+        //    bool flag = true;
+        //    foreach (var line in lines)
+        //    {
+        //        var trimmedLine = line.Trim();
+        //        if (trimmedLine.StartsWith("Organisation Details:"))
+        //        {
+        //            flag = false;
+        //        }
+
+        //        if (trimmedLine.StartsWith("Volunteer Details:"))
+        //        {
+        //            // Save the current volunteer, if any
+        //            if (currentVolunteer != null)
+        //                tempVolunteers.Add(currentVolunteer);
+        //            flag = true;
+        //            currentVolunteer = new Volunteer("", "", "", Gender.Female, new char[] { }, "", "", "", "", new List<DateTime>(), null);
+        //        }
+        //        else if (currentVolunteer != null && flag)
+        //        {
+        //            if (trimmedLine.StartsWith("ID:"))
+        //                currentVolunteer.VolunteerID = int.Parse(trimmedLine.Substring(4));
+        //            else if (trimmedLine.StartsWith("First Name:"))
+        //                currentVolunteer.FirstName = trimmedLine.Substring(12);
+        //            else if (trimmedLine.StartsWith("Last Name:"))
+        //                currentVolunteer.LastName = trimmedLine.Substring(11);
+        //            else if (trimmedLine.StartsWith("Email:"))
+        //                currentVolunteer.Email = trimmedLine.Substring(7);
+        //            else if (trimmedLine.StartsWith("Gender:"))
+        //            {
+        //                Enum.TryParse(trimmedLine.Substring(8), out Gender gender);
+        //                currentVolunteer.Gender = gender;
+        //            }
+        //            else if (trimmedLine.StartsWith("Phone:"))
+        //                currentVolunteer.PhoneNumber = trimmedLine.Substring(7).ToCharArray();
+        //            else if (trimmedLine.StartsWith("Address:"))
+        //                currentVolunteer.Address = trimmedLine.Substring(9);
+        //            else if (trimmedLine.StartsWith("Experience:"))
+        //                currentVolunteer.Experience = trimmedLine.Substring(12);
+        //            else if (trimmedLine.StartsWith("Additional Info:"))
+        //                currentVolunteer.AdditionalInfo = trimmedLine.Substring(17);
+        //            else if (trimmedLine.StartsWith("Skills:"))
+        //                currentVolunteer.Skills = trimmedLine.Substring(8);
+        //            else if (trimmedLine.StartsWith("Availability:"))
+        //            {
+        //                //var times = trimmedLine.Substring(14)
+        //                //    .Split(", ")
+        //                //    .Select(time => DateTime.ParseExact(time, @"hh\:mm\:ss", null))
+        //                //    .ToList();
+        //                //currentVolunteer.Availability = times;
+        //                var dates = trimmedLine.Substring(14).Split(", ").Select(DateTime.Parse).ToList();
+        //                currentVolunteer.Availability = dates;
+        //            }
+        //            else if (trimmedLine.StartsWith("Organisation ID:"))
+        //            {
+        //                int organisationID = int.Parse(trimmedLine.Substring(16));
+        //                var organisation = organisationList.FirstOrDefault(org => org.OrganisationID == organisationID);
+        //                if (organisation != null)
+        //                    currentVolunteer.Organisation = organisation;
+        //            }
+        //        }
+        //    }
+
+        //    // Add the last volunteer if not already added
+        //    if (currentVolunteer != null)
+        //        tempVolunteers.Add(currentVolunteer);
+
+        //    // Add volunteers to the manager
+        //    foreach (var vol in tempVolunteers)
+        //        AddVolunteer(vol);
+        //}
 
     }
 }

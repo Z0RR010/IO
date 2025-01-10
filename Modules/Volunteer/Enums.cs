@@ -14,4 +14,13 @@
         Male = 1,
         Other = 2
     }
+
+    public enum TaskStatus
+    {
+        New,
+        Assigned,
+        Pending,
+        Completed,
+        Archived
+    }
 }
