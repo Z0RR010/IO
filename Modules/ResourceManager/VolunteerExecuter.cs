@@ -7,7 +7,7 @@ namespace IO.Modules.ResourceManager
     public class VolunteerExecuter : IDisposable, IAsyncDisposable
     {
         private readonly string _connectionString =
-            "Data Source=../../../../ResourceManager/databases/volunteerDatabase.db;Version=3;FailIfMissing=True;";
+            "Data Source=../../../Modules/ResourceManager/databases/volunteerDatabase.db;Version=3;FailIfMissing=True;";
         //"Data Source=Modules/ResourceManager/databases/volunteerDatabase.db;Version=3;FailIfMissing=True;Pooling=true;";
 
         public bool AddOrganisationToDatabase(Organisation organisation)
