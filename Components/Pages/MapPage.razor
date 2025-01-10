@@ -3,10 +3,23 @@
 @rendermode InteractiveServer
 
 @inject GoogleMapsClient GoogleMaps;
+@inject Geolocation Geolocation;
 
 <PageTitle>Map</PageTitle>
 
 <h1>Map</h1>
+
+<div style="display: flex; gap: 10px">
+    <button class="btn btn-primary" @onclick="async () => { map01.SetLocation(_address);
+                                                            await map01.DrawMap(); }">Address</button>
+
+    <button class="btn btn-primary" @onclick='async () => { map01.SetLocation("Warszawa");
+                                                            await map01.DrawMap(); }'>String</button>
+
+    <button class="btn btn-primary" @onclick="async () => { map01.SetLocation(await Geolocation.GetUserLocation());
+                                                            await map01.DrawMap(); }">Coordinates</button>
+</div>
+
 <div id="map01" style="width: 100%; height: 500px;"></div>
 
 @code {
@@ -31,7 +44,7 @@
         {
             await GoogleMaps.InitializeApi("pl");
             
-            map01.Address = _address;
+            map01.SetLocation(_address);
             await map01.DrawMap();
         }
     }

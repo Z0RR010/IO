@@ -6,7 +6,7 @@
         private readonly GoogleMapsClient client;
         public readonly string id;
         
-        public Address Address { get; set; }
+        private LocationWrapper _location;
         
         public MapController(GoogleMapsClient client, string id)
         {
@@ -16,20 +16,33 @@
 
         public async Task DrawMap()
         {
-            // TODO: metoda ToString() w klasie Address???
-            string addressString = $"{Address.Street} {Address.StreetNumber}, {Address.Apartment}, {Address.City}, {Address.ZipCode}"
-                .Replace(", ,", ",").Trim(',').Trim();
-
             try
             {
-                var center = await client.GetCoordinates(addressString);
+                var center = await _location.GetCoordinatesAwait(client);
                 await client.DrawMap(this, center);
-                await client.AddMarker(this, center, addressString);
+                await client.AddMarker(this, center, _location.Name);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
+                throw;
             }
+        }
+        
+        
+        public void SetLocation(Address address)
+        {
+            _location = new AddressWrapper(address);
+        }
+        
+        public void SetLocation(string address)
+        {
+            _location = new AddressStringWrapper(address);
+        }
+        
+        public void SetLocation(Coordinates coordinates)
+        {
+            _location = new CoordinatesWrapper(coordinates);
         }
     }
     

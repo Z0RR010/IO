@@ -41,6 +41,8 @@ namespace IO
                 return new GoogleMapsClient(jsRuntime, apiKey);
             });
 
+            builder.Services.AddScoped<Geolocation>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
