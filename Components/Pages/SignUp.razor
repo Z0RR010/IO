@@ -4,6 +4,7 @@
 @using System.Text.Json  
 @using System.Text
 @using System.Net
+@using System.Net.Mail;
 @using MailKit.Net.Smtp;
 @using MimeKit;
 @using IO.Modules.Security;
@@ -252,6 +253,24 @@ input[type="submit"]:hover {
 	private string hashedPassword;
 	private bool registered = false;
 
+	/*public Task sendEmailAsync(string email, string message)
+	{
+		var mail = "skph.no-reply@outlook.com";
+		var pw = "meogievwrddtaemx";
+
+		var smtpClient = new System.Net.Mail.SmtpClient("smtp-mail.outlook.com", 587)
+			{
+				EnableSsl = true,
+				Credentials = new NetworkCredential(mail, pw)
+			};
+
+		return smtpClient.SendMailAsync(
+		new MailMessage(from: mail,
+						to: email,
+						"Weryfikacja",
+						message));
+	}*/
+
 	private async Task HandleSignUp()
 	{
 		if (string.IsNullOrWhiteSpace(email) ||
@@ -394,27 +413,68 @@ input[type="submit"]:hover {
 					string token = tokenGUID.ToString();
 
 					userExecuter.SendToDataBase(individual, key, hashedPassword, token);
-					var emailMessage = new MimeMessage();
 
-					emailMessage.From.Add(MailboxAddress.Parse("abbey61@ethereal.email"));
-					emailMessage.To.Add(MailboxAddress.Parse(email));
 
-					emailMessage.Subject = "Potwierdzenie rejestracji";
-					string link = "http://localhost:5236/verify/" + token;
-					emailMessage.Body = new TextPart("html")
+					//string link = "http://localhost:5236/verify/" + token;
+
+					//Console.WriteLine(link);
+					//await sendEmailAsync(email, link);
+
+
+					//var emailMessage = new MimeMessage();
+
+					//emailMessage.From.Add(MailboxAddress.Parse("toby.koss29@ethereal.email"));
+					//emailMessage.To.Add(MailboxAddress.Parse(email));
+
+					//emailMessage.Subject = "Potwierdzenie rejestracji";
+					//string link = "http://localhost:5236/verify/" + token;
+					/*emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
 					{
 						Text = $@"
 						<p>Witaj,</p>
 						<p>Kliknij poniższy link, aby zweryfikować swój adres e-mail:</p>
 						<p><a href='{link}'>Zweryfikuj e-mail</a></p>
 						<p>Jeśli to nie Ty inicjowałeś tę akcję, zignoruj tę wiadomość.</p>"
-					};
+					};*/
+					/*emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+					{
+						Text = "<p>Witaj,</p><p>Kliknij poniższy link, aby zweryfikować swój adres e-mail:</p><p><a href='{link}'>Zweryfikuj e-mail</a></p><p>Jeśli to nie Ty inicjowałeś tę akcję, zignoruj tę wiadomość.</p>"
+					};*/
 
-					using var smtp = new SmtpClient();
-					smtp.Connect("smtp.ethereal.email", 587, MailKit.Security.SecureSocketOptions.StartTls);
-					smtp.Authenticate("abbey61@ethereal.email", "ED9UGtTe45cJfsVNpm");
-					smtp.Send(emailMessage);
-					smtp.Disconnect(true);
+					//emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+					//{
+					//	Text = "halo"
+					//};
+
+					//using var smtp = new MailKit.Net.Smtp.SmtpClient();
+					//smtp.Connect("smtp.ethereal.email", 587, MailKit.Security.SecureSocketOptions.StartTls);
+					//smtp.Authenticate("toby.koss29@ethereal.email", "mkeakJTDGFJQVfX4Kd");
+					//smtp.Send(emailMessage);
+					//smtp.Disconnect(true);
+
+					/*var emailMessage = new MimeMessage();
+					emailMessage.From.Add(new MailboxAddress("SKPH", "skph@interia.pl"));
+					emailMessage.To.Add(new MailboxAddress("User", email));
+					emailMessage.Subject = "Potwierdzenie rejestracji";
+					string link = "http://localhost:5236/verify/" + token;
+					emailMessage.Body = new TextPart("html")
+						{
+							Text = $@"
+						<p>Witaj,</p>
+						<p>Kliknij poniższy link, aby zweryfikować swój adres e-mail:</p>
+						<p><a href='{link}'>Zweryfikuj e-mail</a></p>
+						<p>Jeśli to nie Ty inicjowałeś tę akcję, zignoruj tę wiadomość.</p>"
+						};
+
+					using (var smtp = new MailKit.Net.Smtp.SmtpClient())
+					{
+						smtp.Connect("poczta.interia.pl", 587, false);
+						smtp.Authenticate("skph@interia.pl", "ioponiedzialek10151234");
+						smtp.Send(emailMessage);
+						smtp.Disconnect(true);
+					}*/
+
+
 				}
 				else
 				{
