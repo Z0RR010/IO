@@ -6,311 +6,313 @@ using System.Data.SQLite;
 using System.Text;
 using System.Text.Json;
 
-namespace ResourceManager;
-
-/// <summary>
-/// Class for managing user accounts
-/// </summary>
-public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
+namespace IO.Modules.ResourceManager
 {
-    //private readonly MySqlConnection _userConnection;
-    private readonly SQLiteConnection _userConnection;
-
-    //If connection is not established try downloading mySQL server so far
-    public UserExecuter()
-    {
-        try
-        {
-            _userConnection =
-                //new MySqlConnection("Server=localhost;Port=3306;Database=userDatabase;User Id=root;Password=root;");
-                new SQLiteConnection("Data Source=../../../../ResourceManager/databases/userDatabase.db;Version=3;FailIfMissing=True;");
-            //new SQLiteConnection("Data Source=Modules/ResourceManager/databases/userDatabase.db;Version=3;FailIfMissing=True;Pooling=true;");
-            _userConnection.Open();
-            //Diagnostics stuff
-            Console.WriteLine(_userConnection.Database);
-        }
-        catch (MySqlException ex)
-        {
-            Console.WriteLine(ex.Message);
-            throw;
-        }
-    }
-
     /// <summary>
-    /// Get the password of the concrete user
+    /// Class for managing user accounts
     /// </summary>
-    /// <param name="email">an email of requested user</param>
-    /// <returns>String containing password. Otherwise, empty string</returns>
-    private string GetPasswordFromDataBase(string email)
+    public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
     {
-        string query = "SELECT password FROM users WHERE email = @email";
+        //private readonly MySqlConnection _userConnection;
+        private readonly SQLiteConnection _userConnection;
 
-        using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+        //If connection is not established try downloading mySQL server so far
+        public UserExecuter()
         {
-            command.Parameters.AddWithValue("@email", email);
-
-            string input = command.ExecuteScalar()?.ToString();
-
-            if (input != null)
+            try
             {
-                return input;
+                _userConnection =
+                    //new MySqlConnection("Server=localhost;Port=3306;Database=userDatabase;User Id=root;Password=root;");
+                    new SQLiteConnection(
+                        "Data Source=./Modules/ResourceManager/databases/userDatabase.db;Version=3;FailIfMissing=True;");
+                _userConnection.Open();
+                //Diagnostics stuff
+                Console.WriteLine("Connection to " + _userConnection.FileName + " established");
+                
             }
-
-            return "";
-        }
-    }
-
-    /// <summary>
-    /// Looks for user and checks if it's stored in user database
-    /// </summary>
-    /// <param name="email">Email of requested user</param>
-    /// <returns>True if user was found in database. Otherwise, false</returns>
-    public bool IsUserInDataBase(string email)
-    {
-        string query = "SELECT * FROM users WHERE email = @email";
-
-        using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
-        {
-            command.Parameters.AddWithValue("@email", email);
-            return command.ExecuteScalar()?.ToString() != null;
+            catch (SQLiteException ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
         }
 
-        // connection closes automatically as this class implements IDisposable interface
-    }
-
-    /// <summary>
-    /// Get a concrete individual user from database as only they have PESEL
-    /// </summary>
-    /// <param name="email">Email of requested user</param>
-    /// <returns>User of type Individual if found in DB. Otherwise, NULL</returns>
-    public Individual GetUserFromDataBase(string email)
-    {
-        if (IsUserInDataBase(email))
+        /// <summary>
+        /// Get the password of the concrete user
+        /// </summary>
+        /// <param name="email">an email of requested user</param>
+        /// <returns>String containing password. Otherwise, empty string</returns>
+        private string GetPasswordFromDataBase(string email)
         {
-            string query = "SELECT user FROM users WHERE email = @email";
+            string query = "SELECT password FROM users WHERE email = @email";
 
             using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
             {
                 command.Parameters.AddWithValue("@email", email);
 
-                var input = command.ExecuteScalar()?.ToString();
+                string input = command.ExecuteScalar()?.ToString();
+
                 if (input != null)
                 {
-                    return JsonSerializer.Deserialize<Individual>(input);
+                    return input;
                 }
 
-                return null;
+                return "";
             }
         }
 
-        return null;
-    }
-
-    /// <summary>
-    /// Add user to data base
-    /// </summary>
-    /// <param name="user">Object of type User. It'll be serialised in JSON and sent</param>
-    /// <param name="encryptionKey">Key for security purposes</param>
-    /// <param name="password">Password of the new user</param>>
-    /// <param name="token">Token that is supposed to be stored</param>>
-    /// <returns>True if operation was successful. Otherwise, false</returns>
-    public bool SendToDataBase(Individual user, string encryptionKey, string password, string token)
-    {
-        //FIXME
-        // var options = new JsonSerializerOptions
-        // {
-        //     WriteIndented = true,
-        //     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        // }
-
-        var packedUser = JsonSerializer.Serialize(user);
-        string query =
-            "INSERT INTO users(email, user, encryptionKey, password, emailVerified, token) VALUES(@email, @packedUser, @encryptionKey, @password, @emailVerified, @token)";
-        try
+        /// <summary>
+        /// Looks for user and checks if it's stored in user database
+        /// </summary>
+        /// <param name="email">Email of requested user</param>
+        /// <returns>True if user was found in database. Otherwise, false</returns>
+        public bool IsUserInDataBase(string email)
         {
+            string query = "SELECT * FROM users WHERE email = @email";
+
             using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
             {
-                command.Parameters.AddWithValue("@email", user.Email);
-                command.Parameters.AddWithValue("@packedUser", packedUser);
-                command.Parameters.AddWithValue("@encryptionKey", encryptionKey);
-                command.Parameters.AddWithValue("@password", password);
-                command.Parameters.AddWithValue("@emailVerified", false);
-                command.Parameters.AddWithValue("@token", token);
+                command.Parameters.AddWithValue("@email", email);
+                return command.ExecuteScalar()?.ToString() != null;
+            }
 
-                int rowsAffected = command.ExecuteNonQuery();
-                return rowsAffected > 0;
+            // connection closes automatically as this class implements IDisposable interface
+        }
+
+        /// <summary>
+        /// Get a concrete individual user from database as only they have PESEL
+        /// </summary>
+        /// <param name="email">Email of requested user</param>
+        /// <returns>User of type Individual if found in DB. Otherwise, NULL</returns>
+        public Individual GetUserFromDataBase(string email)
+        {
+            if (IsUserInDataBase(email))
+            {
+                string query = "SELECT user FROM users WHERE email = @email";
+
+                using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+                {
+                    command.Parameters.AddWithValue("@email", email);
+
+                    var input = command.ExecuteScalar()?.ToString();
+                    if (input != null)
+                    {
+                        return JsonSerializer.Deserialize<Individual>(input);
+                    }
+
+                    return null;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Add user to data base
+        /// </summary>
+        /// <param name="user">Object of type User. It'll be serialised in JSON and sent</param>
+        /// <param name="encryptionKey">Key for security purposes</param>
+        /// <param name="password">Password of the new user</param>>
+        /// <param name="token">Token that is supposed to be stored</param>>
+        /// <returns>True if operation was successful. Otherwise, false</returns>
+        public bool SendToDataBase(Individual user, string encryptionKey, string password, string token)
+        {
+            //FIXME
+            // var options = new JsonSerializerOptions
+            // {
+            //     WriteIndented = true,
+            //     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            // }
+
+            var packedUser = JsonSerializer.Serialize(user);
+            string query =
+                "INSERT INTO users(email, user, encryptionKey, password, emailVerified, token) VALUES(@email, @packedUser, @encryptionKey, @password, @emailVerified, @token)";
+            try
+            {
+                using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+                {
+                    command.Parameters.AddWithValue("@email", user.Email);
+                    command.Parameters.AddWithValue("@packedUser", packedUser);
+                    command.Parameters.AddWithValue("@encryptionKey", encryptionKey);
+                    command.Parameters.AddWithValue("@password", password);
+                    command.Parameters.AddWithValue("@emailVerified", false);
+                    command.Parameters.AddWithValue("@token", token);
+
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
             }
         }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            return false;
-        }
-    }
 
-    /// <summary>
-    /// Checks the validality of password
-    /// </summary>
-    /// <param name="email">Email of requested user</param>
-    /// <param name="password">Provided password</param>
-    /// <returns>True if password is valid. Otherwise, false</returns>
-    public bool IsPasswordCorrect(string email, string password)
-    {
-        return password.Equals(GetPasswordFromDataBase(email));
-    }
-
-    /// <summary>
-    /// Get user PESEL (individual number) providing their Email
-    /// </summary>
-    /// <param name="email">Email of user</param>
-    /// <returns>String PESEL of user if it's in database or is individual person. Otherwise, empty string</returns>
-    public string GetUserPESEL(string email)
-    {
-        User user = GetUserFromDataBase(email);
-        if (user != null && user.GetType().IsSubclassOf(typeof(User)))
+        /// <summary>
+        /// Checks the validality of password
+        /// </summary>
+        /// <param name="email">Email of requested user</param>
+        /// <param name="password">Provided password</param>
+        /// <returns>True if password is valid. Otherwise, false</returns>
+        public bool IsPasswordCorrect(string email, string password)
         {
-            Individual output = (Individual)user;
-            return output.Pesel;
+            return password.Equals(GetPasswordFromDataBase(email));
         }
 
-        return "";
-    }
-
-    /// <summary>
-    /// Make your own query if you dislike our functions
-    /// </summary>
-    /// <param name="query">Command</param>
-    /// <returns>Result of command execution</returns>
-    public string CustomQuery(string query)
-    {
-        if (query.ToLower().Contains("DROP DATABASE".ToLower()) || query.ToLower().Contains("DROP TABLE".ToLower()))
+        /// <summary>
+        /// Get user PESEL (individual number) providing their Email
+        /// </summary>
+        /// <param name="email">Email of user</param>
+        /// <returns>String PESEL of user if it's in database or is individual person. Otherwise, empty string</returns>
+        public string GetUserPESEL(string email)
         {
-            throw new Exception("Are you dumb? What are you trying to do?");
-        }
-
-        try
-        {
-            using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
-            using (var reader = command.ExecuteReader())
+            User user = GetUserFromDataBase(email);
+            if (user != null && user.GetType().IsSubclassOf(typeof(User)))
             {
-                var result = new StringBuilder();
+                Individual output = (Individual)user;
+                return output.Pesel;
+            }
 
-                for (int i = 0; i < reader.FieldCount; i++)
+            return "";
+        }
+
+        /// <summary>
+        /// Make your own query if you dislike our functions
+        /// </summary>
+        /// <param name="query">Command</param>
+        /// <returns>Result of command execution</returns>
+        public string CustomQuery(string query)
+        {
+            if (query.ToLower().Contains("DROP DATABASE".ToLower()) || query.ToLower().Contains("DROP TABLE".ToLower()))
+            {
+                throw new Exception("Are you dumb? What are you trying to do?");
+            }
+
+            try
+            {
+                using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+                using (var reader = command.ExecuteReader())
                 {
-                    result.Append(reader.GetName(i));
-                    if (i < reader.FieldCount - 1) result.Append(", ");
-                }
+                    var result = new StringBuilder();
 
-                result.AppendLine();
-
-                while (reader.Read())
-                {
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        result.Append(reader.GetValue(i));
+                        result.Append(reader.GetName(i));
                         if (i < reader.FieldCount - 1) result.Append(", ");
                     }
 
                     result.AppendLine();
+
+                    while (reader.Read())
+                    {
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            result.Append(reader.GetValue(i));
+                            if (i < reader.FieldCount - 1) result.Append(", ");
+                        }
+
+                        result.AppendLine();
+                    }
+
+                    return result.ToString();
                 }
-
-                return result.ToString();
             }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Gain encryption key of a user by given email
-    /// </summary>
-    /// <param name="email">Email of requested user</param>
-    /// <returns>String containing encryption key (AES, whatever)</returns>
-    public string GetEncryptionKey(string email)
-    {
-        if (IsUserInDataBase(email))
-        {
-            string query = "SELECT encryptionKey FROM users WHERE email = @email";
-
-            using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+            catch (Exception e)
             {
-                command.Parameters.AddWithValue("@email", email);
-
-                string input = command.ExecuteScalar()?.ToString();
-
-                return input;
+                Console.WriteLine(e);
+                throw;
             }
         }
-        else
-        {
-            return "";
-        }
-    }
 
-    /// <summary>
-    /// Gain token of a user by given email
-    /// </summary>
-    /// <param name="email">Email of requested user</param>
-    /// <returns>String containing token</returns>
-    public string GetToken(string email)
-    {
-        if (IsUserInDataBase(email))
+        /// <summary>
+        /// Gain encryption key of a user by given email
+        /// </summary>
+        /// <param name="email">Email of requested user</param>
+        /// <returns>String containing encryption key (AES, whatever)</returns>
+        public string GetEncryptionKey(string email)
         {
-            string query = "SELECT token FROM users WHERE email = @email";
-
-            using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+            if (IsUserInDataBase(email))
             {
-                command.Parameters.AddWithValue("@email", email);
+                string query = "SELECT encryptionKey FROM users WHERE email = @email";
 
-                string input = command.ExecuteScalar()?.ToString();
+                using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+                {
+                    command.Parameters.AddWithValue("@email", email);
 
-                return input;
+                    string input = command.ExecuteScalar()?.ToString();
+
+                    return input;
+                }
             }
-        }
-        else
-        {
-            return "";
-        }
-    }
-
-    /// <summary>
-    /// Updates user's email verification status
-    /// </summary>
-    /// <param name="email">Email of requested user</param>
-    /// <param name="value">New status of email verification</param>
-    /// <returns>True if operation was successful. Otherwise, false</returns>
-    public bool UpdateEmailVerified(string email, bool value)
-    {
-        string query = "UPDATE users SET emailVerified = @value WHERE email = @email";
-        try
-        {
-            using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+            else
             {
-                command.Parameters.AddWithValue("@email", email);
-                command.Parameters.AddWithValue("@value", value);
-
-                int rowsAffected = command.ExecuteNonQuery();
-                return rowsAffected > 0;
+                return "";
             }
         }
-        catch (Exception e)
+
+        /// <summary>
+        /// Gain token of a user by given email
+        /// </summary>
+        /// <param name="email">Email of requested user</param>
+        /// <returns>String containing token</returns>
+        public string GetToken(string email)
         {
-            Console.WriteLine(e);
-            throw;
+            if (IsUserInDataBase(email))
+            {
+                string query = "SELECT token FROM users WHERE email = @email";
+
+                using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+                {
+                    command.Parameters.AddWithValue("@email", email);
+
+                    string input = command.ExecuteScalar()?.ToString();
+
+                    return input;
+                }
+            }
+            else
+            {
+                return "";
+            }
         }
-    }
 
-    public void Dispose()
-    {
-        _userConnection.Close();
-        _userConnection.Dispose();
-    }
+        /// <summary>
+        /// Updates user's email verification status
+        /// </summary>
+        /// <param name="email">Email of requested user</param>
+        /// <param name="value">New status of email verification</param>
+        /// <returns>True if operation was successful. Otherwise, false</returns>
+        public bool UpdateEmailVerified(string email, bool value)
+        {
+            string query = "UPDATE users SET emailVerified = @value WHERE email = @email";
+            try
+            {
+                using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+                {
+                    command.Parameters.AddWithValue("@email", email);
+                    command.Parameters.AddWithValue("@value", value);
 
-    public async ValueTask DisposeAsync()
-    {
-        await _userConnection.DisposeAsync();
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        public void Dispose()
+        {
+            _userConnection.Close();
+            _userConnection.Dispose();
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await _userConnection.DisposeAsync();
+        }
     }
 }

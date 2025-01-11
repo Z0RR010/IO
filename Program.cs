@@ -2,6 +2,8 @@ using IO.Components;
 using IO.Modules.Communication;
 using IO.Modules.MapLibrary;
 using Microsoft.JSInterop;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using IO.Modules.Security;
 
 namespace IO
 {
@@ -14,8 +16,18 @@ namespace IO
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
-
-            builder.Services.AddControllers();
+			builder.Services.AddEndpointsApiExplorer();
+			builder.Services.AddScoped<IEmailService, EmailService>();
+			builder.Services.AddControllers();
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.Cookie.Name = "auth_token";
+                    options.LoginPath = "/signIn";
+                    options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
+                });
+            builder.Services.AddAuthorization();
+            builder.Services.AddCascadingAuthenticationState();
 
             builder.Services.AddSingleton<Communicator>();
 
@@ -60,6 +72,8 @@ namespace IO
 
             app.UseStaticFiles();
             app.UseAntiforgery();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ResourceManager;
+using IO.Modules.ResourceManager;
 
 [Route("api/[controller]")]
 [ApiController]

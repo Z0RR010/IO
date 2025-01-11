@@ -3,10 +3,12 @@
 
 @using System.Text.Json  
 @using System.Text
+@using System.Net
+@using System.Net.Mail;
 @using MailKit.Net.Smtp;
 @using MimeKit;
 @using IO.Modules.Security;
-@using ResourceManager;
+@using IO.Modules.ResourceManager;
 @using System.Text.RegularExpressions;
 @using System.Security.Cryptography;
 
@@ -251,6 +253,24 @@ input[type="submit"]:hover {
 	private string hashedPassword;
 	private bool registered = false;
 
+	/*public Task sendEmailAsync(string email, string message)
+		{
+		var mail = "skph.no-reply@outlook.com";
+		var pw = "meogievwrddtaemx";
+
+		var smtpClient = new System.Net.Mail.SmtpClient("smtp-mail.outlook.com", 587)
+				{
+				EnableSsl = true,
+				Credentials = new NetworkCredential(mail, pw)
+		};
+
+		return smtpClient.SendMailAsync(
+		new MailMessage(from: mail,
+						to: email,
+						"Weryfikacja",
+						message));
+	}*/
+
 	private async Task HandleSignUp()
 	{
 		if (string.IsNullOrWhiteSpace(email) ||
@@ -371,10 +391,12 @@ input[type="submit"]:hover {
 		Individual individual = new Individual(surname, pesel, email, name, phoneNumber, address, true);
 
 		var registerRequest = new RegisterRequest() { Surname = surname, Pesel = pesel, Email = email, Name = name, PhoneNumber = phoneNumber, Address = address };
-		using (var client = new HttpClient())
+		var handler = new HttpClientHandler();
+		using (var client = new HttpClient(handler))
 		{
 			try
 			{
+				var cookieContainer = new CookieContainer();
 				var response = await client.PostAsJsonAsync("http://localhost:5236/api/SignUp/SignUp", registerRequest);
 				Console.WriteLine(response.StatusCode);
 				if (response.IsSuccessStatusCode)
@@ -391,26 +413,31 @@ input[type="submit"]:hover {
 					string token = tokenGUID.ToString();
 
 					userExecuter.SendToDataBase(individual, key, hashedPassword, token);
-					var emailMessage = new MimeMessage();
-					emailMessage.From.Add(new MailboxAddress("SKPH", "skph.no.reply@interia.pl"));
-					emailMessage.To.Add(new MailboxAddress("User", email));
-					emailMessage.Subject = "Potwierdzenie rejestracji";
+
 					string link = "http://localhost:5236/verify/" + token;
-					emailMessage.Body = new TextPart("html")
-					{
-						Text = $@"
+
+					var emailDto = new EmailDto() { To = email, Subject = "Potwierdzenie rejestracji", Body = $@"
 						<p>Witaj,</p>
 						<p>Kliknij poniższy link, aby zweryfikować swój adres e-mail:</p>
 						<p><a href='{link}'>Zweryfikuj e-mail</a></p>
-						<p>Jeśli to nie Ty inicjowałeś tę akcję, zignoruj tę wiadomość.</p>"
-					};
+						<p>Jeśli to nie Ty inicjowałeś tę akcję, zignoruj tę wiadomość.</p>" };
 
-					using (var smtp = new SmtpClient())
+					try
 					{
-						smtp.Connect("poczta.interia.pl", 587, false);
-						smtp.Authenticate("skph.no.reply@interia.pl", "ioponiedzialek10151234");
-						smtp.Send(emailMessage);
-						smtp.Disconnect(true);
+						response = await client.PostAsJsonAsync("http://localhost:5236/api/Email/SendEmail", emailDto);
+						Console.WriteLine(response.StatusCode);
+						if (response.IsSuccessStatusCode)
+						{
+							errorMessage = "Poprawnie wysłano maila.";
+						}
+						else
+						{
+							errorMessage = "Niewysłano maila";
+						}
+					}
+					catch (Exception ex)
+					{
+						errorMessage = "Wystąpił błąd podczas logowania.";
 					}
 				}
 				else

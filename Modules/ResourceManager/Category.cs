@@ -1,10 +1,11 @@
-﻿namespace ResourceManager;
-
-public enum Category
+﻿namespace IO.Modules.ResourceManager
 {
-    Food,
-    Water,
-    Clothing,
-    Money,
-    Transport
+    public enum Category
+    {
+        Food,
+        Water,
+        Clothing,
+        Money,
+        Transport
+    }
 }
