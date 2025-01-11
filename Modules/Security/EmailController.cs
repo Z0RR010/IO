@@ -18,9 +18,10 @@ namespace IO.Modules.Security
 			_emailService = emailService;
 		}
 
-		[HttpPost]
+		[HttpPost("SendEmail")]
 		public IActionResult SendEmail(EmailDto request)
 		{
+			Console.WriteLine("wysylam");
 			_emailService.SendEmail(request);
 			return Ok();
 		}

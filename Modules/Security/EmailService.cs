@@ -17,14 +17,14 @@ namespace IO.Modules.Security
 		public void SendEmail(EmailDto request)
 		{
 			var email = new MimeMessage();
-			email.From.Add(MailboxAddress.Parse(_config.GetSection("EmailUsername").Value));
+			email.From.Add(MailboxAddress.Parse("skph@interia.pl"));
 			email.To.Add(MailboxAddress.Parse(request.To));
 			email.Subject = request.Subject;
 			email.Body = new TextPart(TextFormat.Html) { Text = request.Body };
 
 			using var smtp = new SmtpClient();
-			smtp.Connect(_config.GetSection("EmailHost").Value, 587, SecureSocketOptions.StartTls);
-			smtp.Authenticate(_config.GetSection("EmailUsername").Value, _config.GetSection("EmailPassword").Value);
+			smtp.Connect("poczta.interia.pl", 587, SecureSocketOptions.StartTls);
+			smtp.Authenticate("skph@interia.pl", "ioponiedzialek10151234");
 			smtp.Send(email);
 			smtp.Disconnect(true);
 		}
