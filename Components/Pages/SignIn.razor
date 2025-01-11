@@ -4,6 +4,10 @@
 @using System.Text.Json  
 @using System.Text
 @using IO.Modules.Security
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Abstractions
+@using Microsoft.AspNetCore.Authentication.Cookies
 
 <h3>Logowanie</h3>
 
@@ -80,6 +84,9 @@ button:hover {
     private string errorMessage;
     private bool success = false;
 
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+
     private async Task HandleSignIn()
     {
         if (username != null || password != null)
@@ -97,6 +104,16 @@ button:hover {
                     {
                         success = true;
                         errorMessage = "Poprawnie zalogowano.";
+
+                        var claims = new List<Claim>
+                        {
+                            new Claim(ClaimTypes.Name, username),
+                            new Claim(ClaimTypes.Role, "testowanie")
+                        };
+
+                        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        var principal = new ClaimsPrincipal(identity);
+                        await HttpContext.SignInAsync(principal);
                     }
                     else
                     {
