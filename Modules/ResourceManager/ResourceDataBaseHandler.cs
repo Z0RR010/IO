@@ -22,7 +22,7 @@ namespace IO.Modules.ResourceManager
                 _resourceConnection = new SQLiteConnection(connectionString); //MySqlConnection(connectionString);
                 _resourceConnection.Open();
                 //Diagnostics stuff
-                Console.WriteLine(_resourceConnection.Database);
+                Console.WriteLine("Connection to " + _resourceConnection.FileName + " established");
             }
             catch (Exception e)
             {

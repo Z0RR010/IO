@@ -24,13 +24,13 @@ namespace IO.Modules.ResourceManager
                 _userConnection =
                     //new MySqlConnection("Server=localhost;Port=3306;Database=userDatabase;User Id=root;Password=root;");
                     new SQLiteConnection(
-                        "Data Source=../../../Modules/ResourceManager/databases/userDatabase.db;Version=3;FailIfMissing=True;");
-                //new SQLiteConnection("Data Source=Modules/ResourceManager/databases/userDatabase.db;Version=3;FailIfMissing=True;Pooling=true;");
+                        "Data Source=./Modules/ResourceManager/databases/userDatabase.db;Version=3;FailIfMissing=True;");
                 _userConnection.Open();
                 //Diagnostics stuff
-                Console.WriteLine(_userConnection.Database);
+                Console.WriteLine("Connection to " + _userConnection.FileName + " established");
+                
             }
-            catch (MySqlException ex)
+            catch (SQLiteException ex)
             {
                 Console.WriteLine(ex.Message);
                 throw;
