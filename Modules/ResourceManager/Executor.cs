@@ -66,6 +66,7 @@
                 case "clothing": output = Category.Clothing; break;
                 case "money": output = Category.Money; break;
                 case "transport": output = Category.Transport; break;
+                case "other": output = Category.Other; break;
                 default: throw new AggregateException("Unknown category");
             }
 

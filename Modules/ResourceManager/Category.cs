@@ -6,6 +6,7 @@
         Water,
         Clothing,
         Money,
-        Transport
+        Transport,
+        Other
     }
 }
