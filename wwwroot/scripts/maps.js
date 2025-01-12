@@ -86,4 +86,38 @@ export async function geocode(address) {
     });
 }
 
+export async function drawRoute(mapId, routeCoordinates) {
+    const { DirectionsService, DirectionsRenderer } = await google.maps.importLibrary("directions");
+    const directionsService = new DirectionsService();
+    const directionsRenderer = new DirectionsRenderer({ map: maps[mapId] });
+
+    if (routeCoordinates.length < 2) {
+        throw new Error("At least two coordinates are required to draw a route.");
+    }
+
+    const waypoints = routeCoordinates
+        .slice(1, -1)
+        .map(coord => ({
+            location: new google.maps.LatLng(coord.lat, coord.lng),
+            stopover: true,
+        }));
+
+    const request = {
+        origin: new google.maps.LatLng(routeCoordinates[0].lat, routeCoordinates[0].lng),
+        destination: new google.maps.LatLng(routeCoordinates[routeCoordinates.length - 1].lat, routeCoordinates[routeCoordinates.length - 1].lng),
+        waypoints: waypoints,
+        travelMode: google.maps.TravelMode.DRIVING,
+    };
+
+    return new Promise((resolve, reject) => {
+        directionsService.route(request, (result, status) => {
+            if (status === google.maps.DirectionsStatus.OK) {
+                directionsRenderer.setDirections(result);
+                resolve(result);
+            } else {
+                reject(new Error("Directions request failed due to " + status));
+            }
+        });
+    });
+}
 

@@ -44,6 +44,15 @@ namespace IO.Modules.MapLibrary
             Console.WriteLine($"Adding marker at {position.Latitude}, {position.Longitude}");
             await _module.InvokeVoidAsync("addMarker", map.id, position.Latitude, position.Longitude, title);
         }
-        
+
+        public async Task DrawRoute(MapController map)
+        {
+            Console.WriteLine("Drawing route on map.");
+            var routeCoords = await map.GetRouteCoordinates();
+
+            var points = routeCoords.Select(c => new { lat = c.Latitude, lng = c.Longitude }).ToArray();
+            await _module.InvokeVoidAsync("drawRoute", map.id, points);
+        }
+
     }
 }
