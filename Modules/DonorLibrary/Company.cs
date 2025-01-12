@@ -1,4 +1,4 @@
-﻿namespace ConsoleApp1
+﻿namespace IO.Modules.DonorLibrary
 {
     public class Company : IDonorType
     {

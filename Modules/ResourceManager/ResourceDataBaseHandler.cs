@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using System.Data.SQLite;
 using MySql.Data.MySqlClient;
 
 namespace ResourceManager;
@@ -10,14 +11,15 @@ namespace ResourceManager;
 /// </summary>
 public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
 {
-    private readonly MySqlConnection _resourceConnection;
+    //private readonly MySqlConnection _resourceConnection;
+    private readonly SQLiteConnection _resourceConnection;
 
     public ResourceDataBaseHandler(string connectionString)
     {
         try
         {
             //If connection is not established try downloading mySQL server so far
-            _resourceConnection = new MySqlConnection(connectionString);
+            _resourceConnection = new SQLiteConnection(connectionString); //MySqlConnection(connectionString);
             _resourceConnection.Open();
             //Diagnostics stuff
             Console.WriteLine(_resourceConnection.Database);
@@ -33,14 +35,13 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
     /// Adds item to database
     /// </summary>
     /// <param name="item"></param>
-    /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
+    /// <returns>True if operation was successful. Otherwise, false</returns>
     public bool AddItem(Resource item)
     {
         string query = "INSERT INTO resources(hashcode_id, resource) VALUES(@hashcode, @packedResource)";
         try
         {
-            using (var command = new MySqlCommand(query, _resourceConnection))
+            using (var command = new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
             {
                 command.Parameters.AddWithValue("@hashcode", item.GetHashCode());
                 command.Parameters.AddWithValue("@packedResource", JsonSerializer.Serialize(item));
@@ -66,7 +67,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
         string query = "DELETE FROM resources WHERE hashcode_id = @hashcode";
         try
         {
-            using (var command = new MySqlCommand(query, _resourceConnection))
+            using (var command = new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
             {
                 command.Parameters.AddWithValue("@hashcode", item.GetHashCode());
                 int rowsAffected = command.ExecuteNonQuery();
@@ -92,17 +93,31 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
 
         foreach (Resource res in items)
         {
-            if (res.Name.Equals(name) && !res.Status.Equals(status))
+            if (res.Name.Equals(name))
             {
-                Resource tempRes = res;
+                int hash = res.GetHashCode();
+                res.Status = status;
 
-                tempRes.Status = status;
+                string query = "UPDATE resources SET resource = @resource WHERE hashcode_id = @hashcode";
 
-                RemoveFromDataBase(res);
-                return AddItem(tempRes);
+                try
+                {
+                    using (var command = new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
+                    {
+                        command.Parameters.AddWithValue("@hashcode", hash);
+                        command.Parameters.AddWithValue("@resource", JsonSerializer.Serialize(res));
+
+                        int rowsAffected = command.ExecuteNonQuery();
+
+                        return rowsAffected > 0;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
-
-            return false;
         }
 
         return false;
@@ -117,20 +132,33 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
     public bool SetNewAmount(string name, int newAmount)
     {
         List<Resource> items = GetAllItems();
-
+        
         foreach (Resource res in items)
         {
-            if (res.Name.Equals(name) && !res.Amount.Equals(newAmount))
+            if (res.Name.Equals(name))
             {
-                Resource tempRes = res;
+                int hash = res.GetHashCode();
+                res.Amount = newAmount;
+                
+                string query = "UPDATE resources SET resource = @resource WHERE hashcode_id = @hashcode";
 
-                tempRes.Amount = newAmount;
-
-                RemoveFromDataBase(res);
-                return AddItem(tempRes);
+                try
+                {
+                    using (var command = new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
+                    {
+                        command.Parameters.AddWithValue("@hashcode", hash);
+                        command.Parameters.AddWithValue("@resource", JsonSerializer.Serialize(res));
+                        int rowsAffected = command.ExecuteNonQuery();
+                    
+                        return rowsAffected > 0;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
-
-            return false;
         }
 
         return false;
@@ -148,22 +176,34 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
 
         foreach (Resource res in items)
         {
-            if (res.Name.Equals(name) && res.Amount.Equals(amount))
+            if (res.Name.Equals(name) && res.Amount - amount >= 0)
             {
-                Resource tempRes = res;
+                int hash = res.GetHashCode();
 
-                tempRes.Amount -= amount;
+                res.Amount -= amount;
 
-                RemoveFromDataBase(res);
-                AddItem(tempRes);
+                string query = "UPDATE resources SET resource = @newResAmount WHERE hashcode_id = @hashcode";
+                try
+                {
+                    using (var command = new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
+                    {
+                        command.Parameters.AddWithValue("@newResAmount", JsonSerializer.Serialize(res));
+                        command.Parameters.AddWithValue("@hashcode", hash);
+                        int rowsAffected = command.ExecuteNonQuery();
+                        return rowsAffected > 0 ? res : null;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
-
-            return null;
         }
 
         return null;
     }
-    
+
     /// <summary>
     /// Get amount of items of concrete category
     /// </summary>
@@ -174,7 +214,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
         List<Resource> items = GetAllItems();
 
         int count = 0;
-        
+
         foreach (Resource res in items)
         {
             if (res.Category == category)
@@ -188,6 +228,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
 
     public void Dispose()
     {
+        _resourceConnection.Close();
         _resourceConnection.Dispose();
     }
 
@@ -205,7 +246,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
         string query = "SELECT * FROM resources";
         List<Resource> items = new List<Resource>();
 
-        using (var command = new MySqlCommand(query, _resourceConnection))
+        using (var command = new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
         {
             using (var reader = command.ExecuteReader())
             {
@@ -220,22 +261,22 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
 
         return items;
     }
-    
+
     /// <summary>
     /// Make your own query if you dislike our functions
     /// </summary>
     /// <param name="query">Command</param>
     /// <returns>Result of command execution</returns>
-    public string CustromQuery(string query)
+    public string CustomQuery(string query)
     {
-        if (query.Contains("DROP DATABASE".ToLower()) || query.Contains("DROP TABLE".ToLower()))
+        if (query.ToLower().Contains("DROP DATABASE".ToLower()) || query.ToLower().Contains("DROP TABLE".ToLower()))
         {
             throw new Exception("Are you dumb? What are you trying to do?");
         }
 
         try
         {
-            using (var command = new MySqlCommand(query, _resourceConnection))
+            using (var command = new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
             using (var reader = command.ExecuteReader())
             {
                 var result = new StringBuilder();
@@ -245,6 +286,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
                     result.Append(reader.GetName(i));
                     if (i < reader.FieldCount - 1) result.Append(", ");
                 }
+
                 result.AppendLine();
 
                 while (reader.Read())
@@ -254,6 +296,7 @@ public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
                         result.Append(reader.GetValue(i));
                         if (i < reader.FieldCount - 1) result.Append(", ");
                     }
+
                     result.AppendLine();
                 }
 

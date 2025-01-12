@@ -1,0 +1,140 @@
+﻿@page "/donorPage"
+@using IO.Modules.DonorLibrary
+@rendermode InteractiveServer
+
+<PageTitle>Donor</PageTitle>
+
+<h1>Donor</h1>
+<p role="status">Donors: @donorCount</p>
+
+<button class="btn btn-primary" @onclick="Donate">Donate</button>
+<button class="btn btn-primary" @onclick="ShowDonations">Show Donations</button>
+<button class="btn btn-primary" @onclick="GenerateReport">Generate Report</button>
+
+@if (whichForm == 1)
+{
+    <h1>Donate</h1>
+
+    <div>
+        <p>Item Name: </p>
+        <input type="text" @bind="itemName" placeholder="Enter item name" class="form-control mt-2" />
+
+        <p>Quantity: </p>
+        <input type="text" @bind="quantity" placeholder="Enter item quantity" class="form-control mt-2" />
+
+        <button class="btn btn-success mt-3" @onclick="SubmitDonation">Submit</button>
+    </div>
+}
+
+@if (whichForm == 2)
+{
+    <h2>List of Donations</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th><input type="checkbox" @onclick="ToggleSelectAll" /></th>
+                <th>ID</th>
+                <th>Item Name</th>
+                <th>Quantity</th>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var donation in donationManager.GetAllDonations())
+            {
+                <tr>
+                    <td><input type="checkbox" @bind="donation.Selected" /></td>
+                    <td>@donation.DonationID</td>
+                    <td>@donation.Item</td>
+                    <td>@donation.Quantity</td>
+                    <td>@donation.Date</td>
+                    <td>@donation.DonationStatus</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (whichForm == 3)
+{
+    <h1>Generated Report</h1>
+    <div id="reportContainer" style="margin-top: 20px; border: 1px solid #ddd; padding: 10px;">
+        @if (string.IsNullOrWhiteSpace(ReportContent))
+        {
+            <p>No donations selected. Please go back and select donations to generate a report.</p>
+        }
+        else
+        {
+            <pre>@ReportContent</pre>
+        }
+    </div>
+}
+
+@code {
+    private int whichForm = 0;
+    private int donorCount = 0;
+    private string itemName;
+    private int quantity; 
+    private List<Donation> selectedDonations = new List<Donation>();
+    private DonationManager donationManager = new DonationManager();
+    private string ReportContent { get; set; } = string.Empty;
+
+    private void Donate()
+    {
+        whichForm = 1;
+    }
+
+    private void ShowDonations()
+    {
+        whichForm = 2;
+    }
+
+    private void SubmitDonation()
+    {
+        string date = DateTime.Now.ToString("dd-MM-yyyy");
+        donationManager.AddDonation(itemName, quantity, date);
+        itemName = string.Empty;
+        quantity = 0;
+        whichForm = 0;
+    }
+
+    private void ToggleSelectAll()
+    {
+        var isSelected = donationManager.GetAllDonations().All(d => d.Selected);
+        foreach (var donation in donationManager.GetAllDonations())
+        {
+            donation.Selected = !isSelected;
+        }
+    }
+
+    private void GenerateReport()
+    {
+        var selectedDonations = donationManager.GetAllDonations().Where(d => d.Selected).ToList();
+
+        if (!selectedDonations.Any())
+        {
+            ReportContent = "No donations selected.";
+        }
+        else
+        {
+            var reportBuilder = new System.Text.StringBuilder();
+            reportBuilder.AppendLine("Selected Donations Report:");
+            reportBuilder.AppendLine("----------------------------------------");
+
+            foreach (var donation in selectedDonations)
+            {
+                reportBuilder.AppendLine($"ID: {donation.DonationID}");
+                reportBuilder.AppendLine($"Item: {donation.Item}");
+                reportBuilder.AppendLine($"Quantity: {donation.Quantity}");
+                reportBuilder.AppendLine($"Date: {donation.Date}");
+                reportBuilder.AppendLine($"Status: {donation.DonationStatus}");
+                reportBuilder.AppendLine("----------------------------------------");
+            }
+
+            ReportContent = reportBuilder.ToString();
+        }
+
+        whichForm = 3; // Przełącza na ekran raportu
+    }
+}

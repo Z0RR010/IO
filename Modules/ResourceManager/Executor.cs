@@ -6,14 +6,15 @@ public class Executor : IResManager
 
     public Executor()
     {
-        _handler = new ResourceDataBaseHandler("Server=localhost;Port=3306;Database=resourceBase;User Id=root;Password=root;");
+        _handler = new ResourceDataBaseHandler("Data Source=../../../Modules/ResourceManager/databases/resourceBase.db;Version=3;FailIfMissing=True;");
+        //_handler = new ResourceDataBaseHandler("Data Source=Modules/ResourceManager/databases/resourceBase.db;Version=3;Pooling=true;FailIfMissing=True;");
     }
 
     private Resource CreateResource(string name, Category category, int amount)
     {
         return new Resource(name, category, amount);
     }
-    
+
     /// <summary>
     /// Add new resource item to database
     /// </summary>
@@ -34,7 +35,7 @@ public class Executor : IResManager
             case "transport": output = Category.Transport; break;
             default: throw new AggregateException("Unknown category");
         }
-        
+
         return _handler.AddItem(CreateResource(name, output, amount));
     }
 
@@ -46,9 +47,9 @@ public class Executor : IResManager
     /// <returns>True string info operation was successful. Otherwise, null</returns>
     public string GetItem(string name, int amount)
     {
-        return _handler.GetItem(name , amount).ToString();
+        return _handler.GetItem(name, amount).ToString();
     }
-    
+
     /// <summary>
     /// Get amount of items of concrete category
     /// </summary>
@@ -67,10 +68,10 @@ public class Executor : IResManager
             case "transport": output = Category.Transport; break;
             default: throw new AggregateException("Unknown category");
         }
-        
+
         return _handler.GetItemsByCategory(output);
     }
-    
+
     /// <summary>
     /// Get string info about all resources stored in resource databse
     /// </summary>
@@ -78,8 +79,9 @@ public class Executor : IResManager
     public List<string> GetAllAvailableItems()
     {
         List<string> output = new List<string>();
-        
-        foreach (Resource item in _handler.GetAllItems()) {
+
+        foreach (Resource item in _handler.GetAllItems())
+        {
             output.Add(item.Name + " - " + item.Category + " - " + item.Amount);
         }
         return output;
@@ -114,6 +116,6 @@ public class Executor : IResManager
     /// <returns>Result of command execution</returns>
     public string CustomQuery(string query)
     {
-        return _handler.CustromQuery(query);
+        return _handler.CustomQuery(query);
     }
 }

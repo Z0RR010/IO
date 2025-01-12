@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace ConsoleApp1
+﻿namespace IO.Modules.DonorLibrary
 {
     public class Donation
     {
@@ -15,7 +8,7 @@ namespace ConsoleApp1
         public string Item { get; private set; }
         public int Quantity { get; private set; }
         public string Date { get; private set; }
-
+        public bool Selected { get; set; }
         public Donation(int donationID, string item, int quantity, string date)
         {
             DonationID = donationID;

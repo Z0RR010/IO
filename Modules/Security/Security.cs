@@ -1,10 +1,14 @@
-﻿using System.Security.Cryptography;
+﻿using ResourceManager;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace IO.Modules.Security
 {
     public static class Security
     {
+
+        private static byte[] customIV = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 };
+
         public static string hashData(string input)
         {
             using (SHA256 sha256 = SHA256.Create())
@@ -16,77 +20,90 @@ namespace IO.Modules.Security
             }
         }
 
-        public static string encryptPESEL(string input, User user)
+        private static byte[] stringKeyToBytes(string key)
         {
-			using (Aes myAes = Aes.Create())
-			{
-				myAes.KeySize = 256;
-				// myAes.Key = to do
-				byte[] encrypted = EncryptStringToBytes_Aes(input, myAes.Key, myAes.IV);
-				return BitConverter.ToString(encrypted);
-			}
+            byte[] keyBytes = key
+               .Split('-')
+               .Select(hex => Convert.ToByte(hex, 16))
+               .ToArray();
+            return keyBytes;
         }
 
-		public static string decryptPESEL(string input, User user)
-		{
-			using (Aes myAes = Aes.Create())
-			{
-				myAes.KeySize = 256;
-                // myAes.Key = to do
-                byte[] inputBytes = Encoding.UTF8.GetBytes(input);
-				return DecryptStringFromBytes_Aes(inputBytes, myAes.Key, myAes.IV);
-			}
-		}
+        public static string encryptPESEL(string input, User user)
+        {
+            using (Aes myAes = Aes.Create())
+            {
+                UserExecuter userExecuter = new UserExecuter();
+                myAes.KeySize = 256;
+                myAes.IV = customIV;
+                myAes.Key = stringKeyToBytes(userExecuter.GetEncryptionKey(user.Email));
+                byte[] encrypted = EncryptStringToBytes_Aes(input, myAes.Key, myAes.IV);
+                return BitConverter.ToString(encrypted);
+            }
+        }
 
-		private static byte[] EncryptStringToBytes_Aes(string plainText, byte[] Key, byte[] IV)
-		{
-			byte[] encrypted;
-			using (Aes aesAlg = Aes.Create())
-			{
-				aesAlg.Key = Key;
-				aesAlg.IV = IV;
+        public static string decryptPESEL(string input, User user)
+        {
+            using (Aes myAes = Aes.Create())
+            {
+                UserExecuter userExecuter = new UserExecuter();
+                myAes.KeySize = 256;
+                myAes.IV = customIV;
+                myAes.Key = stringKeyToBytes(userExecuter.GetEncryptionKey(user.Email));
+                byte[] inputBytes = stringKeyToBytes(input);
+                return DecryptStringFromBytes_Aes(inputBytes, myAes.Key, myAes.IV);
+            }
+        }
 
-				ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
+        private static byte[] EncryptStringToBytes_Aes(string plainText, byte[] Key, byte[] IV)
+        {
+            byte[] encrypted;
+            using (Aes aesAlg = Aes.Create())
+            {
+                aesAlg.Key = Key;
+                aesAlg.IV = IV;
 
-				using (MemoryStream msEncrypt = new MemoryStream())
-				{
-					using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
-					{
-						using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
-						{
-							swEncrypt.Write(plainText);
-						}
-					}
+                ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
 
-					encrypted = msEncrypt.ToArray();
-				}
-			}
-			return encrypted;
-		}
+                using (MemoryStream msEncrypt = new MemoryStream())
+                {
+                    using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                    {
+                        using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                        {
+                            swEncrypt.Write(plainText);
+                        }
+                    }
 
-		private static string DecryptStringFromBytes_Aes(byte[] cipherText, byte[] Key, byte[] IV)
-		{
-			string plaintext = null;
+                    encrypted = msEncrypt.ToArray();
+                }
+            }
+            return encrypted;
+        }
 
-			using (Aes aesAlg = Aes.Create())
-			{
-				aesAlg.Key = Key;
-				aesAlg.IV = IV;
+        private static string DecryptStringFromBytes_Aes(byte[] cipherText, byte[] Key, byte[] IV)
+        {
+            string plaintext = null;
 
-				ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+            using (Aes aesAlg = Aes.Create())
+            {
+                aesAlg.Key = Key;
+                aesAlg.IV = IV;
 
-				using (MemoryStream msDecrypt = new MemoryStream(cipherText))
-				{
-					using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-					{
-						using (StreamReader srDecrypt = new StreamReader(csDecrypt))
-						{
-							plaintext = srDecrypt.ReadToEnd();
-						}
-					}
-				}
-			}
-			return plaintext;
-		}
-	}
+                ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+
+                using (MemoryStream msDecrypt = new MemoryStream(cipherText))
+                {
+                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                    {
+                        using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                        {
+                            plaintext = srDecrypt.ReadToEnd();
+                        }
+                    }
+                }
+            }
+            return plaintext;
+        }
+    }
 }
