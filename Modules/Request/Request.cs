@@ -1,5 +1,5 @@
 using IO.Modules.Security;
-using ResourceManager;
+using IO.Modules.ResourceManager;
 
 namespace RequestModule
 {
