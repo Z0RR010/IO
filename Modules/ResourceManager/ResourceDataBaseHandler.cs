@@ -217,7 +217,7 @@ namespace IO.Modules.ResourceManager
         /// </summary>
         /// <param name="category">The category to be found</param>
         /// <returns>Size of list of all items ever found in database</returns>
-        public int GetItemsByCategory(Category category)
+        public int GetItemsAmountByCategory(Category category)
         {
             List<Resource> items = GetAllItems();
 
