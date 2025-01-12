@@ -98,6 +98,12 @@ namespace IO.Modules.ResourceManager
             }
         }
 
+        public bool AddTaskToDatabase(IO.Modules.Volunteer.Task task)
+        {
+            if (task == null) throw new ArgumentNullException(nameof(task));
+            return false;
+        }
+
 
         public List<IO.Modules.Volunteer.Volunteer> LoadVolunteerList(List<Organisation> organisationList)
         {
