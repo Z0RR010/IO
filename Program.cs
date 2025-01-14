@@ -2,8 +2,17 @@ using IO.Components;
 using IO.Modules.Communication;
 using IO.Modules.MapLibrary;
 using Microsoft.JSInterop;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using IO.Modules.Security;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.Cookies;
+//using Microsoft.AspNetCore.Components.Authorization;
+//using Microsoft.AspNetCore.Identity;
+//using Microsoft.AspNetCore.Identity.UI.Services;
+//using Microsoft.EntityFrameworkCore;
+//using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace IO
 {
@@ -16,9 +25,6 @@ namespace IO
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
-			builder.Services.AddEndpointsApiExplorer();
-			builder.Services.AddScoped<IEmailService, EmailService>();
-			builder.Services.AddControllers();
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
@@ -28,6 +34,21 @@ namespace IO
                 });
             builder.Services.AddAuthorization();
             builder.Services.AddCascadingAuthenticationState();
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseSqlite("Data Source=./Modules/ResourceManager/databases/userDatabase.db"));
+            builder.Services.AddControllers();
+
+            /*
+            builder.Services.AddCascadingAuthenticationState();
+            builder.Services.AddScoped<UserAccessor>();
+            builder.Services.AddScoped<IdentityRedirectManager>();
+            builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
+            builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme).AddIdentityCookies();
+            builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddSignInManager()
+                .AddDefaultTokenProviders();
+            */
 
             builder.Services.AddSingleton<Communicator>();
 

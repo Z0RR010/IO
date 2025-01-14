@@ -7,7 +7,12 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            <Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+                <Authorized>
+                    Zalogowany jako @email
+                    <a href="/signOut">Wyloguj</a>
+                </Authorized>
+            </Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
         </div>
 
         <article class="content px-4">
@@ -21,3 +26,18 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@code
+{
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private string email;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var authenticationState = await authenticationStateTask;
+        email = authenticationState.User.Identity.Name;
+    }
+}

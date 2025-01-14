@@ -1,7 +1,44 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
+
+<AuthorizeView>
+	<NotAuthorized>
+		<h5>nie ma autoryzacji</h5>
+	</NotAuthorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Admin">
+	<Authorized>
+		<h4>witaj admin</h4>
+		<p2>@name</p2>
+	</Authorized>
+</AuthorizeView>
+
+@code
+{
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationStateTask{ get; set; }
+
+	public string name;
+
+	private async Task displayInfo()
+	{
+		var authenticationState = await authenticationStateTask;
+		var message = authenticationState.User.Identity.Name;
+
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+		var authenticationState = await authenticationStateTask;
+		var message = authenticationState.User.Identity.Name;
+		name = message;
+	}
+}
