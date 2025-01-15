@@ -79,6 +79,8 @@ namespace IO
 
             builder.Services.AddScoped<RequestModule.IRequestService, RequestModule.RequestService>();
 
+            builder.Services.AddScoped<SessionService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

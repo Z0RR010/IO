@@ -115,7 +115,7 @@ namespace IO.Modules.ResourceManager
         /// <param name="password">Password of the new user</param>>
         /// <param name="token">Token that is supposed to be stored</param>>
         /// <returns>True if operation was successful. Otherwise, false</returns>
-        public bool SendToDataBase(Individual user, string encryptionKey, string password, string token)
+        public bool SendToDataBase(Individual user, string encryptionKey, string password, string token, string role, string website, string krs, string institution)
         {
             //FIXME
             // var options = new JsonSerializerOptions
@@ -126,7 +126,7 @@ namespace IO.Modules.ResourceManager
 
             var packedUser = JsonSerializer.Serialize(user);
             string query =
-                "INSERT INTO users(email, user, encryptionKey, password, emailVerified, token) VALUES(@email, @packedUser, @encryptionKey, @password, @emailVerified, @token)";
+                "INSERT INTO users(email, user, encryptionKey, password, emailVerified, token, role, website, krs, institution) VALUES(@email, @packedUser, @encryptionKey, @password, @emailVerified, @token, @role, @website, @krs, @institution)";
             try
             {
                 using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
@@ -137,8 +137,12 @@ namespace IO.Modules.ResourceManager
                     command.Parameters.AddWithValue("@password", password);
                     command.Parameters.AddWithValue("@emailVerified", false);
                     command.Parameters.AddWithValue("@token", token);
+                    command.Parameters.AddWithValue("@role", role);
+                    command.Parameters.AddWithValue("@website", website);
+					command.Parameters.AddWithValue("@krs", krs);
+					command.Parameters.AddWithValue("@institution", institution);
 
-                    int rowsAffected = command.ExecuteNonQuery();
+					int rowsAffected = command.ExecuteNonQuery();
                     return rowsAffected > 0;
                 }
             }

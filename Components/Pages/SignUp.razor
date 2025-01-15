@@ -362,43 +362,95 @@ input[type="submit"]:hover {
 		errorMessage = null;
 
 		hashedPassword = Security.hashData(password);
-		switch (userType)
+		/*switch (userType)
+		{
+		case "Darczyńca":
+		if (donorType == "Firma")
+			{
+			Donor donor = new Donor(surname, pesel, email, name, phoneNumber, address, true);
+		}
+		if (donorType == "Osoba indywidualna")
+			{
+			Donor donor = new Donor(surname, pesel, email, name, phoneNumber, address, true);
+	}
+	break;
+	case "Przedstawiciel władz":
+		Authority authority = new Authority(institution, surname, pesel, email, name, phoneNumber, address, true);
+	break;
+	case "Poszkodowany":
+		Affected affected = new Affected(surname, pesel, email, name, phoneNumber, address, false);
+	break;
+	case "Wolontariusz":
+		Volunteer volunteer = new Volunteer(surname, pesel, email, name, phoneNumber, address, true);
+	break;
+	case "Organizacja pomocowa":
+		Charity charity = new Charity(website, krs, email, name, phoneNumber, address, true);
+		break;
+	}
+
+	User user = new User(email, name, phoneNumber, address, true);
+	Individual individual = new Individual(surname, pesel, email, name, phoneNumber, address, true);
+	*/
+		Individual individual = new Individual(surname, pesel, email, name, phoneNumber, address, true);
+		string role = "";
+		bool isVerified = true;
+		switch(userType)
 		{
 			case "Darczyńca":
-				if (donorType == "Firma")
 				{
-					Donor donor = new Donor(surname, pesel, email, name, phoneNumber, address, true);
+					role = "Donor";
+					break;
 				}
-				if (donorType == "Osoba indywidualna")
-				{
-					Donor donor = new Donor(surname, pesel, email, name, phoneNumber, address, true);
-				}
-				break;
-			case "Przedstawiciel władz":
-				Authority authority = new Authority(institution, surname, pesel, email, name, phoneNumber, address, true);
-				break;
 			case "Poszkodowany":
-				Affected affected = new Affected(surname, pesel, email, name, phoneNumber, address, false);
-				break;
-			case "Wolontariusz":
-				Volunteer volunteer = new Volunteer(surname, pesel, email, name, phoneNumber, address, true);
-				break;
+				{
+					role = "Affected";
+					isVerified = false;
+					break;
+				}
 			case "Organizacja pomocowa":
-				Charity charity = new Charity(website, krs, email, name, phoneNumber, address, true);
-				break;
+				{
+					role = "Charity";
+					break;
+				}
+			case "Przedstawiciel władz":
+				{
+					role = "Authority";
+					break;
+				}
+			case "Wolontariusz":
+				{
+					role = "Volunteer";
+					break;
+				}
 		}
-		User user = new User(email, name, phoneNumber, address, true);
-		Individual individual = new Individual(surname, pesel, email, name, phoneNumber, address, true);
 
-		var registerRequest = new RegisterRequest() { Surname = surname, Pesel = pesel, Email = email, Name = name, PhoneNumber = phoneNumber, Address = address };
+		BasicUser createdUser = new BasicUser(email, name, phoneNumber, address, isVerified, surname, pesel, institution, website, krs, role);
+
+		/*var registerRequest = new RegisterRequest(){Surname = surname, 
+													Pesel = pesel, 
+													Email = email, 
+													Name = name, 
+													PhoneNumber = phoneNumber, 
+													Address = address, 
+													Institution = institution, 
+													IsVerified = isVerified, 
+													Krs = krs, 
+													Role = role, 
+													Website = website};*/
+
+		var registerRequest = new RegisterRequest() { Email = email };
+
 		var handler = new HttpClientHandler();
 		using (var client = new HttpClient(handler))
 		{
 			try
 			{
 				var cookieContainer = new CookieContainer();
+				Console.WriteLine("a");
 				var response = await client.PostAsJsonAsync("http://localhost:5236/api/SignUp/SignUp", registerRequest);
+				Console.WriteLine("tutaj");
 				Console.WriteLine(response.StatusCode);
+				Console.WriteLine("gdzies indziej");
 				if (response.IsSuccessStatusCode)
 				{
 					registered = true;
@@ -412,7 +464,23 @@ input[type="submit"]:hover {
 					Guid tokenGUID = Guid.NewGuid();
 					string token = tokenGUID.ToString();
 
-					userExecuter.SendToDataBase(individual, key, hashedPassword, token);
+					//userExecuter.SendToDataBase(individual, key, hashedPassword, token);
+					Individual user = new Individual(surname, pesel, email, name, phoneNumber, address, true);
+					var packedUser = JsonSerializer.Serialize(user);
+					userExecuter.SendToDataBase(individual, key, hashedPassword, token, role, website, krs, institution);
+					/*userExecuter.CustomQuery(@"INSERT INTO users(email, user, encryptionKey, password, emailVerified, token, role, website, krs, institution) 
+											 VALUES("
+											 + email + "," 
+											 + packedUser + "," 
+										     + key + "," 
+											 + hashedPassword + "," 
+									         + "false" + "," 
+											 + token + "," 
+										     + role + "," 
+										     + website + "," 
+											 + krs + "," 
+											 + institution + ","
+											 + ")");*/
 
 					string link = "http://localhost:5236/verify/" + token;
 
