@@ -13,9 +13,16 @@ Welcome to your new app.
 	</NotAuthorized>
 </AuthorizeView>
 
-<AuthorizeView Roles="Admin">
+<AuthorizeView Roles="Volunteer">
 	<Authorized>
-		<h4>witaj admin</h4>
+		<h4>witaj darczynco</h4>
+		<p2>@name</p2>
+	</Authorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Charity">
+	<Authorized>
+		<h4>witaj organizacjo charytatywna</h4>
 		<p2>@name</p2>
 	</Authorized>
 </AuthorizeView>
