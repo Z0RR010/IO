@@ -97,6 +97,28 @@
     {
         var userAccount = appDbContext.UserAccounts.Where(x => x.Email == Model.Email).FirstOrDefault();
         var hashedPassword = Security.hashData(Model.Password);
+        using (var client = new HttpClient())
+        {
+            var loginRequest = new LoginRequest() { Username = userAccount.Email, Password = hashedPassword };
+            var response = await client.PostAsJsonAsync("http://localhost:5236/api/SignIn/SignIn", loginRequest);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                try
+                {
+                    var errorResponse = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent);
+
+                    errorMessage = errorResponse != null && errorResponse.ContainsKey("message")
+                        ? errorResponse["message"]
+                        : "Wystąpił błąd podczas logowania.";
+                }
+                catch
+                {
+                    errorMessage = "Wystąpił błąd podczas logowania: " + responseContent;
+                }
+                return;
+            }
+        }
         if(userAccount is null || userAccount.Password != hashedPassword)
         {
             errorMessage = "Podano niepoprawne dane";
