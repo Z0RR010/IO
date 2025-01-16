@@ -118,14 +118,8 @@ namespace IO.Modules.ResourceManager
                 volCommand.Parameters.AddWithValue("@firstName", volunteer.FirstName);
                 volCommand.Parameters.AddWithValue("@lastName", volunteer.LastName);
                 volCommand.Parameters.AddWithValue("@email", volunteer.Email);
-                volCommand.Parameters.AddWithValue("@gender", volunteer.Gender);
                 volCommand.Parameters.AddWithValue("@phone", volunteer.PhoneNumber);
                 volCommand.Parameters.AddWithValue("@address", volunteer.Address);
-                volCommand.Parameters.AddWithValue("@experience", volunteer.Experience);
-                volCommand.Parameters.AddWithValue("@additionalInfo", volunteer.AdditionalInfo);
-                volCommand.Parameters.AddWithValue("@skills", volunteer.Skills);
-                volCommand.Parameters.AddWithValue("@availability",
-                    string.Join(", ", volunteer.Availability.Select(a => a.ToString("yyyy-MM-dd"))));
                 volCommand.Parameters.AddWithValue("@orgId", organisation.OrganisationID);
 
                 int rowsAffected = volCommand.ExecuteNonQuery();
@@ -269,19 +263,8 @@ namespace IO.Modules.ResourceManager
                     volunteer.FirstName = reader.GetString(1); //"FirstName");
                     volunteer.LastName = reader.GetString(2); //"LastName");
                     volunteer.Email = reader.GetString(3); //"Email");
-                    volunteer.Gender =
-                        Enum.TryParse(reader.GetString(4), out Gender gender)
-                            ? gender
-                            : Gender
-                                .Female; //"Gender"), out Gender gender) ? gender : Gender.Female; // Default to Female if parsing fails
                     volunteer.PhoneNumber = reader.GetString(5).ToCharArray(); //"PhoneNumber").ToCharArray();
                     volunteer.Address = reader.GetString(6); //"Address");
-                    volunteer.Experience = reader.GetString(7); //"Experience");
-                    volunteer.AdditionalInfo = reader.GetString(8); //"AdditionalInfo");
-                    volunteer.Skills = reader.GetString(9); //"Skills");
-                    volunteer.Availability =
-                        reader.GetString(10).Split(", ").Select(DateTime.Parse)
-                            .ToList(); //"Availability").Split(", ").Select(DateTime.Parse).ToList();
                     volunteer.Organisation =
                         organisationList.FirstOrDefault(o =>
                             o.OrganisationID ==

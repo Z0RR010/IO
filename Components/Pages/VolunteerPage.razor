@@ -98,44 +98,11 @@
         <p>Email: </p>
         <input type="email" @bind="email" placeholder="Enter email" class="form-control mt-2" />
 
-        <p>Gender: </p>
-        <select @bind="gender" class="form-select mt-2">
-            <option value="">Select Gender</option>
-            @foreach (var genderOption in Enum.GetValues(typeof(IO.Modules.Volunteer.Gender)).Cast<IO.Modules.Volunteer.Gender>())
-            {
-                <option value="@genderOption">@genderOption</option>
-            }
-        </select>
-
         <p>Phone Number: </p>
         <input type="text" @bind="PhoneNumberString" placeholder="Enter phone number" class="form-control mt-2" />
 
         <p>Address: </p>
         <input type="text" @bind="address" placeholder="Enter address" class="form-control mt-2" />
-
-        <p>Experience: </p>
-        <textarea @bind="experience" placeholder="Enter experience" class="form-control mt-2"></textarea>
-
-        <p>Additional Info: </p>
-        <textarea @bind="additionalInfo" placeholder="Enter additional information" class="form-control mt-2"></textarea>
-
-        <p>Skills: </p>
-        <textarea @bind="skills" placeholder="Enter skills" class="form-control mt-2"></textarea>
-
-        <p>Availability: </p>
-        <div class="d-flex gap-2 align-items-center">
-            <input type="date" @bind="newAvailabilityDate" class="form-control" />
-            <button class="btn btn-success" @onclick="AddAvailabilityDate">Add</button>
-        </div>
-        <ul class="list-group mt-2">
-            @foreach (var date in availability)
-            {
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    @date.ToShortDateString()
-                    <button class="btn btn-danger btn-sm" @onclick="() => RemoveAvailabilityDate(date)">Remove</button>
-                </li>
-            }
-        </ul>
 
         <p>Organisation: </p>
         <select @bind="selectedOrganisationID" class="form-select mt-2">
@@ -314,9 +281,6 @@
 }
 
 
-
-
-
 @code {
     private int whichForm = 0;
     private int prevoiusForm = 0;
@@ -331,9 +295,7 @@
     private IO.Modules.Volunteer.Gender gender = IO.Modules.Volunteer.Gender.Female;
     private char[] phoneNumber = new char[0];
     private string address = string.Empty;
-    private string experience = string.Empty;
-    private string additionalInfo = string.Empty;
-    private string skills = string.Empty;
+
 
     private string organisationName = string.Empty;
 
@@ -422,13 +384,8 @@
             firstName,
             lastName,
             email,
-            gender,
             phoneNumber,
             address,
-            experience,
-            additionalInfo,
-            skills,
-            availability,
             organisationList.FirstOrDefault(o => o.OrganisationID == selectedOrganisationID)
         );
 
@@ -477,39 +434,19 @@
     {
         if(who == 0)
         {
-            selectedTask.Volunteer = selectedVolunteer;
             selectedVolunteer.TaskList.Add(selectedTask);
             selectedTask.TaskStatus = IO.Modules.Volunteer.TaskStatus.Assigned;
-            volunteerManager.AssignVolunteerToTask(selectedTask.TaskID, selectedVolunteer.VolunteerID);
         }
         if(who == 1)
         {
-            selectedTask.Organisation = selectedOrganisation;
             selectedOrganisation.TaskList.Add(selectedTask);
-            volunteerManager.AssignOrganisationToTask(selectedTask.TaskID, selectedOrganisation.OrganisationID);
-
         }
 
     }
 
-    // private void Save()
-    // {
-    //     string filePath = "Modules/Volunteer/volunteersData";
-    //     using (StreamWriter writer = new StreamWriter(filePath, append: false))
-    //     {
-    //         writer.Write(volunteerManager.SaveManagerToFile());
-    //     }
-    //     volunteerCount = volunteerManager.VolunteerCount;
-    //     organisationCount = volunteerManager.OrganisationCount;
-    // }
-
     private void load()
     {
-        // string filePath = "Modules/Volunteer/volunteersData";
-        // volunteerManager.LoadManagerFromFile(filePath);
-        // volunteerCount = volunteerManager.VolunteerCount;
-        // organisationCount = volunteerManager.OrganisationCount;
-        // organisationList = volunteerManager.OrganisationList;
+
         volunteerManager.Load();
         volunteerCount = volunteerManager.VolunteerCount;
         organisationCount = volunteerManager.OrganisationCount;
@@ -519,16 +456,6 @@
         taskList = volunteerManager.TaskList;
     }
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -562,20 +489,6 @@
         <p>Address: </p>
         <input type="text" @bind="address" placeholder="Enter address" class="form-control mt-2" />
 
-        <p>Experience: </p>
-        <textarea @bind="experience" placeholder="Enter experience" class="form-control mt-2"></textarea>
-
-        <p>Additional Info: </p>
-        <textarea @bind="additionalInfo" placeholder="Enter additional information" class="form-control mt-2"></textarea>
-
-        <p>Skills: </p>
-        <textarea @bind="skills" placeholder="Enter skills" class="form-control mt-2"></textarea>
-
-        <p>Availability: </p>
-        <div class="d-flex gap-2 align-items-center">
-            <input type="date" @bind="newAvailabilityDate" class="form-control" />
-            <button class="btn btn-success" @onclick="AddAvailabilityDate">Add</button>
-        </div>
         <ul class="list-group mt-2">
             @foreach (var date in availability)
             {
@@ -690,20 +603,8 @@
             <p>First Name: <input type="text" value="@selectedVolunteer.FirstName" readonly class="form-control" /></p>
             <p>Last Name: <input type="text" value="@selectedVolunteer.LastName" readonly class="form-control" /></p>
             <p>Email: <input type="text" value="@selectedVolunteer.Email" readonly class="form-control" /></p>
-            <p>Gender: <input type="text" value="@selectedVolunteer.Gender.ToString()" readonly class="form-control" /></p>
             <p>Phone Number: <input type="text" value="@PhoneNumberToString(selectedVolunteer.PhoneNumber)" readonly class="form-control" /></p>
             <p>Address: <input type="text" value="@selectedVolunteer.Address" readonly class="form-control" /></p>
-            <p>Experience: <textarea readonly class="form-control">@selectedVolunteer.Experience</textarea></p>
-            <p>Additional Info: <textarea readonly class="form-control">@selectedVolunteer.AdditionalInfo</textarea></p>
-            <p>Skills: <textarea readonly class="form-control">@selectedVolunteer.Skills</textarea></p>
-            <p>Availability:</p>
-            <ul class="list-group">
-                @foreach (var date in selectedVolunteer.Availability)
-                {
-                    <li class="list-group-item">@date.ToString("yyyy-MM-dd")</li>
-                }
-            </ul>
-
             <p>Organisation: <input type="text" value="@selectedVolunteer.Organisation.OrganisationName" readonly class="form-control" /></p>
 
         }
