@@ -1,11 +1,13 @@
 ﻿@page "/signIn"
 @rendermode InteractiveServer
+@inject IStringLocalizer<SignIn> Loc
+@inject NavigationManager nav
 
 @using System.Text.Json  
 @using System.Text
 @using IO.Modules.Security
 
-<h3>Logowanie</h3>
+<h3>@Loc["Login"]</h3>
 
 @if (errorMessage != null)
 {
@@ -110,5 +112,39 @@ button:hover {
                 }
             }
         }
+    }
+}
+<footer class="footer">
+    <button @onclick="Polish" class="lang">Polski</button>
+    <button @onclick="English" class="lang">English</button>
+</footer>
+@code {
+    private async Task English()
+    {
+        String newUri = nav.Uri;
+        String oldUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=pl"))
+        {
+            newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
+        }
+        if (!newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri += "?ui-culture=en-US";
+        }
+        nav.NavigateTo(newUri,true);
+    }
+
+    private async Task Polish()
+    {
+        String newUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
+        }
+        if (!newUri.Contains("?ui-culture=pl"))
+        {
+            newUri += "?ui-culture=pl";
+        }
+        nav.NavigateTo(newUri,true);
     }
 }

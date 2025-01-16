@@ -1,6 +1,8 @@
 ﻿@page "/"
 @using System.Globalization
+@rendermode InteractiveServer
 @inject IStringLocalizer<Home> Loc
+@inject NavigationManager nav
 <PageTitle>Home</PageTitle>
 
 <h1>
@@ -10,3 +12,38 @@
 <h2 class="validation-message">This is not a real site</h2>
 <h2 class="validation-message">You should not enter any of your real information on this site as we do not guarantee information entered will be safe</h2>
 <p>This site is created as a college project</p>
+
+<footer class="footer">
+    <button @onclick="Polish" class="lang">Polski</button>
+    <button @onclick="English" class="lang">English</button>
+</footer>
+@code {
+    private async Task English()
+    {
+        String newUri = nav.Uri;
+        String oldUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=pl"))
+        {
+            newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
+        }
+        if (!newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri += "?ui-culture=en-US";
+        }
+        nav.NavigateTo(newUri,true);
+    }
+
+    private async Task Polish()
+    {
+        String newUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
+        }
+        if (!newUri.Contains("?ui-culture=pl"))
+        {
+            newUri += "?ui-culture=pl";
+        }
+        nav.NavigateTo(newUri,true);
+    }
+}
