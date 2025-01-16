@@ -12,7 +12,7 @@ namespace IO.Modules.ResourceManager
 
         public Individual GetUserFromDataBase(string email);
 
-        public bool SendToDataBase(Individual user, string encryptionKey, string password, string token);
+        public bool SendToDataBase(Individual user, string encryptionKey, string password, string token, string role, string website, string krs, string institution);
 
         public bool IsPasswordCorrect(string email, string password);
 
