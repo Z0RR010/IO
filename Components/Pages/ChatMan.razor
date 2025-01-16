@@ -1,0 +1,24 @@
+@page "/Communication/Conversation/ChatMan"
+@inject NavigationManager Navigation
+
+<h3>ChatMan</h3>
+
+<p>Chat ID: @chatId</p>
+
+@code {
+    private int chatId;
+
+    protected override void OnInitialized()
+    {
+        // Access query string parameters manually
+        var uri = Navigation.Uri;
+        var queryString = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(uri).Query);
+
+        if (queryString.ContainsKey("chatId"))
+        {
+            chatId = int.Parse(queryString["chatId"]);
+        }
+
+        Console.WriteLine($"ChatId manually parsed: {chatId}");
+    }
+}

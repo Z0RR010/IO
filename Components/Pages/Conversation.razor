@@ -21,7 +21,7 @@
         <div class="list-group">
             @foreach (var chat in userChats)
             {
-                <a href="/communication/conversation/@chat.ChatId" class="list-group-item list-group-item-action">
+                <div class="list-group-item">
                     <div class="d-flex justify-content-between align-items-center">
                         <span>
                             <strong>Użytkownicy:</strong>
@@ -32,11 +32,14 @@
                                 }
                             </ul>
                         </span>
-                        <button class="btn btn-sm btn-secondary" @onclick="() => SelectChat(chat.ChatId)">
-                            <i class="bi bi-chat-dots"></i> Przejdź do konwersacji
-                        </button>
+                        <form method="get" action="/Communication/Conversation/ChatMan">
+                            <input type="hidden" name="chatId" value="@chat.ChatId" />
+                            <button type="submit" class="btn btn-primary">
+                                Open Conversation
+                            </button>
+                        </form>
                     </div>
-                </a>
+                </div>
             }
         </div>
     }
@@ -68,4 +71,5 @@
             userChats = CommunicatorService.GetUserChats(userEmailToRead);
         }
     }
+    
 }
