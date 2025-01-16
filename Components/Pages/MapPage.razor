@@ -18,8 +18,9 @@
 
     <button class="btn btn-primary" @onclick="async () => { map01.SetLocation(await Geolocation.GetUserLocation());
                                                             await map01.DrawMap(); }">Coordinates</button>
-    <button class="btn btn-primary" @onclick="async () => { map01.SetRoute(_route);
-                                                            await map01.DrawMap(); }">Route</button>
+    <button class="btn btn-primary" @onclick='async () => { map01.SetRoute(_route);
+                                                            map01.AddRouteLocation(new AddressStringWrapper("Płock"));
+                                                            await map01.DrawMap();}'>Route</button>
 </div>
 
 <div id="map01" style="width: 100%; height: 500px;"></div>

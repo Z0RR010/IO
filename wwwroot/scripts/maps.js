@@ -87,13 +87,14 @@ export async function geocode(address) {
 }
 
 export async function drawRoute(mapId, routeCoordinates) {
-    const { DirectionsService, DirectionsRenderer } = await google.maps.importLibrary("directions");
-    const directionsService = new DirectionsService();
-    const directionsRenderer = new DirectionsRenderer({ map: maps[mapId] });
-
     if (routeCoordinates.length < 2) {
         throw new Error("At least two coordinates are required to draw a route.");
     }
+
+    const directionsService = new google.maps.DirectionsService();
+    const directionsRenderer = new google.maps.DirectionsRenderer({
+        map: maps[mapId]
+    });
 
     const waypoints = routeCoordinates
         .slice(1, -1)
@@ -104,20 +105,47 @@ export async function drawRoute(mapId, routeCoordinates) {
 
     const request = {
         origin: new google.maps.LatLng(routeCoordinates[0].lat, routeCoordinates[0].lng),
-        destination: new google.maps.LatLng(routeCoordinates[routeCoordinates.length - 1].lat, routeCoordinates[routeCoordinates.length - 1].lng),
+        destination: new google.maps.LatLng(
+            routeCoordinates[routeCoordinates.length - 1].lat,
+            routeCoordinates[routeCoordinates.length - 1].lng
+        ),
         waypoints: waypoints,
         travelMode: google.maps.TravelMode.DRIVING,
     };
 
-    return new Promise((resolve, reject) => {
-        directionsService.route(request, (result, status) => {
-            if (status === google.maps.DirectionsStatus.OK) {
-                directionsRenderer.setDirections(result);
-                resolve(result);
-            } else {
-                reject(new Error("Directions request failed due to " + status));
-            }
-        });
-    });
-}
+    try {
+        const result = await directionsService.route(request);
+        directionsRenderer.setDirections(result);
 
+        // Extracting route details (distance and duration)
+        const route = result.routes[0];
+        const legs = route.legs;
+
+        let totalDistance = 0;
+        let totalDuration = 0;
+
+        legs.forEach(leg => {
+            totalDistance += leg.distance.value; // distance in meters
+            totalDuration += leg.duration.value; // duration in seconds
+        });
+
+        // Convert distance to kilometers and duration to minutes
+        totalDistance = (totalDistance / 1000).toFixed(2); // km
+        totalDuration = Math.ceil(totalDuration / 60); // minutes
+
+        const infoDiv = document.createElement('div');
+        infoDiv.style.backgroundColor = 'white';
+        infoDiv.style.padding = '10px';
+        infoDiv.style.margin = '10px';
+        infoDiv.style.borderRadius = '5px';
+        infoDiv.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+
+        infoDiv.innerHTML = `<strong>Total Distance:</strong> ${totalDistance} km<br><strong>Estimated Time:</strong> ${totalDuration} minutes`;
+
+        maps[mapId].controls[google.maps.ControlPosition.TOP_CENTER].push(infoDiv);
+
+        return result;
+    } catch (error) {
+        throw new Error(`Directions request failed: ${error.message}`);
+    }
+}

@@ -4,23 +4,18 @@
 	{
 
 		private List<LocationWrapper> _locations;
-		private List<Coordinates> coordinates;
 
 		internal Route(LocationWrapper startPoint, LocationWrapper endPoint)
 		{
 			_locations = new List<LocationWrapper>{startPoint, endPoint};
-			coordinates = new List<Coordinates>();
+
 		}
 
-		public void AddRoutePoint(Coordinates point)
-		{
-			coordinates.Insert(coordinates.Count-1, point);
-		}
-
-        public List<Coordinates> GetCoordinates()
+        internal void AddRouteLocation(LocationWrapper location)
         {
-            return coordinates;
+            _locations.Insert(_locations.Count - 1, location);
         }
+
 
         public async Task<List<Coordinates>> GenerateCoordinatesList(GoogleMapsClient client)
         {

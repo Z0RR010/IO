@@ -55,14 +55,23 @@
             _route = route;
         }
 
-        public void AddRoutePoint(Coordinates point)
+        internal Task<Coordinates> LocationToCoordinates(LocationWrapper location)
+        {
+            if(location == null)
+            {
+                throw new ArgumentNullException("location");
+            }
+            return location.GetCoordinatesAwait(client);
+        }
+
+        internal void AddRouteLocation(LocationWrapper location)
         {
             if (_route == null)
             {
                 throw new InvalidOperationException("Route is not set. Use SetRoute() to initialize the route.");
             }
 
-            _route.AddRoutePoint(point);
+            _route.AddRouteLocation(location);
         }
         public async Task<List<Coordinates>> GetRouteCoordinates()
         {
