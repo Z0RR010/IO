@@ -1,5 +1,5 @@
 ﻿@inherits LayoutComponentBase
-
+@inject NavigationManager nav
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -7,8 +7,7 @@
 
     <main>
         <div class="top-row px-4">
-            <div>Polski</div>
-            <div class="lang">English</div>
+            
             <div class="nav-item px-3">
             <NavLink class="nav-link" href="signIn">Sign In
             </NavLink>
@@ -30,3 +29,29 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+<style>
+    .footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: fit-content;
+  background-color: #3a0647;
+  color: white;
+  align-self: center;
+  text-align: right;
+  align-items: right;
+}
+
+.lang {
+    padding: 10px;
+    margin-right: 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    border-color: #141414;
+    cursor: pointer;
+    text-align: center;
+}
+</style>

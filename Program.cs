@@ -55,7 +55,7 @@ namespace IO
 
             
             var app = builder.Build();
-            app.UseRequestLocalization(localizationOptions);
+            
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
@@ -68,7 +68,7 @@ namespace IO
 
             app.UseStaticFiles();
             app.UseAntiforgery();
-
+            app.UseRequestLocalization(localizationOptions);
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
             app.MapControllers();
