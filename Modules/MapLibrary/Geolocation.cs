@@ -12,10 +12,18 @@ public class Geolocation
         _jsRuntime = jsRuntime;
     }
     
-    public async Task<Coordinates> GetUserLocation()
+    public async Task<Coordinates?> GetUserLocation()
     {
         await using var module = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "./scripts/geolocation.js");
-        
-        return await module.InvokeAsync<Coordinates>("getUserLocation");
+
+        try
+        {
+            return await module.InvokeAsync<Coordinates>("getUserLocation");
+        }
+        catch (JSException e)
+        {
+            Console.WriteLine(e.Message);
+            return null;
+        }
     }
 }

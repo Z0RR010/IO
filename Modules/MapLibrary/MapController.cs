@@ -44,9 +44,10 @@
             _location = new AddressStringWrapper(address);
         }
         
-        public void SetLocation(Coordinates coordinates)
+        public void SetLocation(Coordinates? coordinates)
         {
-            _location = new CoordinatesWrapper(coordinates);
+            if (coordinates != null)
+                _location = new CoordinatesWrapper(coordinates);
         }
 
         internal LocationWrapper GetLocation()
