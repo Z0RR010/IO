@@ -1,0 +1,63 @@
+@page "/Communication/Reports"
+@inject NavigationManager Navigation
+@using System.Text
+@using IO.Modules.Communication
+@inject Communicator CommunicatorService
+@rendermode InteractiveServer
+
+<div class="container my-5">
+    <h2 class="text-center">Report Viewer & Downloader</h2>
+
+    <!-- Report Display -->
+    <div class="mb-4">
+        <label for="reportContent" class="form-label">Generated Report:</label>
+        <textarea id="reportContent" class="form-control" rows="8" readonly>@reportContent</textarea>
+    </div>
+
+    <!-- Download Button -->
+    <div class="text-center">
+        <button class="btn btn-primary" @onclick="DownloadReport">Download Report</button>
+    </div>
+</div>
+
+@code {
+    private string reportContent = "This is a dynamically generated report.\nYou can download it as a file.";
+
+    // Method to download the report
+    private void DownloadReport()
+    {
+        var fileName = "report.txt";
+        var contentBytes = Encoding.UTF8.GetBytes(reportContent);
+
+        // Trigger a file download using a data URL
+        var url = $"data:text/plain;charset=utf-8,{Uri.EscapeDataString(reportContent)}";
+        Navigation.NavigateTo(url, forceLoad: true);
+    }
+}
+
+<style>
+    .container {
+        max-width: 700px;
+        margin: 0 auto;
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-label {
+        font-weight: bold;
+    }
+
+    .form-control {
+        font-family: monospace;
+        font-size: 0.95rem;
+        color: #333;
+        background-color: #f7f7f7;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+</style>
