@@ -18,7 +18,8 @@
 
     <button class="btn btn-primary" @onclick="async () => { map01.SetLocation(await Geolocation.GetUserLocation());
                                                             await map01.DrawMap(); }">Coordinates</button>
-    <button class="btn btn-primary" @onclick='async () => { map01.SetRoute(_route);
+    <button class="btn btn-primary" @onclick='async () => { Route rt = new Route(new CoordinatesWrapper(await Geolocation.GetUserLocation()), map01.GetLocation());
+                                                            map01.SetRoute(rt);
                                                             map01.AddRouteLocation(new AddressStringWrapper("Płock"));
                                                             await map01.DrawMap();}'>Route</button>
 </div>
@@ -35,8 +36,7 @@
         "",
         "93-005"
     );
-
-    Route _route = new(new AddressStringWrapper("Łódź"), new AddressStringWrapper("Warszawa"));
+    //Route _route = new(new AddressStringWrapper("Łódź"), new AddressStringWrapper("Warszawa"));
 
 
     protected override void OnInitialized()

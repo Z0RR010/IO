@@ -8,7 +8,6 @@
         
         private LocationWrapper _location;
         private Route _route;
-        
         public MapController(GoogleMapsClient client, string id)
         {
             this.client = client;
@@ -48,6 +47,11 @@
         public void SetLocation(Coordinates coordinates)
         {
             _location = new CoordinatesWrapper(coordinates);
+        }
+
+        internal LocationWrapper GetLocation()
+        {
+            return _location;
         }
 
         public void SetRoute(Route route)
