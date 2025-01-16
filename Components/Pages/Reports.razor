@@ -1,17 +1,15 @@
 @page "/Communication/Reports"
-@inject NavigationManager Navigation
+@using System.IO
 @using System.Text
 @using IO.Modules.Communication
-@inject Communicator CommunicatorService
-@rendermode InteractiveServer
+@inject RaportManager RaportService
 
 <div class="container my-5">
     <h2 class="text-center">Report Viewer & Downloader</h2>
 
-    <!-- Report Display -->
-    <div class="mb-4">
-        <label for="reportContent" class="form-label">Generated Report:</label>
-        <textarea id="reportContent" class="form-control" rows="8" readonly>@reportContent</textarea>
+    <!-- Scrollable Report Display -->
+    <div class="scrollable-report mb-4">
+        <pre>@reportContent</pre>
     </div>
 
     <!-- Download Button -->
@@ -21,20 +19,28 @@
 </div>
 
 @code {
-    private string reportContent = "This is a dynamically generated report.\nYou can download it as a file.";
+    private string reportContent;
 
-    // Method to download the report
-    private void DownloadReport()
+    protected override void OnInitialized()
     {
-        var fileName = "report.txt";
-        var contentBytes = Encoding.UTF8.GetBytes(reportContent);
+        // Fetch the report content from RaportManager
+        reportContent = RaportService.activeReport ?? "No report available.";
+    }
 
-        // Trigger a file download using a data URL
-        var url = $"data:text/plain;charset=utf-8,{Uri.EscapeDataString(reportContent)}";
-        Navigation.NavigateTo(url, forceLoad: true);
+    private async Task DownloadReport()
+    {
+        // Convert the report content to a stream
+        var fileName = "report.txt";
+        var fileBytes = Encoding.UTF8.GetBytes(reportContent);
+
+        // Use a memory stream for file download
+        using var stream = new MemoryStream(fileBytes);
+        var fileUrl = $"data:text/plain;charset=utf-8,{Uri.EscapeDataString(reportContent)}";
+
+        // Trigger the download in the browser
+        await JSRuntime.InvokeVoidAsync("downloadFile", fileUrl, fileName);
     }
 }
-
 <style>
     .container {
         max-width: 700px;
@@ -45,15 +51,17 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
-    .form-label {
-        font-weight: bold;
-    }
-
-    .form-control {
+    .scrollable-report {
+        max-height: 400px; /* Set a fixed height */
+        overflow-y: auto; /* Enable vertical scrolling */
+        padding: 10px;
+        background-color: #f7f7f7;
+        border: 1px solid #ddd;
+        border-radius: 5px;
         font-family: monospace;
         font-size: 0.95rem;
         color: #333;
-        background-color: #f7f7f7;
+        white-space: pre-wrap; /* Preserve whitespace for formatting */
     }
 
     .btn {
@@ -61,3 +69,4 @@
         font-size: 0.9rem;
     }
 </style>
+@inject IJSRuntime JSRuntime

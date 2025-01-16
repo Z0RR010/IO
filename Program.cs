@@ -19,7 +19,11 @@ namespace IO
             builder.Services.AddControllers();
 
             builder.Services.AddSingleton<Communicator>();
-
+            builder.Services.AddSingleton(provider =>
+            {
+                var communicator = provider.GetRequiredService<Communicator>();
+                return communicator.manager; // Use the same instance from Communicator
+            });
             builder.Services.AddHttpClient();
             builder.Services.AddScoped(sp => new HttpClient
             {

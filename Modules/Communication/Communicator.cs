@@ -6,7 +6,7 @@ using System.Linq;
 public class Communicator : ICommunication
 {
     public Server testServer { get; private set; }
-    RaportManager manager = new RaportManager();
+    public RaportManager manager = new RaportManager();
 
     public Communicator()
     {
