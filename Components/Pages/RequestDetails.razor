@@ -24,7 +24,6 @@ else
         <p>Resources Required: @string.Join(", ", request.ResourcesRequired.Select(r => $"{r.Name} (x{r.Amount})"))</p>
         <p>Is Verified: @request.IsVerified</p>
         <p>Handling Organization: @request.HandlingOrganization</p>
-        <p>Categories: @string.Join(", ", request.Categories)</p>
     </div>
 }
 

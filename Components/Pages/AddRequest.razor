@@ -1,26 +1,9 @@
 @page "/requests/add"
-@inject RequestModule.IRequestService RequestService
-
-@code {
-    private RequestModule.Request newRequest = new RequestModule.Request
-        {
-            Status = RequestModule.RequestStatus.New,
-            Address = new RequestModule.Address() // Inicjalizacja Address
-        };
-
-    private void AddNewRequest()
-    {
-        newRequest = new RequestModule.Request
-            {
-                Status = RequestModule.RequestStatus.New,
-                Address = new RequestModule.Address() // Inicjalizacja Address
-            };
-    }
-}
+@inject IO.Modules.Security.SessionService sessionService
 
 <h3>Add Request</h3>
 
-<EditForm Model="newRequest" OnValidSubmit="AddNewRequest">
+<EditForm Model="newRequest" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -37,20 +20,108 @@
         <InputText id="city" class="form-control" @bind-Value="newRequest.Address.City" />
     </div>
     <div class="form-group">
-        <label for="state">Street</label>
-        <InputText id="state" class="form-control" @bind-Value="newRequest.Address.Street" />
+        <label for="street">Street</label>
+        <InputText id="street" class="form-control" @bind-Value="newRequest.Address.Street" />
     </div>
     <div class="form-group">
-        <label for="postalCode">Street Number</label>
-        <InputText id="postalCode" class="form-control" @bind-Value="newRequest.Address.StreetNumber" />
+        <label for="streetNumber">Street Number</label>
+        <InputText id="streetNumber" class="form-control" @bind-Value="newRequest.Address.StreetNumber" />
     </div>
     <div class="form-group">
-        <label for="country">Apartment</label>
-        <InputText id="country" class="form-control" @bind-Value="newRequest.Address.Apartment" />
+        <label for="apartment">Apartment</label>
+        <InputText id="apartment" class="form-control" @bind-Value="newRequest.Address.Apartment" />
     </div>
     <div class="form-group">
-        <label for="country">Zip code</label>
-        <InputText id="country" class="form-control" @bind-Value="newRequest.Address.ZipCode" />
+        <label for="zipCode">Zip Code</label>
+        <InputText id="zipCode" class="form-control" @bind-Value="newRequest.Address.ZipCode" />
     </div>
+    <div class="form-group">
+        <label for="resources">Resources</label>
+        <InputText id="resources" class="form-control" @bind-Value="" />
+    </div>
+
     <button type="submit" class="btn btn-primary">Submit</button>
 </EditForm>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-info">@message</div>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private string email;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var authenticationState = await authenticationStateTask;
+        email = authenticationState.User.Identity.Name;
+    }
+
+    private RequestModule.Request newRequest = new RequestModule.Request
+        {
+            Status = RequestModule.RequestStatus.New,
+            Address = new RequestModule.Address() // Inicjalizacja Address
+        };
+
+    private string? message;
+
+    private IO.Modules.ResourceManager.RequestManager requestManager = new IO.Modules.ResourceManager.RequestManager();
+
+    private List<IO.Modules.ResourceManager.Resource> selectedResource;
+
+    private void AddResource()
+    {
+        if (!newRequest.ResourcesRequired.Contains(selectedResource))
+        {
+            newRequest.ResourcesRequired.Add(selectedResource);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+
+
+
+        RequestModule.Request newRequest = new RequestModule.Request
+            {
+
+                Status = RequestModule.RequestStatus.New,
+                Address = new RequestModule.Address(), // Inicjalizacja Address
+                CreatedAt = DateTime.Now,
+
+            };
+
+        try
+        {
+            // Dodanie do bazy danych
+            bool isAdded = requestManager.AddRequestToDatabase(newRequest);
+
+            if (isAdded)
+            {
+                message = "Request successfully added!";
+                ResetForm();
+            }
+            else
+            {
+                message = "Failed to add request. Please try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"An error occurred: {ex.Message}";
+        }
+    }
+
+    private void ResetForm()
+    {
+        newRequest = new RequestModule.Request
+            {
+                Status = RequestModule.RequestStatus.New,
+                Address = new RequestModule.Address() // Inicjalizacja Address
+            };
+    }
+}

@@ -18,7 +18,7 @@ namespace IO.Modules.ResourceManager
             _connection.Open();
         }
 
-        bool IRequestManager.AddRequestToDatabase(Request request)
+        public bool AddRequestToDatabase(Request request)
         {
             //var packedUser = JsonSerializer.Serialize();
 
@@ -60,7 +60,7 @@ namespace IO.Modules.ResourceManager
             }
         }
 
-        string IRequestManager.CustomQuery(string query)
+        public string CustomQuery(string query)
         {
             if (query.ToLower().Contains("DROP DATABASE".ToLower()) || query.ToLower().Contains("DROP TABLE".ToLower()))
             {
@@ -105,7 +105,7 @@ namespace IO.Modules.ResourceManager
             }
         }
 
-        bool IRequestManager.RemoveRequestFromDatabase(int id)
+        public bool RemoveRequestFromDatabase(int id)
         {
             string query =
                 "DELETE FROM Request WHERE Id = @id";

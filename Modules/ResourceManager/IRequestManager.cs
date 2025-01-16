@@ -8,7 +8,7 @@ namespace IO.Modules.ResourceManager
 
         public bool RemoveRequestFromDatabase(int id);
 
-        List<Request> GetAllRequests();
+        public List<Request> GetAllRequests();
 
         public string CustomQuery(string query);
     }
