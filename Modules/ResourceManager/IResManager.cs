@@ -10,6 +10,8 @@
         public string GetItem(string name, int amount);
 
         public int GetItemAmountByCategory(string category);
+        
+        public List<string> GetItemsByCategory(string category);
 
         public List<string> GetAllAvailableItems();
 

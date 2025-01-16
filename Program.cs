@@ -14,6 +14,7 @@ namespace IO
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
+            
 
             builder.Services.AddControllers();
 
@@ -45,9 +46,16 @@ namespace IO
             });
 
             builder.Services.AddScoped<RequestModule.IRequestService, RequestModule.RequestService>();
+            builder.Services.AddLocalization();
+            var supportedCultures = new[] { "en-US", "pl" };
+            var localizationOptions = new RequestLocalizationOptions()
+                .SetDefaultCulture(supportedCultures[0])
+                .AddSupportedCultures(supportedCultures)
+                .AddSupportedUICultures(supportedCultures);
 
+            
             var app = builder.Build();
-
+            app.UseRequestLocalization(localizationOptions);
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
