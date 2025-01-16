@@ -1,86 +1,53 @@
 ﻿@page "/signIn"
-@rendermode InteractiveServer
-@inject IStringLocalizer<SignIn> Loc
-@inject NavigationManager nav
 
 @using System.Text.Json  
 @using System.Text
 @using IO.Modules.Security
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@inject AppDbContext appDbContext
+@inject NavigationManager navigationManager;
 
-<h3>@Loc["Login"]</h3>
 
-@if (errorMessage != null)
-{
-    @if (success)
-    {
-        <p style="color:green">@errorMessage</p>
-    } else {
-        <p style="color:red">@errorMessage</p>
-    }
-}
-
-<div class="form-container">
-    <div class="form-group">
-        <label for="username">E-mail:</label>
-        <input id="username" @bind="username" />
-    </div>
-    <div class="form-group">
-        <label for="password">Hasło:</label>
-        <input id="password" type="password" @bind="password" />
-    </div>
-    <div class="form-group">
-        <button @onclick="HandleSignIn">Zaloguj się</button>
+<div class="row">
+    <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
+        <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm">
+            <DataAnnotationsValidator/>
+            <div class="mb-3 text-center flex-column">
+                <h3>LOGIN</h3>
+            </div>
+            <div class="mb-3">
+                <label>Email</label>
+                <InputText @bind-Value="Model.Email" class="form-control" placeholder="Email"/>
+                <ValidationMessage For="() => Model.Email"/>
+            </div>
+            <div class="mb-3">
+                <label>Password</label>
+                <InputText @bind-Value="Model.Password" class="form-control" placeholder="Password" type="password"/>
+                <ValidationMessage For="() => Model.Password" />
+            </div>
+            <div class="mb-3 text-center">
+                <span class="text-danger">@errorMessage</span>
+            </div>
+            <div class="mb-3 d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+        </EditForm>
     </div>
 </div>
-
-<style>
-.form-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    width: 100%; 
-    max-width: 400px;
-    margin: 0 auto; 
-    padding: 10px;
-    box-sizing: border-box; 
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column; 
-    gap: 5px;
-}
-
-input {
-    width: 100%; 
-    max-width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-button {
-    padding: 10px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    text-align: center;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-</style>
 
 @code {
     private string username;
     private string password;
     private string errorMessage;
     private bool success = false;
+
+    [SupplyParameterFromForm]
+    public LoginViewModel Model { get; set; } = new();
+
+    [CascadingParameter]
+    public HttpContext? HttpContext{ get; set; }
 
     private async Task HandleSignIn()
     {
@@ -99,6 +66,18 @@ button:hover {
                     {
                         success = true;
                         errorMessage = "Poprawnie zalogowano.";
+
+                        var claims = new List<Claim>
+                        {
+                            new Claim(ClaimTypes.Name, username),
+                            new Claim(ClaimTypes.Role, "user")
+                        };
+
+                        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        var principal = new ClaimsPrincipal(identity);
+
+                        await HttpContext.SignInAsync(principal);
+                        navigationManager.NavigateTo("/");
                     }
                     else
                     {
@@ -113,38 +92,61 @@ button:hover {
             }
         }
     }
-}
-<footer class="footer">
-    <button @onclick="Polish" class="lang">Polski</button>
-    <button @onclick="English" class="lang">English</button>
-</footer>
-@code {
-    private async Task English()
-    {
-        String newUri = nav.Uri;
-        String oldUri = nav.Uri;
-        if (newUri.Contains("?ui-culture=pl"))
-        {
-            newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
-        }
-        if (!newUri.Contains("?ui-culture=en-US"))
-        {
-            newUri += "?ui-culture=en-US";
-        }
-        nav.NavigateTo(newUri,true);
-    }
 
-    private async Task Polish()
+    private async Task Authenticate()
     {
-        String newUri = nav.Uri;
-        if (newUri.Contains("?ui-culture=en-US"))
+        var userAccount = appDbContext.UserAccounts.Where(x => x.Email == Model.Email).FirstOrDefault();
+        var hashedPassword = Security.hashData(Model.Password);
+        using (var client = new HttpClient())
         {
-            newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
+            var loginRequest = new LoginRequest() { Username = userAccount.Email, Password = hashedPassword };
+            var response = await client.PostAsJsonAsync("http://localhost:5236/api/SignIn/SignIn", loginRequest);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                try
+                {
+                    var errorResponse = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent);
+
+                errorMessage = errorResponse != null && errorResponse.ContainsKey("message")
+                    ? errorResponse["message"]
+                    : "Wystąpił błąd podczas logowania.";
+                    if (errorMessage.Contains("Zbyt")) {
+                        var emailDto = new EmailDto() { To = "skph@interia.pl", Subject = "Wielokrotna nieudana próba zalogowania", Body = $@"
+				        <p>Użytkownik {userAccount.Email} przekroczył limit nieudanych prób logowania.</p>" };
+
+                        try
+                        {
+                            response = await client.PostAsJsonAsync("http://localhost:5236/api/Email/SendEmail", emailDto);
+                            Console.WriteLine(response.StatusCode);
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+                    }
+                }
+                catch
+                {
+                    errorMessage = "Wystąpił błąd podczas logowania: " + responseContent;
+                }
+                return;
+            }
         }
-        if (!newUri.Contains("?ui-culture=pl"))
+        if(userAccount is null || userAccount.Password != hashedPassword)
         {
-            newUri += "?ui-culture=pl";
+            errorMessage = "Podano niepoprawne dane";
+            return;
         }
-        nav.NavigateTo(newUri,true);
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, Model.Email),
+            new Claim(ClaimTypes.Role, userAccount.Role)
+        };
+
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+
+        await HttpContext.SignInAsync(principal);
+        navigationManager.NavigateTo("/");
     }
 }

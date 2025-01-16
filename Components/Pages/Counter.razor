@@ -1,0 +1,23 @@
+﻿@page "/counter"
+@rendermode InteractiveServer
+@using IO.Modules.Security
+@inject SessionService sessionService
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int currentCount = 0;
+
+    private async Task IncrementCount()
+    {
+        string sessionUser = await sessionService.GetUserNameAsync();
+        currentCount++;
+        Console.WriteLine(sessionUser);
+    }
+}
