@@ -1,6 +1,9 @@
-﻿using IO.Modules.Volunteer;
+﻿using IO.Modules.Security;
+using IO.Modules.Volunteer;
 using MySql.Data.MySqlClient;
 using System.Data.SQLite;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace IO.Modules.ResourceManager
 {
@@ -15,22 +18,43 @@ namespace IO.Modules.ResourceManager
 
             try
             {
-                using var connection = new SQLiteConnection(_connectionString); //MySqlConnection(_connectionString);
+                using var connection = new SQLiteConnection(_connectionString);
                 connection.Open();
                 Console.WriteLine("Connection to " + connection.FileName + " established");
-                string orgQuery = @"
-            INSERT INTO Organisations (OrganisationID, OrganisationName, PhoneNumber, Address)
-            VALUES (@id, @name, @phone, @address)
-            ON DUPLICATE KEY UPDATE
-                OrganisationName = @name,
-                PhoneNumber = @phone,
-                Address = @address";
 
-                using var orgCommand = new SQLiteCommand(orgQuery, connection); //MySqlCommand(orgQuery, connection);
+                // Sprawdzenie czy organizacja już istnieje
+                string checkQuery = "SELECT COUNT(*) FROM Organisations WHERE OrganisationID = @id";
+                using var checkCommand = new SQLiteCommand(checkQuery, connection);
+                checkCommand.Parameters.AddWithValue("@id", organisation.OrganisationID);
+                int count = Convert.ToInt32(checkCommand.ExecuteScalar());
+
+
+                string orgQuery;
+                if (count > 0)
+                {
+                    // Aktualizacja istniejącej organizacji
+                    orgQuery = @"
+            UPDATE Organisations 
+            SET OrganisationName = @name, PhoneNumber = @phone, Address = @address, Everythink = @everythink
+
+            WHERE OrganisationID = @id";
+                }
+                else
+                {
+                    // Wstawianie nowej organizacji
+                    orgQuery = @"
+            INSERT INTO Organisations (OrganisationID, OrganisationName, PhoneNumber, Address, Everythink)
+            VALUES (@id, @name, @phone, @address, @everythink)";
+                }
+
+                using var orgCommand = new SQLiteCommand(orgQuery, connection);
+                var packedOrg = JsonSerializer.Serialize(organisation);
+
                 orgCommand.Parameters.AddWithValue("@id", organisation.OrganisationID);
                 orgCommand.Parameters.AddWithValue("@name", organisation.OrganisationName);
                 orgCommand.Parameters.AddWithValue("@phone", organisation.PhoneNumber);
                 orgCommand.Parameters.AddWithValue("@address", organisation.Address);
+                orgCommand.Parameters.AddWithValue("@everythink", packedOrg);
 
                 int rowsAffected = orgCommand.ExecuteNonQuery();
                 Console.WriteLine(rowsAffected > 0
@@ -52,25 +76,44 @@ namespace IO.Modules.ResourceManager
 
             try
             {
-                using var connection = new SQLiteConnection(_connectionString); //MySqlConnection(_connectionString);
+                using var connection = new SQLiteConnection(_connectionString);
                 connection.Open();
 
-                string volQuery = @"
-            INSERT INTO Volunteers (VolunteerID, FirstName, LastName, Email, Gender, PhoneNumber, Address, Experience, AdditionalInfo, Skills, Availability, OrganisationID)
-            VALUES (@id, @firstName, @lastName, @email, @gender, @phone, @address, @experience, @additionalInfo, @skills, @availability, @orgId)
-            ON DUPLICATE KEY UPDATE
-                FirstName = @firstName,
-                LastName = @lastName,
-                Email = @email,
-                Gender = @gender,
-                PhoneNumber = @phone,
-                Address = @address,
-                Experience = @experience,
-                AdditionalInfo = @additionalInfo,
-                Skills = @skills,
-                Availability = @availability";
+                // Sprawdzenie, czy wolontariusz już istnieje
+                string checkQuery = "SELECT COUNT(*) FROM Volunteers WHERE VolunteerID = @id";
+                using var checkCommand = new SQLiteCommand(checkQuery, connection);
+                checkCommand.Parameters.AddWithValue("@id", volunteer.VolunteerID);
+                int count = Convert.ToInt32(checkCommand.ExecuteScalar());
 
-                using var volCommand = new SQLiteCommand(volQuery, connection); //MySqlCommand(volQuery, connection);
+                string volQuery;
+                if (count > 0)
+                {
+                    // Aktualizacja istniejącego wolontariusza
+                    volQuery = @"
+                UPDATE Volunteers
+                SET FirstName = @firstName,
+                    LastName = @lastName,
+                    Email = @email,
+                    Gender = @gender,
+                    PhoneNumber = @phone,
+                    Address = @address,
+                    Experience = @experience,
+                    AdditionalInfo = @additionalInfo,
+                    Skills = @skills,
+                    Availability = @availability,
+                    OrganisationID = @orgId
+                WHERE VolunteerID = @id";
+                }
+                else
+                {
+                    // Wstawianie nowego wolontariusza
+                    volQuery = @"
+            INSERT INTO Volunteers (VolunteerID, FirstName, LastName, Email, Gender, PhoneNumber, Address, Experience, AdditionalInfo, Skills, Availability, OrganisationID)
+            VALUES (@id, @firstName, @lastName, @email, @gender, @phone, @address, @experience, @additionalInfo, @skills, @availability, @orgId)";
+                }
+
+
+                using var volCommand = new SQLiteCommand(volQuery, connection);
                 volCommand.Parameters.AddWithValue("@id", volunteer.VolunteerID);
                 volCommand.Parameters.AddWithValue("@firstName", volunteer.FirstName);
                 volCommand.Parameters.AddWithValue("@lastName", volunteer.LastName);
@@ -87,8 +130,8 @@ namespace IO.Modules.ResourceManager
 
                 int rowsAffected = volCommand.ExecuteNonQuery();
                 Console.WriteLine(rowsAffected > 0
-                    ? $"Volunteer {volunteer.FirstName} {volunteer.LastName} saved to database."
-                    : $"Failed to save volunteer {volunteer.FirstName} {volunteer.LastName} to database.");
+                    ? $"Volunteer {volunteer.FirstName} {volunteer.LastName} saved/updated in the database."
+                    : $"Failed to save/update volunteer {volunteer.FirstName} {volunteer.LastName} to database.");
                 return rowsAffected > 0;
             }
             catch (Exception e)
@@ -100,11 +143,108 @@ namespace IO.Modules.ResourceManager
 
         public bool AddTaskToDatabase(IO.Modules.Volunteer.Task task)
         {
+            Console.WriteLine("ADD TASK TO DATABASE");
             if (task == null) throw new ArgumentNullException(nameof(task));
-            return false;
+            try
+            {
+                using var connection = new SQLiteConnection(_connectionString);
+                connection.Open();
+
+                // Sprawdzenie, czy task już istnieje
+                string checkQuery = "SELECT COUNT(*) FROM Tasks WHERE TaskID = @taskID";
+                using var checkCommand = new SQLiteCommand(checkQuery, connection);
+                checkCommand.Parameters.AddWithValue("@taskID", task.TaskID);
+                int count = Convert.ToInt32(checkCommand.ExecuteScalar());
+
+                string query;
+                Console.WriteLine("ADD OR UPDATE");
+
+                if (count > 0)
+                {
+                    // Aktualizacja istniejącego taska
+                    query = @"
+        UPDATE Tasks 
+        SET AllInfo = @allInfo
+        WHERE TaskID = @taskID";
+                    Console.WriteLine("UPDATE");
+                }
+                else
+                {
+                    // Wstawianie nowego taska
+                    query = @"
+        INSERT INTO Tasks (TaskID, AllInfo)
+        VALUES (@taskID, @allInfo)";
+                }
+
+                var packedTask = JsonSerializer.Serialize(task);
+                using var command = new SQLiteCommand(query, connection);
+                command.Parameters.AddWithValue("@taskID", task.TaskID);
+                command.Parameters.AddWithValue("@allInfo", packedTask);
+                Console.WriteLine(packedTask);
+                int rowsAffected = command.ExecuteNonQuery();
+                Console.WriteLine(rowsAffected > 0
+                    ? $"Task {task.TaskID} saved/updated in the database."
+                    : $"Failed to save/update task {task.TaskID} to database.");
+                return rowsAffected > 0;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error saving task to the database: {e.Message}");
+                return false;
+            }
         }
 
+        public List<IO.Modules.Volunteer.Task> LoadTaskList()
+        {
+            var tasks = new List<IO.Modules.Volunteer.Task>();
 
+            //if (IsUserInDataBase(email))
+            //{
+            //    string query = "SELECT user FROM users WHERE email = @email";
+
+            //    using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+            //    {
+            //        command.Parameters.AddWithValue("@email", email);
+
+            //        var input = command.ExecuteScalar()?.ToString();
+            //        if (input != null)
+            //        {
+            //            return JsonSerializer.Deserialize<Individual>(input);
+            //        }
+
+            //        return null;
+            //    }
+            //}
+
+            //return null;
+
+            for (int i = 0; ;i++)
+            {
+                string query = "SELECT AllInfo FROM tasks WHERE TaskID = @taskID";
+                try
+                {
+                    using var connection = new SQLiteConnection(_connectionString);
+
+                    using var command = new SQLiteCommand(query, connection);
+                    connection.Open();
+
+                    command.Parameters.AddWithValue("@taskID", i);
+                    var input = command.ExecuteScalar()?.ToString();
+                    if (input != null)
+                    {
+                        IO.Modules.Volunteer.Task task = JsonSerializer.Deserialize< IO.Modules.Volunteer.Task> (input);
+                        tasks.Add(task);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error saving task to the database: {e.Message}");
+                }
+
+                return tasks;
+            }
+
+        }
         public List<IO.Modules.Volunteer.Volunteer> LoadVolunteerList(List<Organisation> organisationList)
         {
             var volunteers = new List<IO.Modules.Volunteer.Volunteer>();

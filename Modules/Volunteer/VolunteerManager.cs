@@ -134,6 +134,19 @@ namespace IO.Modules.Volunteer
                 throw new KeyNotFoundException($"Organisation with ID {organisationID} not found.");
 
             task.AssignOrganisation(organisation);
+            Console.WriteLine("TRYING TO ASSIGN ORGANISATION TO TASK");
+            var executor = new VolunteerExecuter();
+
+            if (executor.AddTaskToDatabase(task))
+            {
+                Console.WriteLine("Task added or updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to add or update task.");
+            }
+            executor.Dispose();
+
         }
 
 
@@ -149,6 +162,17 @@ namespace IO.Modules.Volunteer
                 throw new KeyNotFoundException($"Volunteer with ID {volunteerID} not found.");
 
             task.AssignVolunteer(volunteer);
+            var executor = new VolunteerExecuter();
+
+            if (executor.AddTaskToDatabase(task))
+            {
+                Console.WriteLine("Task added or updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to add or update task.");
+            }
+            executor.Dispose();
         }
 
         public void AddRateToTask(int taskID, Rate rate)
@@ -192,6 +216,7 @@ namespace IO.Modules.Volunteer
             var executor = new VolunteerExecuter();
             organisationList = executor.LoadOrganisationList();
             volunteerList = executor.LoadVolunteerList(organisationList);
+            taskList = executor.LoadTaskList();
             executor.Dispose();
         }
 

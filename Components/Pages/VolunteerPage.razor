@@ -480,11 +480,14 @@
             selectedTask.Volunteer = selectedVolunteer;
             selectedVolunteer.TaskList.Add(selectedTask);
             selectedTask.TaskStatus = IO.Modules.Volunteer.TaskStatus.Assigned;
+            volunteerManager.AssignVolunteerToTask(selectedTask.TaskID, selectedVolunteer.VolunteerID);
         }
         if(who == 1)
         {
             selectedTask.Organisation = selectedOrganisation;
             selectedOrganisation.TaskList.Add(selectedTask);
+            volunteerManager.AssignOrganisationToTask(selectedTask.TaskID, selectedOrganisation.OrganisationID);
+
         }
 
     }
@@ -510,6 +513,7 @@
         volunteerManager.Load();
         volunteerCount = volunteerManager.VolunteerCount;
         organisationCount = volunteerManager.OrganisationCount;
+        taskCount = volunteerManager.TaskCount;
         organisationList = volunteerManager.OrganisationList;
         volunteerList = volunteerManager.VolunteerList;
         taskList = volunteerManager.TaskList;
