@@ -36,9 +36,10 @@ namespace IO.Modules.ResourceManager
         /// </summary>
         /// <param name="item"></param>
         /// <returns>True if operation was successful. Otherwise, false</returns>
-        public bool AddItem(Resource item)
+        public bool AddItem(Resource item, string donorEmail)
         {
-            string query = "INSERT INTO resources(hashcode_id, resource) VALUES(@hashcode, @packedResource)";
+            string query =
+                "INSERT INTO resources(hashcode_id, resource, email) VALUES(@hashcode, @packedResource, @donorEmail)";
             try
             {
                 using (var command =
@@ -46,6 +47,7 @@ namespace IO.Modules.ResourceManager
                 {
                     command.Parameters.AddWithValue("@hashcode", item.GetHashCode());
                     command.Parameters.AddWithValue("@packedResource", JsonSerializer.Serialize(item));
+                    command.Parameters.AddWithValue("@donorEmail", donorEmail);
                     Console.WriteLine("Added resource");
                     int rowsAffected = command.ExecuteNonQuery();
                     return rowsAffected > 0;
@@ -234,6 +236,7 @@ namespace IO.Modules.ResourceManager
             return count;
         }
 
+
         public void Dispose()
         {
             _resourceConnection.Close();
@@ -318,6 +321,31 @@ namespace IO.Modules.ResourceManager
                 Console.WriteLine(e);
                 throw;
             }
+        }
+
+        public List<Resource> GetGetItemsByDonor(string donorEmail)
+        {
+            string query = "SELECT * FROM resources";
+            List<Resource> items = new List<Resource>();
+
+            using (var command =
+                   new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
+            {
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        if (reader.GetString(2).Equals(donorEmail))
+                        {
+                            var item = JsonSerializer.Deserialize<Resource>(reader.GetString(1));
+
+                            items.Add(item);
+                        }
+                    }
+                }
+            }
+
+            return items;
         }
     }
 }

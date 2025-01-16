@@ -22,7 +22,7 @@
         /// <param name="category">Category of the resource</param>
         /// <param name="amount">The amount of the resources</param>
         /// <returns>True if the operation was successful. Otherwise, false</returns>
-        public bool AddItems(string name, string category, int amount)
+        public bool AddItems(string name, string category, int amount, string donorEmail)
         {
             Category output;
             // Robimy switch-case niewrażliwym przez registr podanego stringa
@@ -36,7 +36,7 @@
                 default: throw new AggregateException("Unknown category");
             }
 
-            return _handler.AddItem(CreateResource(name, output, amount));
+            return _handler.AddItem(CreateResource(name, output, amount), donorEmail);
         }
 
         /// <summary>
@@ -124,6 +124,16 @@
         public bool ChangeItemAmount(string name, int newAmount)
         {
             return _handler.SetNewAmount(name, newAmount);
+        }
+
+        /// <summary>
+        /// Get a list of donations made by currently registered user
+        /// </summary>
+        /// <param name="donorEmail">The email of registered user</param>
+        /// <returns>List </returns>
+        public List<Resource> GetItemsByDonor(string donorEmail)
+        {
+            return _handler.GetGetItemsByDonor(donorEmail);
         }
 
         /// <summary>
