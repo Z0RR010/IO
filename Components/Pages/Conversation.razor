@@ -1,0 +1,71 @@
+@page "/communication/conversation"
+@rendermode InteractiveServer
+
+@using IO.Modules.Communication
+@inject Communicator CommunicatorService
+
+<div class="container my-4">
+    <h2 class="text-center">Odczytywanie wiadomości</h2>
+
+    <!-- User Email Input -->
+    <div class="mb-4">
+        <label for="userEmailToRead" class="form-label">E-mail użytkownika:</label>
+        <input type="email" id="userEmailToRead" class="form-control" @bind="userEmailToRead" placeholder="Wprowadź e-mail użytkownika..." />
+        <button class="btn btn-primary mt-2" @onclick="GetUserChats">Pobierz konwersacje</button>
+    </div>
+
+    <!-- Chat List -->
+    <h3 class="mt-5">Konwersacje użytkownika:</h3>
+    @if (userChats.Any())
+    {
+        <div class="list-group">
+            @foreach (var chat in userChats)
+            {
+                <a href="/communication/conversation/@chat.ChatId" class="list-group-item list-group-item-action">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>
+                            <strong>Użytkownicy:</strong>
+                            <ul class="mb-0">
+                                @foreach (var participant in chat.Emails)
+                                {
+                                    <li>@participant</li>
+                                }
+                            </ul>
+                        </span>
+                        <button class="btn btn-sm btn-secondary" @onclick="() => SelectChat(chat.ChatId)">
+                            <i class="bi bi-chat-dots"></i> Przejdź do konwersacji
+                        </button>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="text-muted">Brak konwersacji dla podanego użytkownika.</p>
+    }
+
+   
+</div>
+
+@code {
+    private List<Message> selectedChatMessages = new();
+    private string userEmailToRead;
+    private List<Chat> userChats = new();
+
+    // Fetch messages for the selected chat
+    private void SelectChat(int chatId)
+    {
+        var chat = CommunicatorService.testServer.ActiveChats.FirstOrDefault(c => c.ChatId == chatId);
+        selectedChatMessages = chat?.Messages ?? new List<Message>();
+    }
+
+    // Fetch user's chats
+    private void GetUserChats()
+    {
+        if (!string.IsNullOrWhiteSpace(userEmailToRead))
+        {
+            userChats = CommunicatorService.GetUserChats(userEmailToRead);
+        }
+    }
+}
