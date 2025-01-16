@@ -108,9 +108,22 @@
                 {
                     var errorResponse = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent);
 
-                    errorMessage = errorResponse != null && errorResponse.ContainsKey("message")
-                        ? errorResponse["message"]
-                        : "Wystąpił błąd podczas logowania.";
+                errorMessage = errorResponse != null && errorResponse.ContainsKey("message")
+                    ? errorResponse["message"]
+                    : "Wystąpił błąd podczas logowania.";
+                    if (errorMessage.Contains("Zbyt")) {
+                        var emailDto = new EmailDto() { To = "skph@interia.pl", Subject = "Wielokrotna nieudana próba zalogowania", Body = $@"
+				        <p>Użytkownik {userAccount.Email} przekroczył limit nieudanych prób logowania.</p>" };
+
+                        try
+                        {
+                            response = await client.PostAsJsonAsync("http://localhost:5236/api/Email/SendEmail", emailDto);
+                            Console.WriteLine(response.StatusCode);
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+                    }
                 }
                 catch
                 {

@@ -450,7 +450,6 @@ input[type="submit"]:hover {
 				var response = await client.PostAsJsonAsync("http://localhost:5236/api/SignUp/SignUp", registerRequest);
 				Console.WriteLine("tutaj");
 				Console.WriteLine(response.StatusCode);
-				Console.WriteLine("gdzies indziej");
 				if (response.IsSuccessStatusCode)
 				{
 					registered = true;
@@ -467,6 +466,7 @@ input[type="submit"]:hover {
 					//userExecuter.SendToDataBase(individual, key, hashedPassword, token);
 					Individual user = new Individual(surname, pesel, email, name, phoneNumber, address, true);
 					var packedUser = JsonSerializer.Serialize(user);
+					Console.WriteLine("gdzies indziej");
 					userExecuter.SendToDataBase(individual, key, hashedPassword, token, role, website, krs, institution);
 					/*userExecuter.CustomQuery(@"INSERT INTO users(email, user, encryptionKey, password, emailVerified, token, role, website, krs, institution) 
 											 VALUES("
@@ -492,7 +492,7 @@ input[type="submit"]:hover {
 
 					try
 					{
-						//response = await client.PostAsJsonAsync("http://localhost:5236/api/Email/SendEmail", emailDto);
+						response = await client.PostAsJsonAsync("http://localhost:5236/api/Email/SendEmail", emailDto);
 						Console.WriteLine(response.StatusCode);
 						if (response.IsSuccessStatusCode)
 						{

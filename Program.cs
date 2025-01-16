@@ -25,6 +25,8 @@ namespace IO
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {

@@ -45,7 +45,7 @@ public class SignInController : ControllerBase
 
         if (userExecuter.IsPasswordCorrect(request.Username, request.Password))
         {
-            loginAttempts.TryRemove(request.Username, out _); // Reset attempts on successful login
+            loginAttempts.TryRemove(request.Username, out _);
             return Ok(new { Message = "Zalogowano pomyślnie!" });
         }
 
@@ -56,7 +56,7 @@ public class SignInController : ControllerBase
     private void RegisterFailedAttempt(string username)
     {
         loginAttempts.AddOrUpdate(username,
-            _ => (1, null), // Dodanie nowego wpisu
+            _ => (1, null),
             (_, attemptInfo) =>
             {
                 int newAttempts = attemptInfo.attempts + 1;
