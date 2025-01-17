@@ -1,13 +1,9 @@
 @page "/requests/add"
+@rendermode InteractiveServer
 @inject IO.Modules.Security.SessionService sessionService
 @using IO.Modules.Security
 
 <h3>Add Request</h3>
-
-<Microsoft.AspNetCore.Components.Forms.EditForm Model="newRequest" OnValidSubmit="HandleValidSubmit" FormName="newRequestForm">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-
     <div class="form-group">
         <label for="title">Title</label>
         <InputText id="title" class="form-control" @bind-Value="newRequest.Title" />
@@ -36,8 +32,7 @@
         <label for="zipCode">Zip Code</label>
         <InputText id="zipCode" class="form-control" @bind-Value="newRequest.Address.ZipCode" />
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-</Microsoft.AspNetCore.Components.Forms.EditForm>
+    <button type="submit" class="btn btn-primary" @onclick="HandleValidSubmit">Submit</button>
 
 @if (!string.IsNullOrEmpty(message))
 {
@@ -45,8 +40,7 @@
 }
 
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
     private IO.Modules.ResourceManager.UserExecuter userExecuter = new IO.Modules.ResourceManager.UserExecuter();
 
     private string email;
@@ -54,8 +48,7 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        var authenticationState = await authenticationStateTask;
-        email = authenticationState.User.Identity.Name;
+        email = await sessionService.GetUserNameAsync();
         token = userExecuter.GetToken(email);
     }
 
