@@ -22,7 +22,6 @@ else
         <p>Address: @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
         <p>Resources Required: @string.Join(", ", request.ResourcesRequired.Select(r => $"{r.Name} (x{r.Amount})"))</p>
         <p>Is Verified: @request.IsVerified</p>
-        <p>Handling Organization: @request.HandlingOrganization</p>
     </div>
 }
 

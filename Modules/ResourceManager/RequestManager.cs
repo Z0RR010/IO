@@ -14,37 +14,29 @@ namespace IO.Modules.ResourceManager
         public RequestManager()
         {
             _connection = new SqliteConnection(
-                    "Data Source=./databases/requestDatabase.db;Cache=Shared");
+                "Data Source=./databases/requestDatabase.db;Cache=Shared");
             _connection.Open();
         }
 
         public bool AddRequestToDatabase(Request request)
         {
-            List<Resource> resources = (List<Resource>)request.ResourcesRequired;
-
-            StringBuilder sb = new StringBuilder();
-
-            foreach (Resource res in resources)
-            {
-                sb.Append(JsonSerializer.Serialize(res).ToString());
-            }
+            string resourcesJson = JsonSerializer.Serialize(request.ResourcesRequired);
 
             string query =
-                "INSERT INTO Request(Title, Description, CreatedAt, DateUpdated, Status, User, Address, ResourcesRequired, IsVerified, HandlingOrganization) VALUES(@title, @description, @createdAt, @dateUpdated, @status, @user, @address, @resRequired, @isVerified, @handlingOrganization)";
+                "INSERT INTO Request(Title, Description, CreatedAt, DateUpdated, Status, User, Address, ResourcesRequired, IsVerified) VALUES(@title, @description, @createdAt, @dateUpdated, @status, @user, @address, @resRequired, @isVerified)";
             try
             {
                 using (var command = new SqliteCommand(query, _connection))
                 {
-                    command.Parameters.AddWithValue("@title", request.Title);
-                    command.Parameters.AddWithValue("@description", request.Description);
+                    command.Parameters.AddWithValue("@title", request.Title ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@description", request.Description ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@createdAt", request.CreatedAt);
                     command.Parameters.AddWithValue("@dateUpdated", request.DateUpdated ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@status", request.Status.ToString());
-                    command.Parameters.AddWithValue("@user", request.User);
-                    command.Parameters.AddWithValue("@address", JsonSerializer.Serialize(request.Address));
-                    command.Parameters.AddWithValue("@resRequired", sb.ToString());
+                    command.Parameters.AddWithValue("@user", request.User ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@address", JsonSerializer.Serialize(request.Address) ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@resRequired", resourcesJson ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@isVerified", request.IsVerified ? 1 : 0);
-                    command.Parameters.AddWithValue("@handlingOrganization", request.HandlingOrganization);
 
                     int rowsAffected = command.ExecuteNonQuery();
                     return rowsAffected > 0;
@@ -150,7 +142,6 @@ namespace IO.Modules.ResourceManager
                             User = reader.GetString(reader.GetOrdinal("User")),
                             Address = JsonSerializer.Deserialize<Address>(reader.GetString(reader.GetOrdinal("Address"))),
                             IsVerified = reader.GetInt32(reader.GetOrdinal("IsVerified")) == 1,
-                            HandlingOrganization = reader.GetString(reader.GetOrdinal("HandlingOrganization")),
                         };
 
                         string resourcesString = reader.GetString(reader.GetOrdinal("ResourcesRequired"));
@@ -195,7 +186,6 @@ namespace IO.Modules.ResourceManager
                                 User = reader.GetString(reader.GetOrdinal("User")),
                                 Address = JsonSerializer.Deserialize<Address>(reader.GetString(reader.GetOrdinal("Address"))),
                                 IsVerified = reader.GetBoolean(reader.GetOrdinal("IsVerified")),
-                                HandlingOrganization = reader.GetString(reader.GetOrdinal("HandlingOrganization")),
                             };
 
                             string resourcesString = reader.GetString(reader.GetOrdinal("ResourcesRequired"));
@@ -260,6 +250,28 @@ namespace IO.Modules.ResourceManager
             return resources;
         }
 
+
+        public bool UpdateRequestStatus(int id, RequestStatus newStatus)
+        {
+            string query =
+                "UPDATE Request SET Status = @status WHERE Id = @id";
+            try
+            {
+                using (var command = new SqliteCommand(query, _connection))
+                {
+                    command.Parameters.AddWithValue("@status", newStatus.ToString());
+                    command.Parameters.AddWithValue("@id", id);
+
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+        }
 
 
         public void Dispose()
