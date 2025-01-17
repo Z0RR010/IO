@@ -20,9 +20,7 @@ namespace IO.Modules.ResourceManager
 
         public bool AddRequestToDatabase(Request request)
         {
-            //var packedUser = JsonSerializer.Serialize();
-
-            List<Resource> resources = (List<Resource>) request.ResourcesRequired;
+            List<Resource> resources = (List<Resource>)request.ResourcesRequired;
 
             StringBuilder sb = new StringBuilder();
 
@@ -32,34 +30,21 @@ namespace IO.Modules.ResourceManager
             }
 
             string query =
-                "INSERT INTO Request(Id, Title, Description, CreatedAt, DateUpdated, Status, User, Address, ResourcesRequired, IsVerified, HandlingOrganization) VALUES(@id, @title, @description, @createdAt, @dateUpdated, @status, @user, @address, @resRequired, @isVerified, @handlingOrganization)";
+                "INSERT INTO Request(Title, Description, CreatedAt, DateUpdated, Status, User, Address, ResourcesRequired, IsVerified, HandlingOrganization) VALUES(@title, @description, @createdAt, @dateUpdated, @status, @user, @address, @resRequired, @isVerified, @handlingOrganization)";
             try
             {
-                using (var command = new SQLiteCommand(query, _connection)) //MySqlCommand(query, _userConnection))
+                using (var command = new SQLiteCommand(query, _connection))
                 {
-                    //command.Parameters.AddWithValue("@id", request.Id);
-                    //command.Parameters.AddWithValue("@title", request.Title);
-                    //command.Parameters.AddWithValue("@description", request.Description);
-                    //command.Parameters.AddWithValue("@createdAt", request.CreatedAt);
-                    //command.Parameters.AddWithValue("@dateUpdated", request.DateUpdated);
-                    //command.Parameters.AddWithValue("@status", request.Status.ToString());
-                    //command.Parameters.AddWithValue("@user", request.User);
-                    //command.Parameters.AddWithValue("@address", request.Address.ToString());
-                    //command.Parameters.AddWithValue("@resRequired", sb.ToString());
-                    //command.Parameters.AddWithValue("@isVerified", request.IsVerified);
-                    //command.Parameters.AddWithValue("@handlingOrganization", request.HandlingOrganization);
-
-                    command.Parameters.AddWithValue("@id", "test");
-                    command.Parameters.AddWithValue("@title", "test");
-                    command.Parameters.AddWithValue("@description", "test");
+                    command.Parameters.AddWithValue("@title", request.Title);
+                    command.Parameters.AddWithValue("@description", request.Description);
                     command.Parameters.AddWithValue("@createdAt", request.CreatedAt);
-                    command.Parameters.AddWithValue("@status", "test");
-                    command.Parameters.AddWithValue("@user", "test");
-                    command.Parameters.AddWithValue("@address", "test");
-                    command.Parameters.AddWithValue("@resRequired", "test");
-                    command.Parameters.AddWithValue("@isVerified", false);
-                    command.Parameters.AddWithValue("@handlingOrganization", "test");
-
+                    command.Parameters.AddWithValue("@dateUpdated", request.DateUpdated ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@status", request.Status.ToString());
+                    command.Parameters.AddWithValue("@user", request.User);
+                    command.Parameters.AddWithValue("@address", JsonSerializer.Serialize(request.Address));
+                    command.Parameters.AddWithValue("@resRequired", sb.ToString());
+                    command.Parameters.AddWithValue("@isVerified", request.IsVerified ? 1 : 0);
+                    command.Parameters.AddWithValue("@handlingOrganization", request.HandlingOrganization);
 
                     int rowsAffected = command.ExecuteNonQuery();
                     return rowsAffected > 0;
@@ -160,21 +145,19 @@ namespace IO.Modules.ResourceManager
                             CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
                             DateUpdated = reader.IsDBNull(reader.GetOrdinal("DateUpdated"))
                                 ? (DateTime?)null
-                                : reader.GetDateTime(reader.GetOrdinal  ("DateUpdated")),
+                                : reader.GetDateTime(reader.GetOrdinal("DateUpdated")),
                             Status = Enum.Parse<RequestStatus>(reader.GetString(reader.GetOrdinal("Status"))),
                             User = reader.GetString(reader.GetOrdinal("User")),
                             Address = JsonSerializer.Deserialize<Address>(reader.GetString(reader.GetOrdinal("Address"))),
-                            IsVerified = reader.GetBoolean(reader.GetOrdinal("IsVerified")),
+                            IsVerified = reader.GetInt32(reader.GetOrdinal("IsVerified")) == 1,
                             HandlingOrganization = reader.GetString(reader.GetOrdinal("HandlingOrganization")),
                         };
 
-                        
                         string resourcesString = reader.GetString(reader.GetOrdinal("ResourcesRequired"));
                         var resources = new List<Resource>();
 
                         if (!string.IsNullOrWhiteSpace(resourcesString))
                         {
-                            
                             var resourceStrings = resourcesString.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
                             foreach (var resourceJson in resourceStrings)
