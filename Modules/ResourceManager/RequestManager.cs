@@ -37,18 +37,30 @@ namespace IO.Modules.ResourceManager
             {
                 using (var command = new SQLiteCommand(query, _connection)) //MySqlCommand(query, _userConnection))
                 {
-                    command.Parameters.AddWithValue("@id", request.Id);
-                    command.Parameters.AddWithValue("@title", request.Title);
-                    command.Parameters.AddWithValue("@description", request.Description);
+                    //command.Parameters.AddWithValue("@id", request.Id);
+                    //command.Parameters.AddWithValue("@title", request.Title);
+                    //command.Parameters.AddWithValue("@description", request.Description);
+                    //command.Parameters.AddWithValue("@createdAt", request.CreatedAt);
+                    //command.Parameters.AddWithValue("@dateUpdated", request.DateUpdated);
+                    //command.Parameters.AddWithValue("@status", request.Status.ToString());
+                    //command.Parameters.AddWithValue("@user", request.User);
+                    //command.Parameters.AddWithValue("@address", request.Address.ToString());
+                    //command.Parameters.AddWithValue("@resRequired", sb.ToString());
+                    //command.Parameters.AddWithValue("@isVerified", request.IsVerified);
+                    //command.Parameters.AddWithValue("@handlingOrganization", request.HandlingOrganization);
+
+                    command.Parameters.AddWithValue("@id", "test");
+                    command.Parameters.AddWithValue("@title", "test");
+                    command.Parameters.AddWithValue("@description", "test");
                     command.Parameters.AddWithValue("@createdAt", request.CreatedAt);
-                    command.Parameters.AddWithValue("@dateUpdated", request.DateUpdated);
-                    command.Parameters.AddWithValue("@status", request.Status.ToString());
-                    command.Parameters.AddWithValue("@user", request.User.Email);
-                    command.Parameters.AddWithValue("@address", request.Address.ToString());
-                    command.Parameters.AddWithValue("@resRequired", sb.ToString());
-                    command.Parameters.AddWithValue("@isVerified", request.IsVerified);
-                    command.Parameters.AddWithValue("@handlingOrganization", request.HandlingOrganization);
-                   
+                    command.Parameters.AddWithValue("@status", "test");
+                    command.Parameters.AddWithValue("@user", "test");
+                    command.Parameters.AddWithValue("@address", "test");
+                    command.Parameters.AddWithValue("@resRequired", "test");
+                    command.Parameters.AddWithValue("@isVerified", false);
+                    command.Parameters.AddWithValue("@handlingOrganization", "test");
+
+
                     int rowsAffected = command.ExecuteNonQuery();
                     return rowsAffected > 0;
                 }
@@ -148,9 +160,9 @@ namespace IO.Modules.ResourceManager
                             CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
                             DateUpdated = reader.IsDBNull(reader.GetOrdinal("DateUpdated"))
                                 ? (DateTime?)null
-                                : reader.GetDateTime(reader.GetOrdinal("DateUpdated")),
+                                : reader.GetDateTime(reader.GetOrdinal  ("DateUpdated")),
                             Status = Enum.Parse<RequestStatus>(reader.GetString(reader.GetOrdinal("Status"))),
-                            User = um.GetUserFromDataBase(reader.GetString(reader.GetOrdinal("User"))),
+                            User = reader.GetString(reader.GetOrdinal("User")),
                             Address = JsonSerializer.Deserialize<Address>(reader.GetString(reader.GetOrdinal("Address"))),
                             IsVerified = reader.GetBoolean(reader.GetOrdinal("IsVerified")),
                             HandlingOrganization = reader.GetString(reader.GetOrdinal("HandlingOrganization")),

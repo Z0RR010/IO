@@ -14,7 +14,7 @@ namespace RequestModule
             //    Description = "This is a fixed request added manually.",
             //    Status = RequestStatus.New,
             //    CreatedAt = DateTime.Now,
-            //    User = new User("email1@example.com", "John Doe", "123456789", "123 Main St", true),
+            //    User = "test",
             //    Address = new Address("City1", "Street1", "123", "Apt 1", "12345"),
             //    ResourcesRequired = new List<Resource>
             //    {

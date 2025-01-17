@@ -1,9 +1,10 @@
 @page "/requests/add"
 @inject IO.Modules.Security.SessionService sessionService
+@using IO.Modules.Security
 
 <h3>Add Request</h3>
 
-<Microsoft.AspNetCore.Components.Forms.EditForm Model="newRequest" OnValidSubmit="HandleValidSubmit">
+<Microsoft.AspNetCore.Components.Forms.EditForm Model="newRequest" OnValidSubmit="HandleValidSubmit" FormName="newRequestForm">
     <DataAnnotationsValidator />
     <ValidationSummary />
     <RequestVerificationToken value="@token" />
@@ -63,6 +64,7 @@
     {
             Status = RequestModule.RequestStatus.New,
             Address = new RequestModule.Address(), // Inicjalizacja Address
+            User = "test"
     };
 
     private string? message;
@@ -77,8 +79,8 @@
         try
         {
             newRequest.IsVerified = false;
-            newRequest.User = userExecuter.GetUserFromDataBase(email);
             newRequest.CreatedAt = DateTime.Now;
+            newRequest.DateUpdated = DateTime.Now;
             // Dodanie do bazy danych
             bool isAdded = requestManager.AddRequestToDatabase(newRequest);
 

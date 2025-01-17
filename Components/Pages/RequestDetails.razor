@@ -19,7 +19,7 @@ else
         <p>Status: @request.Status</p>
         <p>Created At: @request.CreatedAt</p>
         <p>Updated At: @request.DateUpdated</p>
-        <p>User: @request.User.Name (@request.User.Email)</p>
+        <p>User: @request.User </p>
         <p>Address: @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
         <p>Resources Required: @string.Join(", ", request.ResourcesRequired.Select(r => $"{r.Name} (x{r.Amount})"))</p>
         <p>Is Verified: @request.IsVerified</p>
