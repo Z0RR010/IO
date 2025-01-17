@@ -14,7 +14,7 @@
 
 <div class="row">
     <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
-        <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm">
+        <Microsoft.AspNetCore.Components.Forms.EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm">
             <DataAnnotationsValidator/>
             <div class="mb-3 text-center flex-column">
                 <h3>@Loc["Login"]</h3>
@@ -35,7 +35,7 @@
             <div class="mb-3 d-grid gap-2">
                 <button type="submit" class="btn btn-primary">Login</button>
             </div>
-        </EditForm>
+        </Microsoft.AspNetCore.Components.Forms.EditForm>
     </div>
 </div>
 

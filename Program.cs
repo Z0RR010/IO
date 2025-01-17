@@ -51,7 +51,7 @@ namespace IO
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
             */
-            
+
             builder.Services.AddSingleton<Communicator>();
             builder.Services.AddSingleton(provider =>
             {
@@ -73,7 +73,7 @@ namespace IO
                     BaseAddress = new Uri("http://ioserver.ddns.net")
                 });
             }
-            
+
 
             builder.Services.AddCors(options =>
             {
@@ -104,7 +104,7 @@ namespace IO
             builder.Services.AddScoped<SessionService>();
 
             var app = builder.Build();
-            
+
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
