@@ -49,3 +49,27 @@ h1:focus {
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+.custom-message {
+    max-width: 455px;
+    margin-top: 20px;
+    padding: 1px;
+    border-radius: 10px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    font-size: 20px;
+    color: black;
+    position: relative;
+}
+
+.close-btn {
+    cursor: pointer;
+    font-size: 50px;
+    color: black;
+    background: none;
+    border: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(10%, -30%);
+}

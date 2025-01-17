@@ -11,6 +11,7 @@
 @using IO.Modules.ResourceManager;
 @using System.Text.RegularExpressions;
 @using System.Security.Cryptography;
+@inject NavigationManager nav
 
 <h3>Rejestracja</h3>
 
@@ -447,7 +448,8 @@ input[type="submit"]:hover {
 			{
 				var cookieContainer = new CookieContainer();
 				Console.WriteLine("a");
-				var response = await client.PostAsJsonAsync("http://localhost:5236/api/SignUp/SignUp", registerRequest);
+				
+				var response = await client.PostAsJsonAsync(nav.BaseUri + "api/SignUp/SignUp", registerRequest);
 				Console.WriteLine("tutaj");
 				Console.WriteLine(response.StatusCode);
 				if (response.IsSuccessStatusCode)
@@ -482,7 +484,7 @@ input[type="submit"]:hover {
 											 + institution + ","
 											 + ")");*/
 
-					string link = "http://localhost:5236/verify/" + token;
+					string link = nav.BaseUri + "verify/" + token;
 
 					var emailDto = new EmailDto() { To = email, Subject = "Potwierdzenie rejestracji", Body = $@"
 						<p>Witaj,</p>
@@ -492,7 +494,7 @@ input[type="submit"]:hover {
 
 					try
 					{
-						response = await client.PostAsJsonAsync("http://localhost:5236/api/Email/SendEmail", emailDto);
+						response = await client.PostAsJsonAsync(nav.BaseUri + "api/Email/SendEmail", emailDto);
 						Console.WriteLine(response.StatusCode);
 						if (response.IsSuccessStatusCode)
 						{

@@ -11,7 +11,6 @@
 @using Microsoft.Extensions.Localization
 @using System.Text.RegularExpressions
 @inject AppDbContext appDbContext
-@inject NavigationManager navigationManager;
 
 <div class="row">
     <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
@@ -84,7 +83,7 @@
                 try
                 {
                     Console.WriteLine($"Zawartość loginRequest: Username={loginRequest.Username}, Password={loginRequest.Password}");
-                    var response = await client.PostAsJsonAsync("http://localhost:5236/api/SignIn/SignIn", loginRequest);
+                    var response = await client.PostAsJsonAsync(nav.BaseUri + "api/SignIn/SignIn", loginRequest);
                     Console.WriteLine(response.StatusCode);
                     if (response.IsSuccessStatusCode)
                     {
@@ -101,7 +100,7 @@
                         var principal = new ClaimsPrincipal(identity);
 
                         await HttpContext.SignInAsync(principal);
-                        navigationManager.NavigateTo("/");
+                        nav.NavigateTo("/");
                     }
                     else
                     {
@@ -124,7 +123,7 @@
         using (var client = new HttpClient())
         {
             var loginRequest = new LoginRequest() { Username = userAccount.Email, Password = hashedPassword };
-            var response = await client.PostAsJsonAsync("http://localhost:5236/api/SignIn/SignIn", loginRequest);
+            var response = await client.PostAsJsonAsync(nav.BaseUri + "api/SignIn/SignIn", loginRequest);
             var responseContent = await response.Content.ReadAsStringAsync();
             if (!response.IsSuccessStatusCode)
             {
@@ -141,7 +140,7 @@
 
                         try
                         {
-                            response = await client.PostAsJsonAsync("http://localhost:5236/api/Email/SendEmail", emailDto);
+                            response = await client.PostAsJsonAsync(nav.BaseUri + "api/Email/SendEmail", emailDto);
                             Console.WriteLine(response.StatusCode);
                         }
                         catch (Exception ex)
@@ -171,7 +170,7 @@
         var principal = new ClaimsPrincipal(identity);
 
         await HttpContext.SignInAsync(principal);
-        navigationManager.NavigateTo("/");
+        nav.NavigateTo("/");
     }
 
     private async Task English()
