@@ -4,7 +4,7 @@ using Microsoft.Data.Sqlite;
 
 namespace IO.Modules.ResourceManager
 {
-    public class VolunteerExecuter : IDisposable, IAsyncDisposable
+    public class VolunteerExecuter : IVolunteerManager, IDisposable, IAsyncDisposable
     {
         private readonly string _connectionString =
             "Data Source=./databases/volunteerDatabase.db;Cache=Shared";

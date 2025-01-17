@@ -22,7 +22,7 @@
         /// <param name="category">Category of the resource</param>
         /// <param name="amount">The amount of the resources</param>
         /// <returns>True if the operation was successful. Otherwise, false</returns>
-        public bool AddItems(string name, string category, int amount)
+        public bool AddItems(string name, string category, int amount, string donorEmail)
         {
             Category output;
             // Robimy switch-case niewrażliwym przez registr podanego stringa
@@ -36,7 +36,7 @@
                 default: throw new AggregateException("Unknown category");
             }
 
-            return _handler.AddItem(CreateResource(name, output, amount));
+            return _handler.AddItem(CreateResource(name, output, amount), donorEmail);
         }
 
         /// <summary>
@@ -69,7 +69,7 @@
                 default: throw new AggregateException("Unknown category");
             }
 
-            return _handler.GetItemsByCategory(output);
+            return _handler.GetItemsAmountByCategory(output);
         }
 
         /// <summary>
@@ -82,9 +82,25 @@
 
             foreach (Resource item in _handler.GetAllItems())
             {
-                output.Add(item.Name + " - " + item.Category + " - " + item.Amount);
+                output.Add(item.Name + " - " + item.Category + " - " + item.Amount + " - " + item.Status);
             }
-
+            return output;
+        }
+        /// <summary>
+        /// Get list of resources of wanted category
+        /// </summary>
+        /// <param name="category">Wanted category</param>
+        /// <returns>List of resources of wanted category</returns>
+        public List<string> GetItemsByCategory(string category)
+        {
+            List<string> output = new List<string>();
+            foreach (Resource item in _handler.GetAllItems())
+            {
+                if (item.Category.ToString().ToLower().Equals(category.ToLower()))
+                {
+                    output.Add(item.Name + " - " + item.Category + " - " + item.Amount + " - " + item.Status);
+                }
+            }
             return output;
         }
 
@@ -108,6 +124,16 @@
         public bool ChangeItemAmount(string name, int newAmount)
         {
             return _handler.SetNewAmount(name, newAmount);
+        }
+
+        /// <summary>
+        /// Get a list of donations made by currently registered user
+        /// </summary>
+        /// <param name="donorEmail">The email of registered user</param>
+        /// <returns>List </returns>
+        public List<Resource> GetItemsByDonor(string donorEmail)
+        {
+            return _handler.GetGetItemsByDonor(donorEmail);
         }
 
         /// <summary>
