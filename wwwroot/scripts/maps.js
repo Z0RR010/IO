@@ -86,7 +86,21 @@ export async function geocode(address) {
     });
 }
 
-export async function drawRoute(mapId, routeCoordinates) {
+const translations = {
+    en: {
+        distance: 'Total Distance',
+        time: 'Estimated Time',
+        unitDistance: 'km',
+        unitTime: 'minutes',
+    },
+    pl: {
+        distance: 'Całkowita odległość',
+        time: 'Szacowany czas',
+        unitDistance: 'km',
+        unitTime: 'minuty',
+    },
+};
+export async function drawRoute(mapId, routeCoordinates, language) {
     if (routeCoordinates.length < 2) {
         throw new Error("At least two coordinates are required to draw a route.");
     }
@@ -140,7 +154,9 @@ export async function drawRoute(mapId, routeCoordinates) {
         infoDiv.style.borderRadius = '5px';
         infoDiv.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
 
-        infoDiv.innerHTML = `<strong>Total Distance:</strong> ${totalDistance} km<br><strong>Estimated Time:</strong> ${totalDuration} minutes`;
+        const text = translations[language]
+
+        infoDiv.innerHTML = `<strong>${text.distance}:</strong> ${totalDistance} ${text.unitDistance}<br><strong>${text.time}:</strong> ${totalDuration} ${text.unitTime}`;
 
         maps[mapId].controls[google.maps.ControlPosition.TOP_CENTER].push(infoDiv);
 

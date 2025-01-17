@@ -55,7 +55,7 @@ namespace IO.Modules.MapLibrary
             var points = routeCoords.Select(c => new { lat = c.Latitude, lng = c.Longitude }).ToArray();
             try
             {
-                await _module.InvokeVoidAsync("drawRoute", map.id, points);
+                await _module.InvokeVoidAsync("drawRoute", map.id, points, CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
             }
             catch (Exception error)
             {
