@@ -80,7 +80,7 @@
     {
         if (firstRender)
         {
-            await GoogleMaps.InitializeApi("pl");
+            await GoogleMaps.InitializeApi();
 
             map01.SetLocation(_address);
             await map01.DrawMap();

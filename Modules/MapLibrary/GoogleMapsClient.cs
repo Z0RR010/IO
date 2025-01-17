@@ -1,4 +1,5 @@
-﻿using Microsoft.JSInterop;
+﻿using System.Globalization;
+using Microsoft.JSInterop;
 
 namespace IO.Modules.MapLibrary
 {
@@ -19,12 +20,13 @@ namespace IO.Modules.MapLibrary
             _module = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "./scripts/maps.js");
             options.Add("key", _apiKey);
             options.Add("v", "weekly");
+            options.Add("language", CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
             await _module.InvokeVoidAsync("loadGoogleMapsAPI", options);
         }
         
-        public async Task InitializeApi(string language)
+        public async Task InitializeApi()
         {
-            await InitializeApi(new Dictionary<string, object> { { "language", language } });
+            await InitializeApi(new Dictionary<string, object>());
         }
         
         public async Task<Coordinates> GetCoordinates(string address)
