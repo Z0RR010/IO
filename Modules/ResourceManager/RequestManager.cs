@@ -237,6 +237,34 @@ namespace IO.Modules.ResourceManager
             return null;
         }
 
+        public List<Resource> GetResourcesForRequest(int requestId)
+        {
+            var resources = new List<Resource>();
+            try
+            {
+                var query = "SELECT ResourcesRequired FROM Request WHERE Id = @id";
+                using (var command = new SQLiteCommand(query, _connection))
+                {
+                    command.Parameters.AddWithValue("@id", requestId);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            string resourcesString = reader.GetString(reader.GetOrdinal("ResourcesRequired"));
+                            resources = ParseResources(resourcesString);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetResourcesForRequest: {ex.Message}");
+                throw;
+            }
+
+            return resources;
+        }
         private List<Resource> ParseResources(string resourcesString)
         {
             var resources = new List<Resource>();
@@ -261,6 +289,8 @@ namespace IO.Modules.ResourceManager
             }
             return resources;
         }
+
+
 
         public void Dispose()
         {
