@@ -328,7 +328,7 @@ namespace IO.Modules.ResourceManager
             List<Resource> items = new List<Resource>();
 
             using (var command =
-                   new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
+                   new SqliteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
             {
 
                 command.Parameters.AddWithValue("@email", donorEmail);

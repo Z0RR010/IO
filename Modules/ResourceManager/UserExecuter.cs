@@ -24,7 +24,7 @@ namespace IO.Modules.ResourceManager
             {
                 _userConnection =
                     //new MySqlConnection("Server=localhost;Port=3306;Database=userDatabase;User Id=root;Password=root;");
-                    new SQLiteConnection(
+                    new SqliteConnection(
                         "Data Source=./././databases/userDatabase.db;Version=3;FailIfMissing=True;");
                 _userConnection.Open();
                 //Diagnostics stuff

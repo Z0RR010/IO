@@ -2,6 +2,8 @@
 @using IO.Modules.DonorLibrary
 @using PdfSharp
 @using PdfSharp.Drawing
+@using RequestModule
+@using IO.Modules.ResourceManager
 @rendermode InteractiveServer
 
 <PageTitle>Donor</PageTitle>
@@ -103,10 +105,18 @@
     private SortOrder sortDirection = SortOrder.Ascending;
     private List<Donation> SortedDonations => SortDonations(donationManager.GetAllDonations());
     private string selectedItem = string.Empty;
-    private List<string> items = new List<string> { "Item1", "Item2", "Item3" };
+    private List<Resource> items = new List<Resource> {};
+
+    private void Przypisz()
+    {
+        RequestManager requestManager = new RequestManager();
+        List<Request> requests = requestManager.GetAllRequests();
+        items = requestManager.GetResourcesForRequest(2);
+    }
 
     protected override void OnInitialized()
     {
+        Przypisz();
         SortById();
     }
 
