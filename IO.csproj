@@ -6,22 +6,39 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <StartupObject>IO.Program</StartupObject>
   </PropertyGroup>
-
+  <PropertyGroup>
+    <RuntimeIdentifiers>linux-x64;linux-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
   <ItemGroup>
     <_ContentIncludedByDefault Remove="Modules\ResourceManager\ResourceManager\bin\Debug\net9.0\ResourceManager.deps.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MailKit" Version="4.8.0" />
-    <PackageReference Include="MySql.Data" Version="9.1.0" />
-    <PackageReference Include="PDFsharp" Version="6.1.1" />
-    <PackageReference Include="System.Data.SQLite" Version="1.0.119" />
-    <PackageReference Include="TXTextControl.Web" Version="32.4.0" />
+    <PackageReference Include="MailKit" Version="4.8.0" PrivateAssets="none"/>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Abstractions" Version="2.2.0" PrivateAssets="none"/>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.2.0" PrivateAssets="none"/>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.11" PrivateAssets="none"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" PrivateAssets="none"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" PrivateAssets="none"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0" PrivateAssets="none">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.1" PrivateAssets="none"/>
+    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="9.0.1" PrivateAssets="none"/>
+    <PackageReference Include="MySql.Data" Version="9.1.0" PrivateAssets="none"/>
+    <PackageReference Include="PDFsharp" Version="6.1.1" PrivateAssets="none"/>
+    <!-- <PackageReference Include="System.Data.SQLite" Version="1.0.119" PrivateAssets="none" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.119" PrivateAssets="none" /> -->
+    <PackageReference Include="Microsoft.Data.SQLite" PrivateAssets="none"/>
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Modules\MapLibrary\MapLibrary.csproj" />
   </ItemGroup>
+  <ItemGroup>
+  <Content Include="databases/**" CopyToOutputDirectory="PreserveNewest" />
+</ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Update="Components\Pages\Conversation.resx">

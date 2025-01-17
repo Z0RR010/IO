@@ -22,27 +22,30 @@ main {
 }
 
 .top-row {
-    background-color: #272727;
-    border-bottom: 2px solid #141414;
+    background-color: #04163d;
+    border-bottom: 2px solid #000000;
     justify-content: flex-end;
     height: 3.5rem;
     display: flex;
     align-items: center;
 }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
+    .top-row ::deep a:link {
+        color: white;
         text-decoration: none;
+        margin-right: 10px;
     }
 
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
+    .top-row ::deep a:visited {
+        color: white;
+        text-decoration: none;
+        margin-right: 10px;
+    }
+
+    .top-row ::deep a:hover {
+        color: #258cfb;
         text-decoration: underline;
-    }
-
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
+        margin-right: 10px;
     }
 
 @media (max-width: 640.98px) {
@@ -103,3 +106,4 @@ main {
         right: 0.75rem;
         top: 0.5rem;
     }
+

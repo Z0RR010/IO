@@ -68,15 +68,13 @@
             }
         </tbody>
     </table>
-
     <button class="btn btn-primary mt-3" @onclick="GenerateReport" disabled="@(!IsAnyDonationSelected)">Generate Report</button>
 }
-
 @if (!string.IsNullOrEmpty(savedFileMessage))
 {
     <div class="custom-message">
-        <span>@savedFileMessage</span>
-        <button class="close-btn" @onclick="HideMessage">&times;</button>
+    <span>@savedFileMessage</span>
+    <button class="close-btn" @onclick="HideMessage">&times;</button>
     </div>
 }
 
@@ -97,6 +95,23 @@
         SortById();
     }
 
+    private bool AreAllDonationsSelected()
+    {
+        return donationManager.GetAllDonations().All(d => d.Selected);
+    }
+
+    private bool selectAll
+    {
+        get { return AreAllDonationsSelected(); }
+        set
+        {
+            foreach (var donation in donationManager.GetAllDonations())
+            {
+                donation.Selected = value;
+            }
+        }
+    }
+
     private void Donate()
     {
         whichForm = 1;
@@ -114,23 +129,6 @@
         itemName = string.Empty;
         quantity = 0;
         whichForm = 0;
-    }
-
-    private bool AreAllDonationsSelected()
-    {
-        return donationManager.GetAllDonations().All(d => d.Selected);
-    }
-
-    private bool selectAll
-    {
-        get { return AreAllDonationsSelected(); }
-        set
-        {
-            foreach (var donation in donationManager.GetAllDonations())
-            {
-                donation.Selected = value;
-            }
-        }
     }
 
     private void ToggleSelectAll()

@@ -7,7 +7,7 @@
         public Executor()
         {
             _handler = new ResourceDataBaseHandler(
-                "Data Source=./Modules/ResourceManager/databases/resourceBase.db;Version=3;FailIfMissing=True;");
+                "Data Source=./databases/resourceBase.db;Cache=Shared");
         }
 
         private Resource CreateResource(string name, Category category, int amount)
@@ -66,11 +66,10 @@
                 case "clothing": output = Category.Clothing; break;
                 case "money": output = Category.Money; break;
                 case "transport": output = Category.Transport; break;
-                case "other": output = Category.Other; break;
                 default: throw new AggregateException("Unknown category");
             }
 
-            return _handler.GetItemsAmountByCategory(output);
+            return _handler.GetItemsByCategory(output);
         }
 
         /// <summary>
@@ -83,26 +82,7 @@
 
             foreach (Resource item in _handler.GetAllItems())
             {
-                output.Add(item.Name + " - " + item.Category + " - " + item.Amount + " - " + item.Status);
-            }
-
-            return output;
-        }
-
-        /// <summary>
-        /// Get list of resources of wanted category
-        /// </summary>
-        /// <param name="category">Wanted category</param>
-        /// <returns>List of resources of wanted category</returns>
-        public List<string> GetItemsByCategory(string category)
-        {
-            List<string> output = new List<string>();
-            foreach (Resource item in _handler.GetAllItems())
-            {
-                if (item.Category.ToString().ToLower().Equals(category.ToLower()))
-                {
-                    output.Add(item.Name + " - " + item.Category + " - " + item.Amount + " - " + item.Status);
-                }
+                output.Add(item.Name + " - " + item.Category + " - " + item.Amount);
             }
 
             return output;
