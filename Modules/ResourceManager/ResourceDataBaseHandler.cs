@@ -325,22 +325,23 @@ namespace IO.Modules.ResourceManager
 
         public List<Resource> GetGetItemsByDonor(string donorEmail)
         {
-            string query = "SELECT * FROM resources";
+            string query = "SELECT * FROM resources where email = @email";
             List<Resource> items = new List<Resource>();
 
             using (var command =
                    new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
             {
+
+                command.Parameters.AddWithValue("@email", donorEmail);
+
+
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        if (reader.GetString(2).Equals(donorEmail))
-                        {
                             var item = JsonSerializer.Deserialize<Resource>(reader.GetString(1));
 
                             items.Add(item);
-                        }
                     }
                 }
             }
