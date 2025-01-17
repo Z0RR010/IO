@@ -26,13 +26,32 @@
                 var i = index;
                 <div id="textfield-container" style="display: flex; align-items: center; gap: 5px;">
                     <input class="form-control" type="text" @bind="fieldValues[i]" placeholder="Enter address or location" style="flex: 1;" />
-                    <button class="btn btn-danger" @onclick="() => RemoveField(i)">-</button>
+                    
+                    <div class="d-flex flex-column justify-content-between" style="height: 100%; width: 40px;">
+                        @if (i != 0)
+                        {
+                            <button class="btn btn-primary btn-sm p-0 w-100" style="height: 45%;" @onclick="() => MoveFieldUp(i)">
+                                <span class="bi bi-caret-up-fill" style="font-size: 75%;"></span>
+                            </button>
+                        }
+                        @if (i != fieldCount - 1)
+                        {
+                            <button class="btn btn-primary btn-sm p-0 w-100" style="height: 45%;" @onclick="() => MoveFieldDown(i)">
+                                <span class="bi bi-caret-down-fill" style="font-size: 75%;"></span>
+                            </button>
+                        }
+                    </div>
+
+                    @if (fieldValues.Count > 1)
+                    {
+                        <button class="btn btn-danger" @onclick="() => RemoveField(i)">-</button>
+                    }
                 </div>
             }
             <div style="display: flex; gap: 10px;">
                 <button class="btn btn-success" @onclick="AddField">+</button>
-                <button class="btn" style="background-color: #28a745; color: white;" @onclick="() => ConfirmFields()">
-                    Add midpoints
+                <button class="btn btn-primary" @onclick="() => ConfirmFields()">
+                    Update midpoints
                 </button>
             </div>
         </div>
@@ -82,6 +101,23 @@
             fieldCount--;
         }
     }
+    
+    private void MoveFieldUp(int i)
+    {
+        if (i > 0)
+        {
+            (fieldValues[i], fieldValues[i - 1]) = (fieldValues[i - 1], fieldValues[i]);
+        }
+    } 
+    
+    private void MoveFieldDown(int i)
+    {
+        if (i < fieldCount - 1)
+        {
+            (fieldValues[i], fieldValues[i + 1]) = (fieldValues[i + 1], fieldValues[i]);
+        }
+    }
+        
     private async void ConfirmFields()
     {
         Route rt = new Route(new CoordinatesWrapper(await Geolocation.GetUserLocation()), map01.GetLocation());
