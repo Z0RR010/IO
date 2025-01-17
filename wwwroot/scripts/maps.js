@@ -157,7 +157,8 @@ export async function drawRoute(mapId, routeCoordinates, language) {
         const text = translations[language]
 
         infoDiv.innerHTML = `<strong>${text.distance}:</strong> ${totalDistance} ${text.unitDistance}<br><strong>${text.time}:</strong> ${totalDuration} ${text.unitTime}`;
-
+        infoDiv.style.color = 'black';
+        
         maps[mapId].controls[google.maps.ControlPosition.TOP_CENTER].push(infoDiv);
 
         return result;
