@@ -51,7 +51,7 @@ namespace IO
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
             */
-            
+
             builder.Services.AddSingleton<Communicator>();
 
             builder.Services.AddHttpClient();
@@ -69,7 +69,7 @@ namespace IO
                     BaseAddress = new Uri("http://ioserver.ddns.net")
                 });
             }
-            
+
 
             builder.Services.AddCors(options =>
             {
@@ -100,11 +100,7 @@ namespace IO
             builder.Services.AddScoped<SessionService>();
 
             var app = builder.Build();
-            
-            
-=========
 
->>>>>>>>> Temporary merge branch 2
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
@@ -116,11 +112,11 @@ namespace IO
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
-            app.UseRequestLocalization(localizationOptions);
+            app.UseAntiforgery();
             app.UseAuthentication();
             app.UseAuthorization();
 
->>>>>>>>> Temporary merge branch 2
+            app.UseRequestLocalization(localizationOptions);
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
             app.MapControllers();
