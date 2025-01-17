@@ -14,7 +14,7 @@ namespace IO.Modules.ResourceManager
         public RequestManager()
         {
             _connection = new SQLiteConnection(
-                "Data Source=./Modules/ResourceManager/databases/requestDatabase.db;Version=3;FailIfMissing=True;");
+                "Data Source=./././databases/requestDatabase.db;Version=3;FailIfMissing=True;");
             _connection.Open();
         }
 
