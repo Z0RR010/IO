@@ -61,20 +61,4 @@ public class DonorManager
     {
         return donors.FirstOrDefault(d => d.donorID == donorID);
     }
-
-    public void GenerateDonorReport(int donorID)
-    {
-        Donor donor = FindDonorByID(donorID);
-        List<Donation> selectedDonations = donor.donations;
-        if (donor == null)
-        {
-            System.Console.WriteLine($"Nie znaleziono darczyńcy o ID: {donorID}");
-            return;
-        }
-
-        Raport report = new Raport();
-        string reportContent = report.GenerateReport(donorID, selectedDonations);
-
-        System.Console.WriteLine(reportContent);
-    }
 }

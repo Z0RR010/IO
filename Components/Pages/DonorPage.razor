@@ -12,16 +12,20 @@
 
 @if (whichForm == 1)
 {
-    <h1 style="color: white;">Donate</h1>
-
+    <h1 style="color: white; margin-top: 20px;">Donate</h1>
     <div>
-        <p style="color: white;">Item Name:</p>
-        <input type="text" @bind="itemName" placeholder="Enter item name" class="form-control mt-2" />
+        <p style="color: white; margin-bottom: 5px;">Item Name:</p>
+        <select @bind="selectedItem" class="custom-dropdown">
+            @foreach (var item in items)
+            {
+                <option value="@item">@item</option>
+            }
+        </select>
 
-        <p style="color: white;">Quantity:</p>
-        <input type="text" @bind="quantity" placeholder="Enter item quantity" class="form-control mt-2" />
+        <p style="color: white; margin-top: 10px; margin-bottom: 5px;">Quantity:</p>
+        <input type="text" @bind="quantity" placeholder="Enter item quantity" class="custom-dropdown" style="margin-bottom: 30px;" />
 
-        <button class="btn btn-success mt-3" @onclick="SubmitDonation">Submit</button>
+        <button class="btn btn-success" @onclick="SubmitDonation">Submit</button>
     </div>
 }
 
@@ -70,25 +74,36 @@
     </table>
     <button class="btn btn-primary mt-3" @onclick="GenerateReport" disabled="@(!IsAnyDonationSelected)">Generate Report</button>
 }
+
 @if (!string.IsNullOrEmpty(savedFileMessage))
 {
     <div class="custom-message">
-    <span>@savedFileMessage</span>
-    <button class="close-btn" @onclick="HideMessage">&times;</button>
+        <span>@savedFileMessage</span>
+        <button class="close-btn" @onclick="HideMessage">&times;</button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="custom-message error-message">
+        <span>@errorMessage</span>
+        <button class="close-btn" @onclick="HideErrorMessage">&times;</button>
     </div>
 }
 
 @code {
     private int whichForm = 0;
-    private string itemName;
-    private int quantity;
-    private string savedFileMessage;
+    private int? quantity;
+    private string savedFileMessage = string.Empty;
+    private string errorMessage = string.Empty;
     private List<Donation> selectedDonations = new List<Donation>();
     private DonationManager donationManager = new DonationManager();
     private bool IsAnyDonationSelected => donationManager.GetAllDonations().Any(d => d.Selected);
     private string sortBy = "";
     private SortOrder sortDirection = SortOrder.Ascending;
     private List<Donation> SortedDonations => SortDonations(donationManager.GetAllDonations());
+    private string selectedItem = string.Empty;
+    private List<string> items = new List<string> { "Item1", "Item2", "Item3" };
 
     protected override void OnInitialized()
     {
@@ -124,11 +139,23 @@
 
     private void SubmitDonation()
     {
+        if (string.IsNullOrEmpty(selectedItem))
+        {
+            errorMessage = "Please select an item.";
+            return;
+        }
+
+        if (!quantity.HasValue || quantity.Value <= 0)
+        {
+            errorMessage = "Please enter a valid quantity.";
+            return;
+        }
         string date = DateTime.Now.ToString("dd-MM-yyyy");
-        donationManager.AddDonation(itemName, quantity, date);
-        itemName = string.Empty;
-        quantity = 0;
+        donationManager.AddDonation(selectedItem, quantity, date);
+        selectedItem = string.Empty;
+        quantity = null;
         whichForm = 0;
+        errorMessage = string.Empty;
     }
 
     private void ToggleSelectAll()
@@ -204,6 +231,11 @@
     private void HideMessage()
     {
         savedFileMessage = null;
+    }
+
+    private void HideErrorMessage()
+    {
+        errorMessage = null;
     }
 
     private List<Donation> SortDonations(List<Donation> donations)
