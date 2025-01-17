@@ -18,20 +18,20 @@
     </div>
     @if (map01.GetRoute() != null)
     {
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-            @for (var index = 0; index < fieldValues.Count; index++)
+        <div style="display: flex; flex-direction: column-reverse; gap: 10px;">
+            @for (var index = fieldValues.Count-1; index >= 0; index--)
             {
                 Console.WriteLine(index);
                 var i = index;
                 <div id="textfield-container" style="display: flex; align-items: center; gap: 5px;">
                     <input class="form-control" type="text" @bind="fieldValues[i]" placeholder="Enter address or location" style="flex: 1;" />
+                    <button class="btn btn-danger" @onclick="() => RemoveField(i)">-</button>
                 </div>
             }
             <div style="display: flex; gap: 10px;">
                 <button class="btn btn-success" @onclick="AddField">+</button>
-                <button class="btn btn-danger" @onclick="RemoveField">-</button>
                 <button class="btn" style="background-color: #28a745; color: white;" @onclick="() => ConfirmFields()">
-                    <i class="fas fa-check"></i>
+                    Add midpoints
                 </button>
             </div>
         </div>
@@ -69,17 +69,15 @@
 
     private void AddField()
     {
-        Console.Write("+");
         fieldValues.Add("");
         fieldCount++;
     }
 
-    private void RemoveField()
+    private void RemoveField(int i)
     {
         if (fieldCount > 1)
         {
-            Console.Write("-");
-            fieldValues.RemoveAt(fieldValues.Count - 1);
+            fieldValues.RemoveAt(i);
             fieldCount--;
         }
     }
