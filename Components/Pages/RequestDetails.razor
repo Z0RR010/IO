@@ -1,5 +1,4 @@
 @page "/requests/details/{Id:int}"
-@inject RequestModule.IRequestService RequestService
 
 <h3>Request Details</h3>
 
@@ -31,6 +30,7 @@ else
     [Parameter]
     public int Id { get; set; }
 
+    private IO.Modules.ResourceManager.RequestManager requestManager = new IO.Modules.ResourceManager.RequestManager();
     private RequestModule.Request request;
     private bool isLoading = true;
 
@@ -38,11 +38,11 @@ else
     {
         try
         {
-            request = await RequestService.GetRequestByIdAsync(Id);
+            request = await requestManager.GetRequestById(Id);
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) if necessary
+            Console.WriteLine($"Error loading request details: {ex.Message}");
         }
         finally
         {

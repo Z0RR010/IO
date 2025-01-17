@@ -208,6 +208,77 @@ namespace IO.Modules.ResourceManager
             return requests;
         }
 
+        public async Task<Request> GetRequestById(int id)
+        {
+            try
+            {
+                var query = "SELECT * FROM Request WHERE Id = @id";
+                using (var command = new SQLiteCommand(query, _connection))
+                {
+                    command.Parameters.AddWithValue("@id", id);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            var request = new Request
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
+                                DateUpdated = reader.IsDBNull(reader.GetOrdinal("DateUpdated"))
+                                    ? (DateTime?)null
+                                    : reader.GetDateTime(reader.GetOrdinal("DateUpdated")),
+                                Status = Enum.Parse<RequestStatus>(reader.GetString(reader.GetOrdinal("Status"))),
+                                User = reader.GetString(reader.GetOrdinal("User")),
+                                Address = JsonSerializer.Deserialize<Address>(reader.GetString(reader.GetOrdinal("Address"))),
+                                IsVerified = reader.GetBoolean(reader.GetOrdinal("IsVerified")),
+                                HandlingOrganization = reader.GetString(reader.GetOrdinal("HandlingOrganization")),
+                            };
+
+                            string resourcesString = reader.GetString(reader.GetOrdinal("ResourcesRequired"));
+                            request.ResourcesRequired = ParseResources(resourcesString);
+
+                            return request;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetRequestByIdAsync: {ex.Message}");
+                throw;
+            }
+
+            return null;
+        }
+
+        private List<Resource> ParseResources(string resourcesString)
+        {
+            var resources = new List<Resource>();
+            if (!string.IsNullOrWhiteSpace(resourcesString))
+            {
+                var resourceStrings = resourcesString.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var resourceJson in resourceStrings)
+                {
+                    try
+                    {
+                        var resource = JsonSerializer.Deserialize<Resource>(resourceJson);
+                        if (resource != null)
+                        {
+                            resources.Add(resource);
+                        }
+                    }
+                    catch (JsonException ex)
+                    {
+                        Console.WriteLine($"Error deserializing resource: {ex.Message}");
+                    }
+                }
+            }
+            return resources;
+        }
+
         public void Dispose()
         {
             _connection.Close();
