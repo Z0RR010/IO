@@ -3,6 +3,8 @@
 @using IO.Modules.Security
 @using IO.Modules.Volunteer
 @using IO.Modules.ResourceManager;
+@using RequestModule;
+
 @inject SessionService sessionService
 
 <PageTitle>Volunteer</PageTitle>
@@ -202,6 +204,17 @@
         }
 
     }
+    @if (selectedOption == 4)
+    {
+        <h1>Edit Your Profile</h1>
+        <form method="post" @onsubmit="editOrganisation">
+            <p>Organisation Name: <input type="text" @bind-value="selectedOrganisation.OrganisationName" class="form-control" /></p>
+            <p>Email: <input type="text" value="@selectedOrganisation.Email" readonly class="form-control" /></p>
+            <p>Phone Number: <input type="text" @bind-value="selectedOrganisation.PhoneNumber" class="form-control" /></p>
+            <p>Address: <input type="text" @bind-value="selectedOrganisation.Address" class="form-control" /></p>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    }
 
 }
 
@@ -244,6 +257,8 @@
     protected override async System.Threading.Tasks.Task OnInitializedAsync()
     {
         volunteerManager.Load();
+        RequestService requestService = new RequestService();
+        requestService.GetRequestsAsync();
         Console.WriteLine("Volunteer Page Initialized");
         string sessionUser = await sessionService.GetUserNameAsync();
         CheckUser(sessionUser);
@@ -358,7 +373,10 @@
         endDate.Remove(date);
     }
 
-
+    private async Task editOrganisation()
+    {
+       volunteerManager.EditOrganisation(selectedOrganisation);
+    }
     private void CreateVolunteer(int who)
     {
         IO.Modules.Volunteer.Volunteer vol = new IO.Modules.Volunteer.Volunteer(

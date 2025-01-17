@@ -145,6 +145,25 @@ namespace IO.Modules.Volunteer
             executor.Dispose();
         }
 
+        public void EditOrganisation(Organisation organisation)
+        {
+            Organisation org = FindOrganisationByID(organisation.OrganisationID);
+            org.OrganisationName = organisation.OrganisationName;
+            org.Email = organisation.Email;
+            org.PhoneNumber = organisation.PhoneNumber;
+            org.Address = organisation.Address;
+
+            var executor = new VolunteerExecuter();
+            if (executor.AddOrganisationToDatabase(org))
+            {
+                Console.WriteLine("VolunteerTask added or updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to add or update volunteerTask.");
+            }
+            executor.Dispose();
+        }
 
         public void AddRateToTask(int taskID, Rate rate)
         {
