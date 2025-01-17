@@ -237,19 +237,19 @@ input[type="submit"]:hover {
 @code {
 	private string userType = "Darczyńca";
 	private string donorType = "Osoba indywidualna";
-	private string companyName;
-	private string NIP;
-	private string email;
-	private string password;
-	private string name;
-	private string surname;
-	private string phoneNumber;
-	private string address;
-	private string pesel;
+	private string companyName = "";
+	private string NIP = "";
+	private string email = "";
+	private string password = "";
+	private string name = "";
+	private string surname = "";
+	private string phoneNumber = "";
+	private string address = "";
+	private string pesel = "";
 	private DateTime birthDate = DateTime.Now;
-	private string website;
-	private string krs;
-	private string institution;
+	private string website = "";
+	private string krs = "";
+	private string institution = "";
 	private string errorMessage;
 	private string hashedPassword;
 	private bool registered = false;
@@ -297,8 +297,14 @@ input[type="submit"]:hover {
 			return;
 		}
 
-		if (string.IsNullOrWhiteSpace(surname) ||
+		if ((string.IsNullOrWhiteSpace(surname) ||
 			!Regex.IsMatch(surname, @"^[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż\s]+$"))
+			&& (
+				(userType == "Darczyńca" && donorType == "Osoba indywidualna") ||
+				userType == "Przedstawiciel władz" ||
+				userType == "Poszkodowany" ||
+				userType == "Wolontariusz"
+			))
 		{
 			registered = false;
 			errorMessage = "Nazwisko może zawierać tylko litery i spacje.";
@@ -320,8 +326,10 @@ input[type="submit"]:hover {
 			return;
 		}
 
-		if (string.IsNullOrWhiteSpace(pesel) ||
-			!Regex.IsMatch(pesel, @"^\d{11}$"))
+		if ((string.IsNullOrWhiteSpace(pesel) ||
+			!Regex.IsMatch(pesel, @"^\d{11}$")) &&
+			(!(userType == "Darczyńca" && donorType == "Firma") &&
+			 userType != "Organizacja pomocowa"))
 		{
 			registered = false;
 			errorMessage = "Podaj poprawny PESEL (11 cyfr).";

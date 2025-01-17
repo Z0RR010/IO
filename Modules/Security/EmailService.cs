@@ -23,10 +23,10 @@ namespace IO.Modules.Security
 			email.Body = new TextPart(TextFormat.Html) { Text = request.Body };
 
 			using var smtp = new SmtpClient();
-			//smtp.Connect("poczta.interia.pl", 587, SecureSocketOptions.Auto);
-			//smtp.Authenticate("skph@interia.pl", "ioponiedzialek1015123412341234");
-			//smtp.Send(email);
-			//smtp.Disconnect(true);
+			smtp.Connect("poczta.interia.pl", 587, SecureSocketOptions.Auto);
+			smtp.Authenticate("skph@interia.pl", "ioponiedzialek1015123412341234");
+			smtp.Send(email);
+			smtp.Disconnect(true);
 		}
 	}
 }

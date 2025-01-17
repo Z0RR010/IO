@@ -53,7 +53,11 @@ namespace IO
             */
             
             builder.Services.AddSingleton<Communicator>();
-
+            builder.Services.AddSingleton(provider =>
+            {
+                var communicator = provider.GetRequiredService<Communicator>();
+                return communicator.manager; // Use the same instance from Communicator
+            });
             builder.Services.AddHttpClient();
             if (builder.Environment.IsDevelopment())
             {
