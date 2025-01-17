@@ -1,4 +1,6 @@
 ﻿@page "/signIn"
+@inject IStringLocalizer<SignIn> Loc
+@inject NavigationManager nav
 
 @using System.Text.Json  
 @using System.Text
@@ -6,16 +8,16 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
+@using Microsoft.Extensions.Localization
+@using System.Text.RegularExpressions
 @inject AppDbContext appDbContext
-@inject NavigationManager navigationManager;
-
 
 <div class="row">
     <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
         <Microsoft.AspNetCore.Components.Forms.EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm">
             <DataAnnotationsValidator/>
             <div class="mb-3 text-center flex-column">
-                <h3>LOGIN</h3>
+                <h3>@Loc["Login"]</h3>
             </div>
             <div class="mb-3">
                 <label>Email</label>
@@ -37,6 +39,11 @@
     </div>
 </div>
 
+<footer class="footer">
+    <button class="lang" onclick="location.href='@GetCultureUrl("pl")'">Polski</button>
+    <button class="lang" onclick="location.href='@GetCultureUrl("en-US")'">English</button>
+</footer>
+
 @code {
     private string username;
     private string password;
@@ -49,6 +56,22 @@
     [CascadingParameter]
     public HttpContext? HttpContext{ get; set; }
 
+    private string GetCultureUrl(string culture)
+    {
+        var currentUri = nav.Uri;
+
+        if (currentUri.Contains("?ui-culture="))
+        {
+            currentUri = currentUri.Replace(Regex.Match(currentUri, @"\?ui-culture=[^&]+").Value, $"?ui-culture={culture}");
+        }
+        else
+        {
+            currentUri += $"?ui-culture={culture}";
+        }
+
+        return currentUri;
+    }
+
     private async Task HandleSignIn()
     {
         if (username != null || password != null)
@@ -60,7 +83,7 @@
                 try
                 {
                     Console.WriteLine($"Zawartość loginRequest: Username={loginRequest.Username}, Password={loginRequest.Password}");
-                    var response = await client.PostAsJsonAsync("http://localhost:5236/api/SignIn/SignIn", loginRequest);
+                    var response = await client.PostAsJsonAsync(nav.BaseUri + "api/SignIn/SignIn", loginRequest);
                     Console.WriteLine(response.StatusCode);
                     if (response.IsSuccessStatusCode)
                     {
@@ -77,7 +100,7 @@
                         var principal = new ClaimsPrincipal(identity);
 
                         await HttpContext.SignInAsync(principal);
-                        navigationManager.NavigateTo("/");
+                        nav.NavigateTo("/");
                     }
                     else
                     {
@@ -100,7 +123,7 @@
         using (var client = new HttpClient())
         {
             var loginRequest = new LoginRequest() { Username = userAccount.Email, Password = hashedPassword };
-            var response = await client.PostAsJsonAsync("http://localhost:5236/api/SignIn/SignIn", loginRequest);
+            var response = await client.PostAsJsonAsync(nav.BaseUri + "api/SignIn/SignIn", loginRequest);
             var responseContent = await response.Content.ReadAsStringAsync();
             if (!response.IsSuccessStatusCode)
             {
@@ -108,7 +131,7 @@
                 {
                     var errorResponse = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent);
 
-                errorMessage = errorResponse != null && errorResponse.ContainsKey("message")
+                    errorMessage = errorResponse != null && errorResponse.ContainsKey("message")
                     ? errorResponse["message"]
                     : "Wystąpił błąd podczas logowania.";
                     if (errorMessage.Contains("Zbyt")) {
@@ -117,7 +140,7 @@
 
                         try
                         {
-                            response = await client.PostAsJsonAsync("http://localhost:5236/api/Email/SendEmail", emailDto);
+                            response = await client.PostAsJsonAsync(nav.BaseUri + "api/Email/SendEmail", emailDto);
                             Console.WriteLine(response.StatusCode);
                         }
                         catch (Exception ex)
@@ -147,6 +170,35 @@
         var principal = new ClaimsPrincipal(identity);
 
         await HttpContext.SignInAsync(principal);
-        navigationManager.NavigateTo("/");
+        nav.NavigateTo("/");
+    }
+
+    private async Task English()
+    {
+        String newUri = nav.Uri;
+        String oldUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=pl"))
+        {
+            newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
+        }
+        if (!newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri += "?ui-culture=en-US";
+        }
+        nav.NavigateTo(newUri,true);
+    }
+
+    private async Task Polish()
+    {
+        String newUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
+        }
+        if (!newUri.Contains("?ui-culture=pl"))
+        {
+            newUri += "?ui-culture=pl";
+        }
+        nav.NavigateTo(newUri,true);
     }
 }

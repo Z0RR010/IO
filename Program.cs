@@ -37,7 +37,7 @@ namespace IO
             builder.Services.AddAuthorization();
             builder.Services.AddCascadingAuthenticationState();
             builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite("Data Source=./Modules/ResourceManager/databases/userDatabase.db"));
+            options.UseSqlite("Data Source=./databases/userDatabase.db"));
             builder.Services.AddControllers();
 
             /*
@@ -51,14 +51,25 @@ namespace IO
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
             */
-
+            
             builder.Services.AddSingleton<Communicator>();
 
             builder.Services.AddHttpClient();
-            builder.Services.AddScoped(sp => new HttpClient
+            if (builder.Environment.IsDevelopment())
             {
-                BaseAddress = new Uri("http://localhost:5236")
-            });
+                builder.Services.AddScoped(sp => new HttpClient
+                {
+                    BaseAddress = new Uri("http://localhost:5236")
+                });
+            }
+            else
+            {
+                builder.Services.AddScoped(sp => new HttpClient
+                {
+                    BaseAddress = new Uri("http://ioserver.ddns.net")
+                });
+            }
+            
 
             builder.Services.AddCors(options =>
             {
@@ -80,11 +91,20 @@ namespace IO
             });
 
             builder.Services.AddScoped<RequestModule.IRequestService, RequestModule.RequestService>();
-
+            builder.Services.AddLocalization();
+            var supportedCultures = new[] { "en-US", "pl" };
+            var localizationOptions = new RequestLocalizationOptions()
+                .SetDefaultCulture(supportedCultures[0])
+                .AddSupportedCultures(supportedCultures)
+                .AddSupportedUICultures(supportedCultures);
             builder.Services.AddScoped<SessionService>();
 
             var app = builder.Build();
+            
+            
+=========
 
+>>>>>>>>> Temporary merge branch 2
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
@@ -96,10 +116,11 @@ namespace IO
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
-            app.UseAntiforgery();
+            app.UseRequestLocalization(localizationOptions);
             app.UseAuthentication();
             app.UseAuthorization();
 
+>>>>>>>>> Temporary merge branch 2
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
             app.MapControllers();
