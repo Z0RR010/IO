@@ -1,5 +1,5 @@
 ﻿@inherits LayoutComponentBase
-
+@inject NavigationManager nav
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -7,7 +7,21 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            
+            <div class="">
+            <NavLink class="sign" href="signIn">Sign In
+            </NavLink>
+            </div>
+            <div class="">
+                <NavLink class="sign" href="signUp">Sign Up
+                </NavLink>
+            </div>
+            <Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+                <Authorized>
+                    Zalogowany jako @email
+                    <a href="/signOut">Wyloguj</a>
+                </Authorized>
+            </Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
         </div>
 
         <article class="content px-4">
@@ -21,3 +35,44 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+<style>
+    .footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: fit-content;
+  background-color: #3a0647;
+  color: white;
+  align-self: center;
+  text-align: right;
+  align-items: right;
+}
+
+.lang {
+    padding: 10px;
+    margin-right: 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    border-color: #141414;
+    cursor: pointer;
+    text-align: center;
+}
+</style>
+
+@code
+{
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private string email;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var authenticationState = await authenticationStateTask;
+        email = authenticationState.User.Identity.Name;
+    }
+}

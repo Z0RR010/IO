@@ -1,6 +1,4 @@
-﻿using IO.Components.Pages;
-
-namespace IO.Modules.Volunteer
+﻿namespace IO.Modules.Volunteer
 {
     public class Organisation
     {
@@ -10,6 +8,8 @@ namespace IO.Modules.Volunteer
         public string OrganisationName { get; set; }
         public char[] PhoneNumber { get; set; }
         public string Address { get; set; }
+
+        public Organisation() { }
 
         public Organisation(string organisationName, char[] phoneNumber, string address)
         {

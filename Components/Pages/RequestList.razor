@@ -1,5 +1,6 @@
 @page "/requests"
 @inject RequestModule.IRequestService RequestService
+@using IO.Modules.Security
 
 <h3>Requests</h3>
 
@@ -46,7 +47,15 @@ else
 
     private async Task DeleteRequest(int id)
     {
-        await RequestService.DeleteRequestAsync(id);
-        requests = await RequestService.GetRequestsAsync();
+        try
+        {
+            await RequestService.DeleteRequestAsync(id);
+            requests = await RequestService.GetRequestsAsync();
+        }
+        catch (Exception ex)
+        {
+            // Log the exception (ex) if necessary
+            Console.WriteLine($"Error deleting request: {ex.Message}");
+        }
     }
 }

@@ -1,7 +1,5 @@
-using System;
-using System.Collections.Generic;
-using ResourceManager;
 using IO.Modules.Security;
+using IO.Modules.ResourceManager;
 
 namespace RequestModule
 {

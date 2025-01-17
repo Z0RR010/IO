@@ -1,22 +1,15 @@
 @page "/requests/details/{Id:int}"
 @inject RequestModule.IRequestService RequestService
-@code {
-    [Parameter]
-    public int Id { get; set; }
-
-    private RequestModule.Request request;
-
-    protected override async Task OnInitializedAsync()
-    {
-        request = await RequestService.GetRequestByIdAsync(Id);
-    }
-}
 
 <h3>Request Details</h3>
 
-@if (request == null)
+@if (isLoading)
 {
     <p><em>Loading...</em></p>
+}
+else if (request == null)
+{
+    <p><em>Request not found.</em></p>
 }
 else
 {
@@ -27,10 +20,34 @@ else
         <p>Created At: @request.CreatedAt</p>
         <p>Updated At: @request.DateUpdated</p>
         <p>User: @request.User.Name (@request.User.Email)</p>
-        <p>Address: @request.Address.Street, @request.Address.City, @request.Address.Street, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
-        <p>Resources Required: @string.Join(", ", request.ResourcesRequired.Select(r => r.Name))</p>
+        <p>Address: @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
+        <p>Resources Required: @string.Join(", ", request.ResourcesRequired.Select(r => $"{r.Name} (x{r.Amount})"))</p>
         <p>Is Verified: @request.IsVerified</p>
         <p>Handling Organization: @request.HandlingOrganization</p>
         <p>Categories: @string.Join(", ", request.Categories)</p>
     </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private RequestModule.Request request;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            request = await RequestService.GetRequestByIdAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            // Log the exception (ex) if necessary
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using IO.Modules.ResourceManager;
 
 namespace IO.Modules.Volunteer
 {
@@ -32,6 +29,19 @@ namespace IO.Modules.Volunteer
             }
 
             organisationList.Add(organisation);
+
+            var executor = new VolunteerExecuter();
+
+            if (executor.AddOrganisationToDatabase(organisation))
+            {
+                Console.WriteLine("Organisation added or updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to add or update organisation.");
+            }
+            executor.Dispose();
+
         }
 
         public void AddVolunteer(Volunteer volunteer)
@@ -59,6 +69,18 @@ namespace IO.Modules.Volunteer
 
             volunteer.Organisation.AddVolunteer(volunteer);
             volunteerList.Add(volunteer);
+
+            var executor = new VolunteerExecuter();
+
+            if (executor.AddVolunteerToDatabase(volunteer, volunteer.Organisation))
+            {
+                Console.WriteLine("Organisation added or updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to add or update organisation.");
+            }
+            executor.Dispose();
         }
 
         public Organisation FindOrganisationByID(int organisationID)
@@ -84,6 +106,31 @@ namespace IO.Modules.Volunteer
         public int VolunteerCount => volunteerList.Count;
         public int OrganisationCount => organisationList.Count;
         public List<Organisation> OrganisationList => organisationList;
+        public List<Volunteer> VolunteerList => volunteerList;
+
+
+
+
+
+
+        public void Load()
+        {
+            var executor = new VolunteerExecuter();
+            organisationList = executor.LoadOrganisationList();
+            volunteerList = executor.LoadVolunteerList(organisationList);
+
+            executor.Dispose();
+        }
+
+
+
+
+
+
+
+
+
+
 
         public string SaveManagerToFile()
         {

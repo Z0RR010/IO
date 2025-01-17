@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace IO.Modules.Volunteer
+﻿namespace IO.Modules.Volunteer
 {
     public class Volunteer
     {
@@ -16,6 +14,8 @@ namespace IO.Modules.Volunteer
         public string Skills { get; set; }
         public List<DateTime> Availability { get; set; }
         public Organisation Organisation { get; set; }
+
+        public Volunteer() { }
 
         public Volunteer(
             string firstName,

@@ -1,13 +1,50 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using RequestModule;
+using IO.Modules.Security;
+using IO.Modules.ResourceManager;
 
 namespace RequestModule
 {
     public class RequestService : IRequestService
     {
-        private readonly List<Request> _requests = new List<Request>();
+        private readonly List<Request> _requests = new List<Request>()
+        {
+
+            new Request
+            {
+                Id = 1,
+                Title = "Fixed Request 1",
+                Description = "This is a fixed request added manually.",
+                Status = RequestStatus.New,
+                CreatedAt = DateTime.Now,
+                User = new User("email1@example.com", "John Doe", "123456789", "123 Main St", true),
+                Address = new Address("City1", "Street1", "123", "Apt 1", "12345"),
+                ResourcesRequired = new List<Resource>
+                {
+                    new Resource("pomidor", Category.Food, 3),
+                    new Resource("chleb", Category.Food, 5),
+                },
+                Categories = new List<string> { "Category1" },
+                IsVerified = true,
+                HandlingOrganization = "Org1"
+            },
+            new Request
+            {
+                Id = 2,
+                Title = "Fixed Request 2",
+                Description = "This is a fixed request added manually.",
+                Status = RequestStatus.New,
+                CreatedAt = DateTime.Now,
+                User = new User("email2@example.com", "Jane Doe", "987654321", "456 Main St", true),
+                Address = new Address("City2", "Street2", "456", "Apt 2", "67890"),
+                ResourcesRequired = new List<Resource>
+                {
+                    new Resource("ogórek", Category.Food, 20),
+                    new Resource("ser", Category.Food, 500),
+                },
+                Categories = new List<string> { "Category2" },
+                IsVerified = true,
+                HandlingOrganization = "Org2"
+            }
+        };
 
         public Task<List<Request>> GetRequestsAsync()
         {

@@ -1,5 +1,7 @@
 ﻿@page "/counter"
 @rendermode InteractiveServer
+@using IO.Modules.Security
+@inject SessionService sessionService
 
 <PageTitle>Counter</PageTitle>
 
@@ -12,8 +14,10 @@
 @code {
     private int currentCount = 0;
 
-    private void IncrementCount()
+    private async Task IncrementCount()
     {
+        string sessionUser = await sessionService.GetUserNameAsync();
         currentCount++;
+        Console.WriteLine(sessionUser);
     }
 }
