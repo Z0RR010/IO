@@ -55,6 +55,11 @@
             return _location;
         }
 
+        public Route GetRoute()
+        {
+            return _route;
+        }
+
         public void SetRoute(Route route)
         {
             _route = route;

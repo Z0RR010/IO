@@ -1,34 +1,44 @@
 ﻿@page "/map"
 @using IO.Modules.MapLibrary
 @rendermode InteractiveServer
-
 @inject GoogleMapsClient GoogleMaps;
 @inject Geolocation Geolocation;
-
 <PageTitle>Map</PageTitle>
 
 <h1>Map</h1>
-
-<div style="display: flex; gap: 10px">
-    <button class="btn btn-primary" @onclick="async () => { map01.SetLocation(_address);
-                                                            await map01.DrawMap(); }">Address</button>
-
-    <button class="btn btn-primary" @onclick='async () => { map01.SetLocation("Warszawa");
-                                                            await map01.DrawMap(); }'>String</button>
-
-    <button class="btn btn-primary" @onclick="async () => { map01.SetLocation(await Geolocation.GetUserLocation());
-                                                            await map01.DrawMap(); }">Coordinates</button>
-    <button class="btn btn-primary" @onclick='async () => { Route rt = new Route(new CoordinatesWrapper(await Geolocation.GetUserLocation()), map01.GetLocation());
-                                                            map01.SetRoute(rt);
-                                                            map01.AddRouteLocation(new AddressStringWrapper("Płock"));
-                                                            await map01.DrawMap();}'>Route</button>
+<div style="display: flex; gap: 20px; align-items: flex-start;">
+    <div>
+        <div style="display: flex; gap: 10px">
+            <button class="btn btn-primary" @onclick="async () => { map01.SetLocation(_address); await map01.DrawMap(); }">Address</button>
+            <button class="btn btn-primary" @onclick='async () => { map01.SetLocation("Warszawa"); await map01.DrawMap(); }'>String</button>
+            <button class="btn btn-primary" @onclick="async () => { map01.SetLocation(await Geolocation.GetUserLocation()); await map01.DrawMap(); }">Coordinates</button>
+            <button class="btn btn-primary" @onclick='async () => { Route rt = new Route(new CoordinatesWrapper(await Geolocation.GetUserLocation()), map01.GetLocation()); map01.SetRoute(rt); map01.AddRouteLocation(new AddressStringWrapper("Płock")); await map01.DrawMap(); }'>Route</button>
+        </div>
+        <div id="map01" style="width: 100%; height: 500px; margin-top: 20px;"></div>
+    </div>
+    @if (map01.GetRoute() != null)
+    {
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            @for (var i = 0; i < fieldCount; i++)
+            {
+                Console.WriteLine(i);
+                <div id="textfield-container" style="display: flex; align-items: center; gap: 5px;">
+                    <input class="form-control" type="text" @bind="fieldValues[i]" placeholder="Enter address or location" style="flex: 1;" />
+                    <button class="btn" style="background-color: #28a745; color: white;" @onclick="() => ConfirmField(i)">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+            }
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-success" @onclick="AddField">+</button>
+                <button class="btn btn-danger" @onclick="RemoveField">-</button>
+            </div>
+        </div>
+    }
 </div>
-
-<div id="map01" style="width: 100%; height: 500px;"></div>
 
 @code {
     MapController map01;
-
     Address _address = new(
         "Łódź",
         "Wólczańska",
@@ -36,8 +46,9 @@
         "",
         "93-005"
     );
-    //Route _route = new(new AddressStringWrapper("Łódź"), new AddressStringWrapper("Warszawa"));
 
+    int fieldCount = 1;
+    private List<string> fieldValues = new List<string> { "", ""};
 
     protected override void OnInitialized()
     {
@@ -49,9 +60,33 @@
         if (firstRender)
         {
             await GoogleMaps.InitializeApi("pl");
-            
+
             map01.SetLocation(_address);
             await map01.DrawMap();
         }
+    }
+
+    private void AddField()
+    {
+        Console.Write("+");
+        fieldValues.Add("");
+        fieldCount++;
+    }
+
+    private void RemoveField()
+    {
+        if (fieldCount > 1)
+        {
+            Console.Write("-");
+            fieldValues.RemoveAt(fieldValues.Count - 1);
+            fieldCount--;
+        }
+    }
+    private async void ConfirmField(int i)
+    {
+        Console.WriteLine(fieldValues);
+        Console.WriteLine(i);
+        map01.AddRouteLocation(new AddressStringWrapper(fieldValues[i]));
+        await map01.DrawMap();
     }
 }
