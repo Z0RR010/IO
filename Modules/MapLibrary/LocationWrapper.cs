@@ -1,4 +1,5 @@
 ﻿namespace IO.Modules.MapLibrary;
+using RequestModule;
 
 internal abstract record LocationWrapper
 {
