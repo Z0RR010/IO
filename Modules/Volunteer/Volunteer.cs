@@ -8,8 +8,7 @@
         public string Email { get; set; }
         public char[] PhoneNumber { get; set; }
         public string Address { get; set; }
-        public Organisation Organisation { get; set; }
-        public List<VolunteerTask> VolunteerTaskList { get; private set; } = new List<VolunteerTask>();
+        public int OrganisationID { get; set; }
 
         public Volunteer() { }
 
@@ -19,19 +18,14 @@
             string email,
             char[] phoneNumber,
             string address,
-            Organisation organisation)
+            int organisationID)
         {
             FirstName = firstName;
             LastName = lastName;
             Email = email;
             PhoneNumber = phoneNumber;
             Address = address;
-            Organisation = organisation;
-        }
-
-        public void AddTask(VolunteerTask volunteerTask)
-        {
-            VolunteerTaskList.Add(volunteerTask);
+            OrganisationID = organisationID;
         }
     }
 }

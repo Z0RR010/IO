@@ -1,4 +1,5 @@
 ﻿using IO.Modules.ResourceManager;
+using IO.Modules.Security;
 
 namespace IO.Modules.Volunteer
 {
@@ -58,8 +59,8 @@ namespace IO.Modules.Volunteer
             if (volunteer == null)
                 throw new ArgumentNullException(nameof(volunteer), "Volunteer cannot be null.");
 
-            if (volunteer.Organisation == null)
-                throw new ArgumentNullException(nameof(volunteer.Organisation), "Organisation cannot be null.");
+            if (volunteer.OrganisationID == null)
+                throw new ArgumentNullException(nameof(volunteer.OrganisationID), "Organisation cannot be null.");
 
             if (volunteer.VolunteerID == 0 && volunteerList.Count != 0)
             {
@@ -71,28 +72,27 @@ namespace IO.Modules.Volunteer
                 throw new InvalidOperationException($"Volunteer with ID {volunteer.VolunteerID} already exists.");
             }
 
-            if (!organisationList.Contains(volunteer.Organisation))
+            if (FindOrganisationByID(volunteer.OrganisationID) == null)
             {
                 throw new InvalidOperationException("Organisation not found.");
             }
 
-            volunteer.Organisation.AddVolunteer(volunteer);
             volunteerList.Add(volunteer);
 
             var executor = new VolunteerExecuter();
 
-            if (executor.AddVolunteerToDatabase(volunteer, volunteer.Organisation))
+            if (executor.AddVolunteerToDatabase(volunteer))
             {
-                Console.WriteLine("Organisation added or updated successfully!");
+                Console.WriteLine("Volunteer added or updated successfully!");
             }
             else
             {
-                Console.WriteLine("Failed to add or update organisation.");
+                Console.WriteLine("Failed to add or update volunteer.");
             }
             executor.Dispose();
         }
 
-        public void AddTask(VolunteerTask volunteerTask, Organisation organisation)
+        public void AddTask(VolunteerTask volunteerTask)
         {
             if (volunteerTask == null)
                 throw new ArgumentNullException(nameof(volunteerTask), "VolunteerTask cannot be null.");
@@ -108,7 +108,7 @@ namespace IO.Modules.Volunteer
             }
 
             volunteerTaskList.Add(volunteerTask);
-            FindOrganisationByID(organisation.OrganisationID).AddTask(volunteerTask);
+
             var executor = new VolunteerExecuter();
 
             if (executor.AddTaskToDatabase(volunteerTask))
@@ -119,13 +119,28 @@ namespace IO.Modules.Volunteer
             {
                 Console.WriteLine("Failed to add or update volunteerTask.");
             }
-            if (executor.AddOrganisationToDatabase(organisation))
+            executor.Dispose();
+        }
+
+        public void AssignTask(VolunteerTask volunteerTask, Volunteer volunteer)
+        {
+            VolunteerTask vt = FindTaskByID(volunteerTask.VolunteerTaskID);
+            vt.VolunteerID = volunteer.VolunteerID;
+            UpdateTaskStatus(vt, TaskStatus.Assigned);
+        }
+
+        public void UpdateTaskStatus(VolunteerTask volunteerTask, TaskStatus taskStatus)
+        {
+            volunteerTask.TaskStatus = taskStatus;
+            var executor = new VolunteerExecuter();
+
+            if (executor.AddTaskToDatabase(volunteerTask))
             {
-                Console.WriteLine("Organisation added or updated successfully!");
+                Console.WriteLine("VolunteerTask added or updated successfully!");
             }
             else
             {
-                Console.WriteLine("Failed to add or update organisation.");
+                Console.WriteLine("Failed to add or update volunteerTask.");
             }
             executor.Dispose();
         }
@@ -146,6 +161,37 @@ namespace IO.Modules.Volunteer
         {
             return organisationList.FirstOrDefault(o => o.OrganisationID == organisationID);
         }
+        public VolunteerTask FindTaskByID(int taskID)
+        {
+            return volunteerTaskList.FirstOrDefault(t => t.VolunteerTaskID == taskID);
+        }
+        public Volunteer FindVolunteerByID(int volunteerID)
+        {
+            return volunteerList.FirstOrDefault(v => v.VolunteerID == volunteerID);
+        }
+        public List<Volunteer> FindVolunteersByOrganisation(int organisationID)
+        {
+            return volunteerList.Where(v => v.OrganisationID == organisationID).ToList();
+        }
+
+        public List<VolunteerTask> FindTasksByStatus(TaskStatus taskStatus)
+        {
+            return volunteerTaskList.Where(t => t.TaskStatus == taskStatus).ToList();
+        }
+
+        public List<VolunteerTask> FindTasksByOrganisation(int organisationID)
+        {
+            return volunteerTaskList.Where(t => t.OrganisationID == organisationID).ToList();
+        }
+
+        public List<VolunteerTask> FindTasksByVolunteer(int volunteerID)
+        {
+            return volunteerTaskList.Where(t => t.VolunteerID == volunteerID).ToList();
+        }
+
+
+
+
 
         public void RemoveVolunteer(int volunteerID)
         {
@@ -157,17 +203,12 @@ namespace IO.Modules.Volunteer
             volunteerList.Remove(volunteerToRemove);
         }
 
-        public Volunteer FindVolunteerByID(int volunteerID)
-        {
-            return volunteerList.FirstOrDefault(v => v.VolunteerID == volunteerID);
-        }
-
 
         public void Load()
         {
             var executor = new VolunteerExecuter();
             organisationList = executor.LoadOrganisationList();
-            volunteerList = executor.LoadVolunteerList(organisationList);
+            volunteerList = executor.LoadVolunteerList();
             volunteerTaskList = executor.LoadTaskList();
             executor.Dispose();
         }

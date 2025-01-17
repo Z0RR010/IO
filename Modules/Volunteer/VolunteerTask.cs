@@ -7,6 +7,9 @@
         public List<DateTime> EndDate { get; set; }
         public TaskStatus TaskStatus { get; set; }
         public Rate Rate { get; set; }
+        public int OrganisationID { get; set; }
+        public int VolunteerID { get; set; }
+
 
         public VolunteerTask() { }
 
@@ -14,11 +17,13 @@
             string description,
             string address,
             List<DateTime> endDate,
+            int organisationID,
             TaskStatus taskStatus = TaskStatus.New)
         {
             Description = description;
             Address = address;
             EndDate = endDate;
+            OrganisationID = organisationID;
             TaskStatus = taskStatus;
         }
 
@@ -27,8 +32,5 @@
         {
             Rate = rate;
         }
-
-
-
     }
 }
