@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using IO.Modules.ResourceManager;
 using System.Collections.Concurrent;
+using IO.Modules.Security;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -9,12 +10,13 @@ public class SignInController : ControllerBase
     private static ConcurrentDictionary<string, (int attempts, DateTime? lockoutEnd)> loginAttempts = new();
 
     private const int MaxAttempts = 5;
-    private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
 
     [HttpPost("SignIn")]
     public IActionResult SignIn([FromBody] LoginRequest request)
     {
         UserExecuter userExecuter = new UserExecuter();
+
         Console.WriteLine($"Otrzymano dane: {request.Username}, {request.Password}");
 
         if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))

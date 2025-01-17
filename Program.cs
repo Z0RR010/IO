@@ -37,7 +37,7 @@ namespace IO
             builder.Services.AddAuthorization();
             builder.Services.AddCascadingAuthenticationState();
             builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite("Data Source=./Modules/ResourceManager/databases/userDatabase.db"));
+            options.UseSqlite("Data Source=./databases/userDatabase.db"));
             builder.Services.AddControllers();
 
             /*
@@ -51,14 +51,25 @@ namespace IO
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
             */
-
+            
             builder.Services.AddSingleton<Communicator>();
 
             builder.Services.AddHttpClient();
-            builder.Services.AddScoped(sp => new HttpClient
+            if (builder.Environment.IsDevelopment())
             {
-                BaseAddress = new Uri("http://localhost:5236")
-            });
+                builder.Services.AddScoped(sp => new HttpClient
+                {
+                    BaseAddress = new Uri("http://localhost:5236")
+                });
+            }
+            else
+            {
+                builder.Services.AddScoped(sp => new HttpClient
+                {
+                    BaseAddress = new Uri("http://ioserver.ddns.net")
+                });
+            }
+            
 
             builder.Services.AddCors(options =>
             {
