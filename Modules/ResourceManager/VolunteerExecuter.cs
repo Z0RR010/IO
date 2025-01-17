@@ -1,6 +1,6 @@
 ﻿using IO.Modules.Volunteer;
 using MySql.Data.MySqlClient;
-using System.Data.SQLite;
+using Microsoft.Data.Sqlite;
 
 namespace IO.Modules.ResourceManager
 {
@@ -15,9 +15,9 @@ namespace IO.Modules.ResourceManager
 
             try
             {
-                using var connection = new SQLiteConnection(_connectionString); //MySqlConnection(_connectionString);
+                using var connection = new SqliteConnection(_connectionString); //MySqlConnection(_connectionString);
                 connection.Open();
-                Console.WriteLine("Connection to " + connection.FileName + " established");
+                Console.WriteLine("Connection to " + connection.ConnectionString + " established");
                 string orgQuery = @"
             INSERT INTO Organisations (OrganisationID, OrganisationName, PhoneNumber, Address)
             VALUES (@id, @name, @phone, @address)
@@ -26,7 +26,7 @@ namespace IO.Modules.ResourceManager
                 PhoneNumber = @phone,
                 Address = @address";
 
-                using var orgCommand = new SQLiteCommand(orgQuery, connection); //MySqlCommand(orgQuery, connection);
+                using var orgCommand = new SqliteCommand(orgQuery, connection); //MySqlCommand(orgQuery, connection);
                 orgCommand.Parameters.AddWithValue("@id", organisation.OrganisationID);
                 orgCommand.Parameters.AddWithValue("@name", organisation.OrganisationName);
                 orgCommand.Parameters.AddWithValue("@phone", organisation.PhoneNumber);
@@ -52,7 +52,7 @@ namespace IO.Modules.ResourceManager
 
             try
             {
-                using var connection = new SQLiteConnection(_connectionString); //MySqlConnection(_connectionString);
+                using var connection = new SqliteConnection(_connectionString); //MySqlConnection(_connectionString);
                 connection.Open();
 
                 string volQuery = @"
@@ -70,7 +70,7 @@ namespace IO.Modules.ResourceManager
                 Skills = @skills,
                 Availability = @availability";
 
-                using var volCommand = new SQLiteCommand(volQuery, connection); //MySqlCommand(volQuery, connection);
+                using var volCommand = new SqliteCommand(volQuery, connection); //MySqlCommand(volQuery, connection);
                 volCommand.Parameters.AddWithValue("@id", volunteer.VolunteerID);
                 volCommand.Parameters.AddWithValue("@firstName", volunteer.FirstName);
                 volCommand.Parameters.AddWithValue("@lastName", volunteer.LastName);
@@ -105,14 +105,14 @@ namespace IO.Modules.ResourceManager
 
             try
             {
-                using var connection = new SQLiteConnection(_connectionString); //MySqlConnection(_connectionString);
+                using var connection = new SqliteConnection(_connectionString); //MySqlConnection(_connectionString);
                 connection.Open();
 
                 string query = @"
         SELECT v.VolunteerID, v.FirstName, v.LastName, v.Email, v.Gender, v.PhoneNumber, v.Address, v.Experience, v.AdditionalInfo, v.Skills, v.Availability, v.OrganisationID
         FROM Volunteers v";
 
-                using var command = new SQLiteCommand(query, connection); //MySqlCommand(query, connection);
+                using var command = new SqliteCommand(query, connection); //MySqlCommand(query, connection);
                 using var reader = command.ExecuteReader();
 
                 while (reader.Read())
@@ -164,12 +164,12 @@ namespace IO.Modules.ResourceManager
 
             try
             {
-                using var connection = new SQLiteConnection(_connectionString); //MySqlConnection(_connectionString);
+                using var connection = new SqliteConnection(_connectionString); //MySqlConnection(_connectionString);
                 connection.Open();
 
                 string query = "SELECT OrganisationID, OrganisationName, PhoneNumber, Address FROM Organisations";
 
-                using var command = new SQLiteCommand(query, connection); //MySqlCommand(query, connection);
+                using var command = new SqliteCommand(query, connection); //MySqlCommand(query, connection);
                 using var reader = command.ExecuteReader();
 
                 while (reader.Read())
