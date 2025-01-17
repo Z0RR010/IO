@@ -20,7 +20,7 @@
         <select @bind="selectedItem" class="custom-dropdown">
             @foreach (var item in items)
             {
-                <option value="@item">@item</option>
+                <option value="@item.Name">@item.Name</option>
             }
         </select>
 
@@ -111,7 +111,10 @@
     {
         RequestManager requestManager = new RequestManager();
         List<Request> requests = requestManager.GetAllRequests();
-        items = requestManager.GetResourcesForRequest(2);
+        for (int i = 0; i < requests.Count; i++)
+        {
+            items = requestManager.GetResourcesForRequest(i);
+        }
     }
 
     protected override void OnInitialized()
