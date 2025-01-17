@@ -1,14 +1,15 @@
 ﻿using IO.Modules.Volunteer;
 using System.Data;
-using System.Data.SQLite;
 using System.Text.Json;
+using Microsoft.Data.Sqlite;
+
 
 namespace IO.Modules.ResourceManager
 {
     public class VolunteerExecuter : IDisposable, IAsyncDisposable
     {
         private readonly string _connectionString =
-            "Data Source=./databases/volunteerDatabase.db;Version=3;FailIfMissing=True;";
+                    "Data Source=./databases/volunteerDatabase.db;Cache=Shared";
 
         public bool AddOrganisationToDatabase(Organisation organisation)
         {
@@ -16,13 +17,13 @@ namespace IO.Modules.ResourceManager
 
             try
             {
-                using var connection = new SQLiteConnection(_connectionString);
+                using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
-                Console.WriteLine("Connection to " + connection.FileName + " established");
+                Console.WriteLine("Connection to " + connection.ConnectionString + " established");
 
                 // Sprawdzenie czy organizacja już istnieje
                 string checkQuery = "SELECT COUNT(*) FROM Organisations WHERE OrganisationID = @id";
-                using var checkCommand = new SQLiteCommand(checkQuery, connection);
+                using var checkCommand = new SqliteCommand(checkQuery, connection);
                 checkCommand.Parameters.AddWithValue("@id", organisation.OrganisationID);
                 int count = Convert.ToInt32(checkCommand.ExecuteScalar());
 
@@ -45,7 +46,7 @@ namespace IO.Modules.ResourceManager
             SELECT last_insert_rowid();";
                 }
 
-                using var orgCommand = new SQLiteCommand(orgQuery, connection);
+                using var orgCommand = new SqliteCommand(orgQuery, connection);
 
                 orgCommand.Parameters.AddWithValue("@email", organisation.Email);
                 orgCommand.Parameters.AddWithValue("@name", organisation.OrganisationName);
@@ -84,12 +85,12 @@ namespace IO.Modules.ResourceManager
 
             try
             {
-                using var connection = new SQLiteConnection(_connectionString);
+                using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
 
                 // Sprawdzenie, czy wolontariusz już istnieje
                 string checkQuery = "SELECT COUNT(*) FROM Volunteers WHERE VolunteerID = @id";
-                using var checkCommand = new SQLiteCommand(checkQuery, connection);
+                using var checkCommand = new SqliteCommand(checkQuery, connection);
                 checkCommand.Parameters.AddWithValue("@id", volunteer.VolunteerID);
                 int count = Convert.ToInt32(checkCommand.ExecuteScalar());
 
@@ -117,7 +118,7 @@ namespace IO.Modules.ResourceManager
                 }
 
 
-                using var volCommand = new SQLiteCommand(volQuery, connection);
+                using var volCommand = new SqliteCommand(volQuery, connection);
 
                 volCommand.Parameters.AddWithValue("@firstName", volunteer.FirstName);
                 volCommand.Parameters.AddWithValue("@lastName", volunteer.LastName);
@@ -155,12 +156,12 @@ namespace IO.Modules.ResourceManager
             if (volunteerTask == null) throw new ArgumentNullException(nameof(volunteerTask));
             try
             {
-                using var connection = new SQLiteConnection(_connectionString);
+                using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
 
                 // Sprawdzenie, czy volunteerTask już istnieje
                 string checkQuery = "SELECT COUNT(*) FROM VolunteerTasks WHERE VolunteerTaskID = @volunteerTaskID";
-                using var checkCommand = new SQLiteCommand(checkQuery, connection);
+                using var checkCommand = new SqliteCommand(checkQuery, connection);
                 checkCommand.Parameters.AddWithValue("@volunteerTaskID", volunteerTask.VolunteerTaskID);
                 int count = Convert.ToInt32(checkCommand.ExecuteScalar());
 
@@ -182,7 +183,7 @@ namespace IO.Modules.ResourceManager
         SELECT last_insert_rowid();";
                 }
 
-                using var command = new SQLiteCommand(query, connection);
+                using var command = new SqliteCommand(query, connection);
 
                 command.Parameters.AddWithValue("@description", volunteerTask.Description);
                 command.Parameters.AddWithValue("@address", volunteerTask.Address);
@@ -222,13 +223,13 @@ namespace IO.Modules.ResourceManager
 
             try
             {
-                using var connection = new SQLiteConnection(_connectionString);
+                using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
                 string query = @"
             SELECT VolunteerTaskID, Description, Address, TaskStatus, EndDate, OrganisationID, VolunteerID
             FROM VolunteerTasks";
 
-                using var command = new SQLiteCommand(query, connection);
+                using var command = new SqliteCommand(query, connection);
                 using var reader = command.ExecuteReader();
 
                 while (reader.Read())
@@ -259,13 +260,13 @@ namespace IO.Modules.ResourceManager
 
             try
             {
-                using var connection = new SQLiteConnection(_connectionString);
+                using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
                 string query = @"
         SELECT v.VolunteerID, v.FirstName, v.LastName, v.Email, v.PhoneNumber, v.Address, v.OrganisationID
         FROM Volunteers v";
 
-                using var command = new SQLiteCommand(query, connection);
+                using var command = new SqliteCommand(query, connection);
                 using var reader = command.ExecuteReader();
 
                 while (reader.Read())
@@ -299,12 +300,12 @@ namespace IO.Modules.ResourceManager
 
             try
             {
-                using var connection = new SQLiteConnection(_connectionString);
+                using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
 
                 string query = "SELECT OrganisationID, OrganisationName, Email, PhoneNumber, Address FROM Organisations";
 
-                using var command = new SQLiteCommand(query, connection);
+                using var command = new SqliteCommand(query, connection);
                 using var reader = command.ExecuteReader();
 
                 while (reader.Read())
