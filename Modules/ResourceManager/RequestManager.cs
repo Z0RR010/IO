@@ -154,30 +154,8 @@ namespace IO.Modules.ResourceManager
                         };
 
                         string resourcesString = reader.GetString(reader.GetOrdinal("ResourcesRequired"));
-                        var resources = new List<Resource>();
+                        request.ResourcesRequired = ParseResources(resourcesString);
 
-                        if (!string.IsNullOrWhiteSpace(resourcesString))
-                        {
-                            var resourceStrings = resourcesString.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-
-                            foreach (var resourceJson in resourceStrings)
-                            {
-                                try
-                                {
-                                    var resource = JsonSerializer.Deserialize<Resource>(resourceJson);
-                                    if (resource != null)
-                                    {
-                                        resources.Add(resource);
-                                    }
-                                }
-                                catch (JsonException ex)
-                                {
-                                    Console.WriteLine($"Error while deserialisation: {ex.Message}");
-                                }
-                            }
-                        }
-
-                        request.ResourcesRequired = resources;
                         requests.Add(request);
                     }
                 }
@@ -270,21 +248,13 @@ namespace IO.Modules.ResourceManager
             var resources = new List<Resource>();
             if (!string.IsNullOrWhiteSpace(resourcesString))
             {
-                var resourceStrings = resourcesString.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var resourceJson in resourceStrings)
+                try
                 {
-                    try
-                    {
-                        var resource = JsonSerializer.Deserialize<Resource>(resourceJson);
-                        if (resource != null)
-                        {
-                            resources.Add(resource);
-                        }
-                    }
-                    catch (JsonException ex)
-                    {
-                        Console.WriteLine($"Error deserializing resource: {ex.Message}");
-                    }
+                    resources = JsonSerializer.Deserialize<List<Resource>>(resourcesString);
+                }
+                catch (JsonException ex)
+                {
+                    Console.WriteLine($"Error deserializing resources: {ex.Message}");
                 }
             }
             return resources;
