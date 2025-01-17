@@ -3,6 +3,7 @@
 @using IO.Modules.Communication
 @inject Communicator CommunicatorService
 @using System.Globalization
+@using Microsoft.Extensions.Localization
 @inject IStringLocalizer<Conversation> Loc
 @rendermode InteractiveServer
 <h3 class="chat-header">@Loc["Conversation"]</h3>

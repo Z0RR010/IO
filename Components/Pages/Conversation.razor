@@ -3,6 +3,7 @@
 @using System.Globalization
 @inject IStringLocalizer<Conversation> Loc
 @using IO.Modules.Communication
+@using Microsoft.Extensions.Localization
 @inject Communicator CommunicatorService
 
 <div class="container my-4">
@@ -62,6 +63,8 @@
     {
         userChats = CommunicatorService.GetUserChats(userEmailToRead);
     }
+    
+    
 
     // Fetch user's chats
     private void GetUserChats()
