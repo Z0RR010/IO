@@ -1,21 +1,21 @@
 @page "/communication/conversation"
 @rendermode InteractiveServer
-
+@using System.Globalization
+@inject IStringLocalizer<Conversation> Loc
 @using IO.Modules.Communication
 @inject Communicator CommunicatorService
 
 <div class="container my-4">
-    <h2 class="text-center">Odczytywanie wiadomości</h2>
 
     <!-- User Email Input -->
     <div class="mb-4">
-        <label for="userEmailToRead" class="form-label">E-mail użytkownika:</label>
-        <input type="email" id="userEmailToRead" class="form-control" @bind="newChatUser" placeholder="Wprowadź e-mail użytkownika..." />
-        <button class="btn btn-primary mt-2" @onclick="beginChatWithSomeone">Rozpocznij nową konwersacje</button>
+        <label for="userEmailToRead" class="form-label"></label>
+        <input type="email" id="userEmailToRead" class="form-control" @bind="newChatUser" placeholder=@Loc["User Email"] />
+        <button class="btn btn-primary mt-2" @onclick="beginChatWithSomeone">@Loc["Start Conversation"]</button>
     </div>
 
     <!-- Chat List -->
-    <h3 class="mt-5">Konwersacje użytkownika:</h3>
+    <h3 class="mt-5">@Loc["Conversation"]</h3>
     @if (userChats.Any())
     {
         <div class="list-group">
@@ -24,7 +24,7 @@
                 <div class="list-group-item">
                     <div class="d-flex justify-content-between align-items-center">
                         <span>
-                            <strong>Użytkownicy:</strong>
+                            <strong>@Loc["Users"]</strong>
                             <ul class="mb-0">
                                 @foreach (var participant in chat.Emails)
                                 {
@@ -35,7 +35,7 @@
                         <form method="get" action="/Communication/Conversation/ChatMan">
                             <input type="hidden" name="chatId" value="@chat.ChatId" />
                             <button type="submit" class="btn btn-primary">
-                                Open Conversation
+                                @Loc["Open Conversation"]
                             </button>
                         </form>
                     </div>
@@ -45,7 +45,7 @@
     }
     else
     {
-        <p class="text-muted">Brak konwersacji dla podanego użytkownika.</p>
+        <p class="text-muted">@Loc["No Conversations"]</p>
     }
 
    

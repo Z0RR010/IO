@@ -2,10 +2,12 @@
 @using System.IO
 @using System.Text
 @using IO.Modules.Communication
+@using System.Globalization
+@inject IStringLocalizer<Conversation> Loc
 @inject RaportManager RaportService
 
 <div class="container my-5">
-    <h2 class="text-center">Report Viewer & Downloader</h2>
+    <h2 class="text-center">@Loc["Report Viewer & Downloader"]</h2>
 
     <!-- Scrollable Report Display -->
     <div class="scrollable-report mb-4">
@@ -14,7 +16,7 @@
 
     <!-- Download Button -->
     <div class="text-center">
-        <button class="btn btn-primary" @onclick="DownloadReport">Download Report</button>
+        <button class="btn btn-primary" @onclick="DownloadReport">@Loc["Download Report"]</button>
     </div>
 </div>
 

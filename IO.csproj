@@ -23,4 +23,11 @@
     <Content Include="Modules\MapLibrary\MapLibrary.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Update="Components\Pages\Conversation.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Conversation.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>
