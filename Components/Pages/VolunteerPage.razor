@@ -1,5 +1,9 @@
 ﻿@page "/volunteerPage"
 @rendermode InteractiveServer
+@using IO.Modules.Security
+@using IO.Modules.Volunteer
+@using IO.Modules.ResourceManager;
+@inject SessionService sessionService
 
 <PageTitle>Volunteer</PageTitle>
 
@@ -20,7 +24,7 @@
     <p>Choose Volunteer: </p>
     <select @bind="selectedVolunteerID" class="form-select mt-2">
         <option value="">Select a volunteer</option>
-        @foreach (var vol in volunteerList)
+        @foreach (var vol in volunteerManager.VolunteerList)
         {
             <option value="@vol.VolunteerID">@vol.FirstName @vol.LastName</option>
         }
@@ -28,7 +32,7 @@
     @if (previousSelectedVolunteerID != selectedVolunteerID)
     {
         previousSelectedVolunteerID = selectedVolunteerID;
-        selectedVolunteer = volunteerList.FirstOrDefault(v => v.VolunteerID == selectedVolunteerID);
+        selectedVolunteer = volunteerManager.VolunteerList.FirstOrDefault(v => v.VolunteerID == selectedVolunteerID);
     }
     @if (selectedVolunteer != null && selectedVolunteer.FirstName != null) {
         <button class="btn btn-primary" @onclick="() => ChangeForm(7)">Submit</button>
@@ -44,7 +48,7 @@
     <p>Choose Organisation: </p>
     <select @bind="selectedOrganisationID" class="form-select mt-2">
         <option value="">Select an organisation</option>
-        @foreach (var org in organisationList)
+        @foreach (var org in volunteerManager.OrganisationList)
         {
             <option value="@org.OrganisationID">@org.OrganisationName</option>
         }
@@ -52,7 +56,7 @@
     @if (previousSelectedOrganisationID != selectedOrganisationID)
     {
         previousSelectedOrganisationID = selectedOrganisationID;
-        selectedOrganisation = organisationList.FirstOrDefault(o => o.OrganisationID == selectedOrganisationID);
+        selectedOrganisation = volunteerManager.OrganisationList.FirstOrDefault(o => o.OrganisationID == selectedOrganisationID);
     }
     @if (selectedOrganisation != null && selectedOrganisation.OrganisationName != null)
     {
@@ -72,13 +76,13 @@
 
 @if (whichForm == 4)
 {
-    <p role="status">Volunteers: @volunteerCount  Organisations: @organisationCount  Tasks: @taskCount</p>
+    <p role="status">Volunteers: @volunteerManager.VolunteerCount  Organisations: @volunteerManager.OrganisationCount  Tasks: @volunteerManager.VolunteerTaskCount</p>
     <button class="btn btn-primary" @onclick="() => ChangeForm(11)">Single Volunteer Application</button>
     <button class="btn btn-primary" @onclick="() => ChangeForm(12)">Organisation Application</button>
-    <button class="btn btn-primary" @onclick="() => ChangeForm(13)">Task Addition</button>
+    <button class="btn btn-primary" @onclick="() => ChangeForm(13)">VolunteerTask Addition</button>
     <button class="btn btn-primary" @onclick="() => ChangeForm(14)">Get Volunteer</button>
     <button class="btn btn-primary" @onclick="() => ChangeForm(15)">Get Organisation</button>
-    <button class="btn btn-primary" @onclick="() => ChangeForm(16)">Task List</button>
+    <button class="btn btn-primary" @onclick="() => ChangeForm(16)">VolunteerTask List</button>
     <button class="btn btn-primary" @onclick="() => ChangeForm(0)">Back</button>
 
 }
@@ -107,7 +111,7 @@
         <p>Organisation: </p>
         <select @bind="selectedOrganisationID" class="form-select mt-2">
             <option value="">Select an organisation</option>
-            @foreach (var org in organisationList)
+            @foreach (var org in volunteerManager.OrganisationList)
             {
                 <option value="@org.OrganisationID">@org.OrganisationName</option>
             }
@@ -131,6 +135,8 @@
         <p>Organisation Name: </p>
         <input type="text" @bind="organisationName" placeholder="Enter name" class="form-control mt-2" />
 
+        <p>Email: </p>
+        <input type="email" @bind="email" placeholder="Enter email" class="form-control mt-2" />
 
         <p>Phone Number: </p>
         <input type="text" @bind="PhoneNumberString" placeholder="Enter phone number" class="form-control mt-2" />
@@ -152,20 +158,21 @@
 @if (whichForm == 7)
 {
     <h1>Hello @selectedVolunteer.FirstName</h1>
-    <button class="btn btn-primary" @onclick="() => ChangeSelect(1)">Available Tasks</button>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(1)">Create Task</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(2)">Your Tasks</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(3)">Profile Information</button>
 
-    @if(selectedOption == 1)
+
+    @if (selectedOption == 1)
     {
-        <h1>Task List</h1>
+        <h1>Available Tasks</h1>
         <ul class="list-group">
-            @foreach (var task in selectedVolunteer.Organisation.TaskList)
+            @foreach (var volunteerTask in selectedVolunteer.Organisation.VolunteerTaskList)
             {
                 <li class="list-group-item d-flex justify-content-between align-items-center"
-                    @onclick="() => ShowTaskDetails(task)">
+                    @onclick="() => ShowTaskDetails(volunteerTask)">
                     <div>
-                        <strong>@task.Description</strong> - Status: @task.TaskStatus
+                        <strong>@volunteerTask.Description</strong> - Status: @volunteerTask.TaskStatus
                     </div>
                     <button class="btn btn-info btn-sm">Details</button>
                 </li>
@@ -175,19 +182,19 @@
         @if (selectedTask != null && selectedTask.Description != null)
         {
             <div class="mt-3 p-3 border rounded">
-                <h3>Task Details</h3>
+                <h3>VolunteerTask Details</h3>
                 <p><strong>Description:</strong> @selectedTask.Description</p>
                 <p><strong>Address:</strong> @selectedTask.Address</p>
-                <p><strong>Availability:</strong></p>
+                <p><strong>EndDate:</strong></p>
 
                 <ul>
-                    @foreach (var date in selectedTask.Availability)
+                    @foreach (var date in selectedTask.EndDate)
                     {
                         <li>@date.ToString("yyyy-MM-dd")</li>
                     }
                 </ul>
 
-                <button class="btn btn-primary" @onclick="() => AssignTask(0)">Assign Task</button>
+                <button class="btn btn-primary" @onclick="() => AssignTask(0)">Assign VolunteerTask</button>
             </div>
         }
     }
@@ -196,12 +203,12 @@
     {
         <h1>Your Tasks</h1>
         <ul class="list-group">
-            @foreach (var task in selectedVolunteer.TaskList)
+            @foreach (var volunteerTask in selectedVolunteer.VolunteerTaskList)
             {
                 <li class="list-group-item d-flex justify-content-between align-items-center"
-                    @onclick="() => ShowTaskDetails(task)">
+                    @onclick="() => ShowTaskDetails(volunteerTask)">
                     <div>
-                        <strong>@task.Description</strong> - Status: @task.TaskStatus
+                        <strong>@volunteerTask.Description</strong> - Status: @volunteerTask.TaskStatus
                     </div>
                     <button class="btn btn-info btn-sm">Details</button>
                 </li>
@@ -211,19 +218,17 @@
         @if (selectedTask != null && selectedTask.Description != null)
         {
             <div class="mt-3 p-3 border rounded">
-                <h3>Task Details</h3>
+                <h3>VolunteerTask Details</h3>
                 <p><strong>Description:</strong> @selectedTask.Description</p>
                 <p><strong>Address:</strong> @selectedTask.Address</p>
-                <p><strong>Availability:</strong></p>
+                <p><strong>EndDate:</strong></p>
 
                 <ul>
-                    @foreach (var date in selectedTask.Availability)
+                    @foreach (var date in selectedTask.EndDate)
                     {
                         <li>@date.ToString("yyyy-MM-dd")</li>
                     }
                 </ul>
-
-                <button class="btn btn-primary" @onclick="() => AssignTask(0)">Assign Task</button>
             </div>
         }
 
@@ -231,6 +236,13 @@
     @if(selectedOption == 3)
     {
         <h1>Profile Information</h1>
+        <p>First Name: <input type="text" value="@selectedVolunteer.FirstName" readonly class="form-control" /></p>
+        <p>Last Name: <input type="text" value="@selectedVolunteer.LastName" readonly class="form-control" /></p>
+        <p>Email: <input type="text" value="@selectedVolunteer.Email" readonly class="form-control" /></p>
+        <p>Phone Number: <input type="text" value="@PhoneNumberToString(selectedVolunteer.PhoneNumber)" readonly class="form-control" /></p>
+        <p>Address: <input type="text" value="@selectedVolunteer.Address" readonly class="form-control" /></p>
+        <p>Organisation: <input type="text" value="@selectedVolunteer.Organisation.OrganisationName" readonly class="form-control" /></p>
+
     }
 
     <button class="btn btn-primary" @onclick="() => ChangeForm(0)">Back</button>
@@ -240,36 +252,91 @@
 @if (whichForm == 8)
 {
     <h1>Hello @selectedOrganisation.OrganisationName</h1>
-    <button class="btn btn-primary" @onclick="() => ChangeSelect(1)">Available Tasks</button>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(1)">Create Task</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(2)">Your Tasks</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(3)">Your Volunteers</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(4)">Edit Your Profile</button>
 
-    <h1>Task List</h1>
-    <ul class="list-group">
-        @foreach (var task in taskList)
-        {
-            <li class="list-group-item d-flex justify-content-between align-items-center"
-                @onclick="() => ShowTaskDetails(task)">
-                <div>
-                    <strong>@task.Description</strong> - Status: @task.TaskStatus
-                </div>
-                <button class="btn btn-info btn-sm">Details</button>
-            </li>
-        }
-    </ul>
+    @if (selectedOption == 1)
+    {
+        <h1>Create Task</h1>
 
+        <div>
+
+            <p>Description: </p>
+            <input type="text" @bind="description" placeholder="Description" class="form-control mt-2" />
+
+            <p>Address: </p>
+            <input type="text" @bind="address" placeholder="Enter address" class="form-control mt-2" />
+            <p> </p>
+
+            <p>EndDate: </p>
+            <div class="d-flex gap-2 align-items-center">
+                <input type="date" @bind="newAvailabilityDate" class="form-control" />
+                <button class="btn btn-success" @onclick="AddAvailabilityDate">Add</button>
+            </div>
+            <ul class="list-group mt-2">
+                @foreach (var date in endDate)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        @date.ToShortDateString()
+                        <button class="btn btn-danger btn-sm" @onclick="() => RemoveAvailabilityDate(date)">Remove</button>
+                    </li>
+                }
+            </ul>
+
+            <button class="btn btn-primary" @onclick="CreateTask">Submit</button>
+
+
+        </div>
+    }
+
+    @if (selectedOption == 2)
+    {
+        <h1>Your Tasks</h1>
+        <ul class="list-group">
+            @foreach (var volunteerTask in selectedOrganisation.VolunteerTaskList)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center"
+                    @onclick="() => ShowTaskDetails(volunteerTask)">
+                    <div>
+                        <strong>@volunteerTask.Description</strong> - Status: @volunteerTask.TaskStatus
+                    </div>
+                    <button class="btn btn-info btn-sm">Details</button>
+                </li>
+            }
+        </ul>
+
+        @if (selectedTask != null && selectedTask.Description != null)
+        {
+            <div class="mt-3 p-3 border rounded">
+                <h3>VolunteerTask Details</h3>
+                <p><strong>Description:</strong> @selectedTask.Description</p>
+                <p><strong>Address:</strong> @selectedTask.Address</p>
+                <p><strong>EndDate:</strong></p>
+
+                <ul>
+                    @foreach (var date in selectedTask.EndDate)
+                    {
+                        <li>@date.ToString("yyyy-MM-dd")</li>
+                    }
+                </ul>
+
+            </div>
+        }
+
+    }
     @if (selectedTask != null && selectedTask.Description != null)
     {
         <div class="mt-3 p-3 border rounded">
-            <h3>Task Details</h3>
+            <h3>VolunteerTask Details</h3>
             <p><strong>Description:</strong> @selectedTask.Description</p>
             <p><strong>Address:</strong> @selectedTask.Address</p>
-            <p><strong>Availability:</strong></p>
-            <button class="btn btn-primary" @onclick="() => AssignTask(1)">Assign Task</button>
+            <p><strong>EndDate:</strong></p>
+            <button class="btn btn-primary" @onclick="() => AssignTask(1)">Assign VolunteerTask</button>
 
             <ul>
-                @foreach (var date in selectedTask.Availability)
+                @foreach (var date in selectedTask.EndDate)
                 {
                     <li>@date.ToString("yyyy-MM-dd")</li>
                 }
@@ -284,15 +351,11 @@
 @code {
     private int whichForm = 0;
     private int prevoiusForm = 0;
-    private int volunteerCount = 0;
-    private int organisationCount = 0;
-    private int taskCount = 0;
     private int volunteerID = 0;
 
     private string firstName = string.Empty;
     private string lastName = string.Empty;
     private string email = string.Empty;
-    private IO.Modules.Volunteer.Gender gender = IO.Modules.Volunteer.Gender.Female;
     private char[] phoneNumber = new char[0];
     private string address = string.Empty;
 
@@ -302,12 +365,9 @@
     private string description = string.Empty;
     private int selectedOption = 0;
 
-    private List<DateTime> availability = new List<DateTime>();
+    private List<DateTime> endDate = new List<DateTime>();
     private DateTime newAvailabilityDate = DateTime.Today;
 
-    private List<IO.Modules.Volunteer.Organisation> organisationList = new List<IO.Modules.Volunteer.Organisation>();
-    private List<IO.Modules.Volunteer.Volunteer> volunteerList = new List<IO.Modules.Volunteer.Volunteer>();
-    private List<IO.Modules.Volunteer.Task> taskList = new List<IO.Modules.Volunteer.Task>();
 
     private int? selectedOrganisationID;
     private int? previousSelectedOrganisationID;
@@ -315,19 +375,64 @@
     private int? selectedVolunteerID;
     private int? previousSelectedVolunteerID;
     private IO.Modules.Volunteer.Volunteer selectedVolunteer = new IO.Modules.Volunteer.Volunteer();
-    private IO.Modules.Volunteer.Organisation selectedOrganisation = new IO.Modules.Volunteer.Organisation();
-    private IO.Modules.Volunteer.Task selectedTask = new IO.Modules.Volunteer.Task();
+    private Organisation selectedOrganisation = new Organisation();
+    private VolunteerTask selectedTask = new VolunteerTask();
 
     private string selectedOrganisationName =>
-        organisationList.FirstOrDefault(o => o.OrganisationID == selectedOrganisationID)?.OrganisationName ?? "None";
+        volunteerManager.OrganisationList.FirstOrDefault(o => o.OrganisationID == selectedOrganisationID)?.OrganisationName ?? "None";
 
-    IO.Modules.Volunteer.VolunteerManager volunteerManager = new IO.Modules.Volunteer.VolunteerManager();
+    VolunteerManager volunteerManager = new VolunteerManager();
 
-    protected override async Task OnInitializedAsync()
+    protected override async System.Threading.Tasks.Task OnInitializedAsync()
     {
-        load();
+        volunteerManager.Load();
         Console.WriteLine("Volunteer Page Initialized");
+        string sessionUser = await sessionService.GetUserNameAsync();
+        //CheckUser(sessionUser);
+        Console.WriteLine(sessionUser);
     }
+
+
+    private void CheckUser(string sessionUser)
+    {
+        UserExecuter userExecuter = new UserExecuter();
+        User user = userExecuter.GetUserFromDataBase(sessionUser);
+        bool isVolunteer = false;
+        for(int i = 0; i < volunteerManager.VolunteerList.Count; i++)
+        {
+            if(volunteerManager.VolunteerList[i].Email == sessionUser)
+            {
+                isVolunteer = true;
+                selectedVolunteer = volunteerManager.VolunteerList[i];
+                ChangeForm(7);
+            }
+        }
+        bool isOrganisation = false;
+        if(!isVolunteer)
+        {
+            for (int i = 0; i < volunteerManager.OrganisationList.Count; i++)
+            {
+                if (volunteerManager.OrganisationList[i].Email == sessionUser)
+                {
+                    isOrganisation = true;
+                    selectedOrganisation = volunteerManager.OrganisationList[i];
+                    ChangeForm(8);
+                }
+            }
+        }
+        if(!isVolunteer && !isOrganisation)
+        {
+           IO.Modules.Volunteer.Volunteer vol = new IO.Modules.Volunteer.Volunteer(
+           firstName,
+           lastName,
+           email,
+           phoneNumber,
+           address,
+           volunteerManager.OrganisationList.FirstOrDefault(o => o.OrganisationID == selectedOrganisationID)
+       );
+        }
+    }
+
 
     private void ChangeSelect(int select)
     {
@@ -349,9 +454,9 @@
     }
 
 
-    private void ShowTaskDetails(IO.Modules.Volunteer.Task task)
+    private void ShowTaskDetails(VolunteerTask volunteerTask)
     {
-        selectedTask = task;
+        selectedTask = volunteerTask;
     }
 
 
@@ -366,15 +471,15 @@
     }
     private void AddAvailabilityDate()
     {
-        if (!availability.Contains(newAvailabilityDate))
+        if (!endDate.Contains(newAvailabilityDate))
         {
-            availability.Add(newAvailabilityDate);
+            endDate.Add(newAvailabilityDate);
         }
     }
 
     private void RemoveAvailabilityDate(DateTime date)
     {
-        availability.Remove(date);
+        endDate.Remove(date);
     }
 
 
@@ -386,12 +491,10 @@
             email,
             phoneNumber,
             address,
-            organisationList.FirstOrDefault(o => o.OrganisationID == selectedOrganisationID)
+            volunteerManager.OrganisationList.FirstOrDefault(o => o.OrganisationID == selectedOrganisationID)
         );
 
         volunteerManager.AddVolunteer(vol);
-        volunteerCount = volunteerManager.VolunteerCount;
-        volunteerList = volunteerManager.VolunteerList;
         if(who == 1)
         {
             selectedVolunteer = vol;
@@ -401,15 +504,14 @@
 
     private void CreateOrganisation(int who)
     {
-        IO.Modules.Volunteer.Organisation org = new IO.Modules.Volunteer.Organisation(
+        Organisation org = new Organisation(
             organisationName,
+            email,
             phoneNumber,
             address
         );
 
         volunteerManager.AddOrganisation(org);
-        organisationCount = volunteerManager.OrganisationCount;
-        organisationList = volunteerManager.OrganisationList;
         if (who == 1)
         {
             selectedOrganisation = org;
@@ -419,42 +521,30 @@
 
     private void CreateTask()
     {
-        IO.Modules.Volunteer.Task task = new IO.Modules.Volunteer.Task(
+        VolunteerTask volunteerTask = new VolunteerTask(
             description,
             address,
-            availability
+            endDate
         );
-
-        volunteerManager.AddTask(task);
-        taskCount = volunteerManager.TaskCount;
-        taskList = volunteerManager.TaskList;
+        Console.WriteLine(selectedOrganisation.VolunteerTaskList.Count);
+        volunteerManager.AddTask(volunteerTask, selectedOrganisation);
+        Console.WriteLine(selectedOrganisation.VolunteerTaskList.Count);
     }
 
     private void AssignTask(int who)
     {
         if(who == 0)
         {
-            selectedVolunteer.TaskList.Add(selectedTask);
+            selectedVolunteer.VolunteerTaskList.Add(selectedTask);
             selectedTask.TaskStatus = IO.Modules.Volunteer.TaskStatus.Assigned;
         }
         if(who == 1)
         {
-            selectedOrganisation.TaskList.Add(selectedTask);
+            selectedOrganisation.VolunteerTaskList.Add(selectedTask);
         }
 
     }
 
-    private void load()
-    {
-
-        volunteerManager.Load();
-        volunteerCount = volunteerManager.VolunteerCount;
-        organisationCount = volunteerManager.OrganisationCount;
-        taskCount = volunteerManager.TaskCount;
-        organisationList = volunteerManager.OrganisationList;
-        volunteerList = volunteerManager.VolunteerList;
-        taskList = volunteerManager.TaskList;
-    }
 }
 
 
@@ -474,15 +564,6 @@
         <p>Email: </p>
         <input type="email" @bind="email" placeholder="Enter email" class="form-control mt-2" />
 
-        <p>Gender: </p>
-        <select @bind="gender" class="form-select mt-2">
-            <option value="">Select Gender</option>
-            @foreach (var genderOption in Enum.GetValues(typeof(IO.Modules.Volunteer.Gender)).Cast<IO.Modules.Volunteer.Gender>())
-            {
-                <option value="@genderOption">@genderOption</option>
-            }
-        </select>
-
         <p>Phone Number: </p>
         <input type="text" @bind="PhoneNumberString" placeholder="Enter phone number" class="form-control mt-2" />
 
@@ -490,7 +571,7 @@
         <input type="text" @bind="address" placeholder="Enter address" class="form-control mt-2" />
 
         <ul class="list-group mt-2">
-            @foreach (var date in availability)
+            @foreach (var date in endDate)
             {
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     @date.ToShortDateString()
@@ -502,7 +583,7 @@
         <p>Organisation: </p>
         <select @bind="selectedOrganisationID" class="form-select mt-2">
             <option value="">Select an organisation</option>
-            @foreach (var org in organisationList)
+            @foreach (var org in volunteerManager.OrganisationList)
             {
                 <option value="@org.OrganisationID">@org.OrganisationName</option>
             }
@@ -527,6 +608,8 @@
         <p>Organisation Name: </p>
         <input type="text" @bind="organisationName" placeholder="Enter name" class="form-control mt-2" />
 
+        <p>Email: </p>
+        <input type="email" @bind="email" placeholder="Enter email" class="form-control mt-2" />
 
         <p>Phone Number: </p>
         <input type="text" @bind="PhoneNumberString" placeholder="Enter phone number" class="form-control mt-2" />
@@ -544,7 +627,7 @@
 }
 @if (whichForm == 13)
 {
-    <h1>Task Addition</h1>
+    <h1>VolunteerTask Addition</h1>
 
     <div>
 
@@ -556,13 +639,13 @@
         <input type="text" @bind="address" placeholder="Enter address" class="form-control mt-2" />
         <p> </p>
 
-        <p>Availability: </p>
+        <p>EndDate: </p>
         <div class="d-flex gap-2 align-items-center">
             <input type="date" @bind="newAvailabilityDate" class="form-control" />
             <button class="btn btn-success" @onclick="AddAvailabilityDate">Add</button>
         </div>
         <ul class="list-group mt-2">
-            @foreach (var date in availability)
+            @foreach (var date in endDate)
             {
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     @date.ToShortDateString()
@@ -588,7 +671,7 @@
         <p>Choose Volunteer: </p>
         <select @bind="selectedVolunteerID" class="form-select mt-2">
             <option value="">Select a volunteer</option>
-            @foreach (var vol in volunteerList)
+            @foreach (var vol in volunteerManager.VolunteerList)
             {
                 <option value="@vol.VolunteerID">@vol.FirstName @vol.LastName</option>
             }
@@ -596,7 +679,7 @@
         @if (previousSelectedVolunteerID != selectedVolunteerID)
         {
             previousSelectedVolunteerID = selectedVolunteerID;
-            selectedVolunteer = volunteerList.FirstOrDefault(v => v.VolunteerID == selectedVolunteerID);
+            selectedVolunteer = volunteerManager.VolunteerList.FirstOrDefault(v => v.VolunteerID == selectedVolunteerID);
         }
         @if (selectedVolunteer != null && selectedVolunteer.LastName != null)
         {
@@ -622,7 +705,7 @@
         <p>Choose Organisation: </p>
         <select @bind="selectedOrganisationID" class="form-select mt-2">
             <option value="">Select an organisation</option>
-            @foreach (var org in organisationList)
+            @foreach (var org in volunteerManager.OrganisationList)
             {
                 <option value="@org.OrganisationID">@org.OrganisationName</option>
             }
@@ -630,7 +713,7 @@
         @if (previousSelectedOrganisationID != selectedOrganisationID)
         {
             previousSelectedOrganisationID = selectedOrganisationID;
-            selectedOrganisation = organisationList.FirstOrDefault(o => o.OrganisationID == selectedOrganisationID);
+            selectedOrganisation = volunteerManager.OrganisationList.FirstOrDefault(o => o.OrganisationID == selectedOrganisationID);
         }
         @if (selectedOrganisation != null && selectedOrganisation.OrganisationName != null)
         {
@@ -647,13 +730,13 @@
 
 @if (whichForm == 16)
 {
-    <h1>Task List</h1>
+    <h1>VolunteerTask List</h1>
     <ul class="list-group">
-        @foreach (var task in taskList)
+        @foreach (var volunteerTask in volunteerManager.VolunteerTaskList)
         {
             <li class="list-group-item d-flex justify-content-between align-items-center"
-                @onclick="() => ShowTaskDetails(task)">
-                @task.Description
+                @onclick="() => ShowTaskDetails(volunteerTask)">
+                @volunteerTask.Description
                 <button class="btn btn-info btn-sm">Details</button>
             </li>
         }
@@ -662,12 +745,12 @@
     @if (selectedTask != null && selectedTask.Description != null)
     {
         <div class="mt-3 p-3 border rounded">
-            <h3>Task Details</h3>
+            <h3>VolunteerTask Details</h3>
             <p><strong>Description:</strong> @selectedTask.Description</p>
             <p><strong>Address:</strong> @selectedTask.Address</p>
-            <p><strong>Availability:</strong></p>
+            <p><strong>EndDate:</strong></p>
             <ul>
-                @foreach (var date in selectedTask.Availability)
+                @foreach (var date in selectedTask.EndDate)
                 {
                     <li>@date.ToString("yyyy-MM-dd")</li>
                 }

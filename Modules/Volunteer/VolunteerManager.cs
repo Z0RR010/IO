@@ -6,21 +6,21 @@ namespace IO.Modules.Volunteer
     {
         private List<Volunteer> volunteerList;
         private List<Organisation> organisationList;
-        private List<Task> taskList;
+        private List<VolunteerTask> volunteerTaskList;
 
         public VolunteerManager()
         {
             volunteerList = new List<Volunteer>();
             organisationList = new List<Organisation>();
-            taskList = new List<Task>();
+            volunteerTaskList = new List<VolunteerTask>();
         }
 
         public int VolunteerCount => volunteerList.Count;
         public int OrganisationCount => organisationList.Count;
-        public int TaskCount => taskList.Count;
+        public int VolunteerTaskCount => volunteerTaskList.Count;
         public List<Organisation> OrganisationList => organisationList;
         public List<Volunteer> VolunteerList => volunteerList;
-        public List<Task> TaskList => taskList;
+        public List<VolunteerTask> VolunteerTaskList => volunteerTaskList;
 
         public void AddOrganisation(Organisation organisation)
         {
@@ -92,32 +92,40 @@ namespace IO.Modules.Volunteer
             executor.Dispose();
         }
 
-        public void AddTask(Task task)
+        public void AddTask(VolunteerTask volunteerTask, Organisation organisation)
         {
-            if (task == null)
-                throw new ArgumentNullException(nameof(task), "Task cannot be null.");
+            if (volunteerTask == null)
+                throw new ArgumentNullException(nameof(volunteerTask), "VolunteerTask cannot be null.");
 
-            if (task.TaskID == 0 && taskList.Count != 0)
+            if (volunteerTask.VolunteerTaskID == 0 && volunteerTaskList.Count != 0)
             {
-                task.TaskID = taskList.Last().TaskID + 1;
+                volunteerTask.VolunteerTaskID = volunteerTaskList.Last().VolunteerTaskID + 1;
             }
 
-            if (taskList.Any(t => t.TaskID == task.TaskID))
+            if (volunteerTaskList.Any(t => t.VolunteerTaskID == volunteerTask.VolunteerTaskID))
             {
-                throw new InvalidOperationException($"Task with ID {task.TaskID} already exists.");
+                throw new InvalidOperationException($"VolunteerTask with ID {volunteerTask.VolunteerTaskID} already exists.");
             }
 
-            taskList.Add(task);
-
+            volunteerTaskList.Add(volunteerTask);
+            FindOrganisationByID(organisation.OrganisationID).AddTask(volunteerTask);
             var executor = new VolunteerExecuter();
 
-            if (executor.AddTaskToDatabase(task))
+            if (executor.AddTaskToDatabase(volunteerTask))
             {
-                Console.WriteLine("Task added or updated successfully!");
+                Console.WriteLine("VolunteerTask added or updated successfully!");
             }
             else
             {
-                Console.WriteLine("Failed to add or update task.");
+                Console.WriteLine("Failed to add or update volunteerTask.");
+            }
+            if (executor.AddOrganisationToDatabase(organisation))
+            {
+                Console.WriteLine("Organisation added or updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to add or update organisation.");
             }
             executor.Dispose();
         }
@@ -125,12 +133,12 @@ namespace IO.Modules.Volunteer
 
         public void AddRateToTask(int taskID, Rate rate)
         {
-            var task = taskList.FirstOrDefault(t => t.TaskID == taskID);
+            var volunteerTask = volunteerTaskList.FirstOrDefault(t => t.VolunteerTaskID == taskID);
 
-            if (task == null)
-                throw new KeyNotFoundException($"Task with ID {taskID} not found.");
+            if (volunteerTask == null)
+                throw new KeyNotFoundException($"VolunteerTask with ID {taskID} not found.");
 
-            task.AddRate(rate);
+            volunteerTask.AddRate(rate);
         }
 
 
@@ -160,7 +168,7 @@ namespace IO.Modules.Volunteer
             var executor = new VolunteerExecuter();
             organisationList = executor.LoadOrganisationList();
             volunteerList = executor.LoadVolunteerList(organisationList);
-            taskList = executor.LoadTaskList();
+            volunteerTaskList = executor.LoadTaskList();
             executor.Dispose();
         }
 

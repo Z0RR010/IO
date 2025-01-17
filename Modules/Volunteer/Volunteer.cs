@@ -9,7 +9,7 @@
         public char[] PhoneNumber { get; set; }
         public string Address { get; set; }
         public Organisation Organisation { get; set; }
-        public List<Task> TaskList { get; private set; } = new List<Task>();
+        public List<VolunteerTask> VolunteerTaskList { get; private set; } = new List<VolunteerTask>();
 
         public Volunteer() { }
 
@@ -29,9 +29,9 @@
             Organisation = organisation;
         }
 
-        public void AddTask(Task task)
+        public void AddTask(VolunteerTask volunteerTask)
         {
-            TaskList.Add(task);
+            VolunteerTaskList.Add(volunteerTask);
         }
     }
 }
