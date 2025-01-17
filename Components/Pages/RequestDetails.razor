@@ -1,5 +1,4 @@
 @page "/requests/details/{Id:int}"
-@inject RequestModule.IRequestService RequestService
 
 <h3>Request Details</h3>
 
@@ -19,12 +18,11 @@ else
         <p>Status: @request.Status</p>
         <p>Created At: @request.CreatedAt</p>
         <p>Updated At: @request.DateUpdated</p>
-        <p>User: @request.User.Name (@request.User.Email)</p>
+        <p>User: @request.User </p>
         <p>Address: @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
         <p>Resources Required: @string.Join(", ", request.ResourcesRequired.Select(r => $"{r.Name} (x{r.Amount})"))</p>
         <p>Is Verified: @request.IsVerified</p>
         <p>Handling Organization: @request.HandlingOrganization</p>
-        <p>Categories: @string.Join(", ", request.Categories)</p>
     </div>
 }
 
@@ -32,6 +30,7 @@ else
     [Parameter]
     public int Id { get; set; }
 
+    private IO.Modules.ResourceManager.RequestManager requestManager = new IO.Modules.ResourceManager.RequestManager();
     private RequestModule.Request request;
     private bool isLoading = true;
 
@@ -39,11 +38,11 @@ else
     {
         try
         {
-            request = await RequestService.GetRequestByIdAsync(Id);
+            request = await requestManager.GetRequestById(Id);
         }
         catch (Exception ex)
         {
-            // Log the exception (ex) if necessary
+            Console.WriteLine($"Error loading request details: {ex.Message}");
         }
         finally
         {

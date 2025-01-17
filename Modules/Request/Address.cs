@@ -21,5 +21,9 @@ namespace RequestModule
         public Address()
         {
         }
+        public override string ToString()
+        {
+            return $"{Id};{City};{Street};{StreetNumber};{Apartment};{ZipCode}";
+        }
     }
 }
