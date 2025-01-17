@@ -25,12 +25,15 @@
                 var i = index;
                 <div id="textfield-container" style="display: flex; align-items: center; gap: 5px;">
                     <input class="form-control" type="text" @bind="fieldValues[i]" placeholder="Enter address or location" style="flex: 1;" />
-                    <button class="btn btn-danger" @onclick="() => RemoveField(i)">-</button>
+                    @if (fieldValues.Count > 1)
+                    {
+                        <button class="btn btn-danger" @onclick="() => RemoveField(i)">-</button>
+                    }
                 </div>
             }
             <div style="display: flex; gap: 10px;">
                 <button class="btn btn-success" @onclick="AddField">+</button>
-                <button class="btn" style="background-color: #28a745; color: white;" @onclick="() => ConfirmFields()">
+                <button class="btn btn-primary" @onclick="() => ConfirmFields()">
                     Add midpoints
                 </button>
             </div>
