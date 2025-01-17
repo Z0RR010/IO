@@ -150,7 +150,14 @@
                                 {
                                     <div class="mt-2">
                                         <p>Description: @request.Description</p>
-                                        <p>Address: @request.Address</p>                                        
+                                        <p>Status: @request.Status</p>
+                                        <button class="btn btn-primary btn-sm mt-2" @onclick="() => ChangeRequestStatus(request, RequestStatus.InProgress)">Change Status</button>
+                                        <p>Created at: @request.CreatedAt</p>
+                                        <p>Updated At: @request.DateUpdated</p>
+                                        <p>User: @request.User</p>
+                                        <p>Resources Required: @string.Join(", ", request.ResourcesRequired.Select(r => $"{r.Name} (x{r.Amount})"))</p>
+                                        <p>Address: @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
+                                        <p>Is Verified: @request.IsVerified</p>
                                         <button class="btn btn-primary btn-sm mt-2" @onclick="() => SelectRequest(request)">Select</button>
                                     </div>
                                 }
@@ -170,6 +177,9 @@
 
                             <p>Address: </p>
                             <input type="text" @bind="address" placeholder="Enter address" class="form-control mt-2" />
+
+                            <p>Selected Request: </p>
+                            <input type="text" @bind="selectedRequestForTask.Title" readonly class="form-control mt-2" />
 
                             <p>EndDate: </p>
                             <div class="d-flex gap-2 align-items-center">
@@ -193,42 +203,12 @@
                 </div>
             </div>
         </div>
-        
     }
 
     @if (selectedOption == 2)
     {
         <h1>Your Tasks</h1>
-        <h1>Create Task</h1>
-
-        <div>
-
-            <p>Description: </p>
-            <input type="text" @bind="description" placeholder="Description" class="form-control mt-2" />
-
-            <p>Address: </p>
-            <input type="text" @bind="address" placeholder="Enter address" class="form-control mt-2" />
-            <p> </p>
-
-            <p>EndDate: </p>
-            <div class="d-flex gap-2 align-items-center">
-                <input type="date" @bind="newAvailabilityDate" class="form-control" />
-                <button class="btn btn-success" @onclick="AddAvailabilityDate">Add</button>
-            </div>
-            <ul class="list-group mt-2">
-                @foreach (var date in endDate)
-                {
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        @date.ToShortDateString()
-                        <button class="btn btn-danger btn-sm" @onclick="() => RemoveAvailabilityDate(date)">Remove</button>
-                    </li>
-                }
-            </ul>
-
-            <button class="btn btn-primary" @onclick="CreateTask">Submit</button>
-
-
-        </div>
+        
         <ul class="list-group">
             @foreach (var volunteerTask in volunteerManager.FindTasksByOrganisation(selectedOrganisation.OrganisationID))
             {
@@ -289,8 +269,11 @@
 
 
     private string organisationName = string.Empty;
+
+
     private Request selectedRequest;
     private bool showRequestDetails = false;
+
 
     private string description = string.Empty;
     private int selectedOption = 0;
@@ -301,7 +284,7 @@
 
     private int selectedOrganisationID;
     private int previousSelectedOrganisationID;
-
+    private Request selectedRequestForTask = new Request();
     private int? selectedVolunteerID;
     private int? previousSelectedVolunteerID;
     private IO.Modules.Volunteer.Volunteer selectedVolunteer = new IO.Modules.Volunteer.Volunteer();
@@ -434,7 +417,7 @@
 
     private async Task editOrganisation()
     {
-       volunteerManager.EditOrganisation(selectedOrganisation);
+        volunteerManager.EditOrganisation(selectedOrganisation);
     }
     private void CreateVolunteer(int who)
     {
@@ -477,6 +460,7 @@
             description,
             address,
             endDate,
+            selectedRequestForTask.Id,
             selectedOrganisation.OrganisationID
         );
         volunteerManager.AddTask(volunteerTask);
@@ -502,10 +486,12 @@
 
     private void SelectRequest(Request request)
     {
-        Console.WriteLine($"Request {request.Title} selected");
-        //Tutaj logika z wyborem zgłoszenia
+        selectedRequestForTask = request;
+    }
+    private void ChangeRequestStatus(Request request, RequestStatus requestStatus)
+    {
+        request.Status = requestStatus;
     }
 
 }
 
-}

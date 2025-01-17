@@ -42,7 +42,7 @@ namespace IO.Modules.Volunteer
 
             var executor = new VolunteerExecuter();
 
-            if (executor.AddOrganisationToDatabase(organisation))
+            if (executor.SendOrganisationToDatabase(organisation))
             {
                 Console.WriteLine("Organisation added or updated successfully!");
             }
@@ -81,7 +81,7 @@ namespace IO.Modules.Volunteer
 
             var executor = new VolunteerExecuter();
 
-            if (executor.AddVolunteerToDatabase(volunteer))
+            if (executor.SendVolunteerToDatabase(volunteer))
             {
                 Console.WriteLine("Volunteer added or updated successfully!");
             }
@@ -111,7 +111,7 @@ namespace IO.Modules.Volunteer
 
             var executor = new VolunteerExecuter();
 
-            if (executor.AddTaskToDatabase(volunteerTask))
+            if (executor.SendTaskToDatabase(volunteerTask))
             {
                 Console.WriteLine("VolunteerTask added or updated successfully!");
             }
@@ -134,7 +134,7 @@ namespace IO.Modules.Volunteer
             volunteerTask.TaskStatus = taskStatus;
             var executor = new VolunteerExecuter();
 
-            if (executor.AddTaskToDatabase(volunteerTask))
+            if (executor.SendTaskToDatabase(volunteerTask))
             {
                 Console.WriteLine("VolunteerTask added or updated successfully!");
             }
@@ -154,7 +154,7 @@ namespace IO.Modules.Volunteer
             org.Address = organisation.Address;
 
             var executor = new VolunteerExecuter();
-            if (executor.AddOrganisationToDatabase(org))
+            if (executor.SendOrganisationToDatabase(org))
             {
                 Console.WriteLine("VolunteerTask added or updated successfully!");
             }

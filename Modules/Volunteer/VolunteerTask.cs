@@ -9,7 +9,7 @@
         public Rate Rate { get; set; }
         public int OrganisationID { get; set; }
         public int VolunteerID { get; set; }
-
+        public int RequestID { get; set; }
 
         public VolunteerTask() { }
 
@@ -18,12 +18,14 @@
             string address,
             List<DateTime> endDate,
             int organisationID,
+            int requestID,
             TaskStatus taskStatus = TaskStatus.New)
         {
             Description = description;
             Address = address;
             EndDate = endDate;
             OrganisationID = organisationID;
+            RequestID = requestID;
             TaskStatus = taskStatus;
         }
 

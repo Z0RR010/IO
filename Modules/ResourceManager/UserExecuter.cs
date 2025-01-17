@@ -24,13 +24,8 @@ namespace IO.Modules.ResourceManager
             {
                 _userConnection =
                     //new MySqlConnection("Server=localhost;Port=3306;Database=userDatabase;User Id=root;Password=root;");
-//<<<<<<< HEAD
                     new SqliteConnection(
                         "Data Source=./databases/userDatabase.db;Cache=Shared");
-//=======
-                    new SqliteConnection(
-                        "Data Source=./././databases/userDatabase.db;Version=3;FailIfMissing=True;");
-//>>>>>>> Modules/Requests
                 _userConnection.Open();
                 //Diagnostics stuff
                 Console.WriteLine("Connection to " + _userConnection.ConnectionString + " established");

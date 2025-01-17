@@ -11,7 +11,7 @@ namespace IO.Modules.ResourceManager
         private readonly string _connectionString =
                     "Data Source=./databases/volunteerDatabase.db;Cache=Shared";
 
-        public bool AddOrganisationToDatabase(Organisation organisation)
+        public bool SendOrganisationToDatabase(Organisation organisation)
         {
             if (organisation == null) throw new ArgumentNullException(nameof(organisation));
 
@@ -79,7 +79,7 @@ namespace IO.Modules.ResourceManager
             }
         }
 
-        public bool AddVolunteerToDatabase(IO.Modules.Volunteer.Volunteer volunteer)
+        public bool SendVolunteerToDatabase(IO.Modules.Volunteer.Volunteer volunteer)
         {
             if (volunteer == null) throw new ArgumentNullException(nameof(volunteer));
 
@@ -151,7 +151,7 @@ namespace IO.Modules.ResourceManager
             }
         }
 
-        public bool AddTaskToDatabase(IO.Modules.Volunteer.VolunteerTask volunteerTask)
+        public bool SendTaskToDatabase(IO.Modules.Volunteer.VolunteerTask volunteerTask)
         {
             if (volunteerTask == null) throw new ArgumentNullException(nameof(volunteerTask));
             try
@@ -191,6 +191,7 @@ namespace IO.Modules.ResourceManager
                 command.Parameters.AddWithValue("@endDate", string.Join(",", volunteerTask.EndDate.Select(x => x.ToString("O"))));
                 command.Parameters.AddWithValue("@organisationID", volunteerTask.OrganisationID);
                 command.Parameters.AddWithValue("@volunteerID", volunteerTask.VolunteerID);
+                command.Parameters.AddWithValue("@requestID", volunteerTask.RequestID);
 
 
                 int rowsAffected;
@@ -242,6 +243,7 @@ namespace IO.Modules.ResourceManager
                     task.EndDate = reader.GetString(4).Split(',').Select(DateTime.Parse).ToList();
                     task.OrganisationID = reader.GetInt32(5);
                     task.VolunteerID = reader.GetInt32(6);
+                    task.RequestID = reader.GetInt32(7);
                     tasks.Add(task);
                 }
             }
