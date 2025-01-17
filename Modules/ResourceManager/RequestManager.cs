@@ -1,7 +1,7 @@
 ﻿using IO.Modules.Security;
 using RequestModule;
 using System.Data;
-using System.Data.SQLite;
+using Microsoft.Data.Sqlite;
 using System.Text;
 using System.Text.Json;
 
@@ -9,11 +9,11 @@ namespace IO.Modules.ResourceManager
 {
     public class RequestManager : IRequestManager, IDisposable, IAsyncDisposable
     {
-        private readonly SQLiteConnection _connection;
+        private readonly SqliteConnection _connection;
 
         public RequestManager()
         {
-            _connection = new SQLiteConnection(
+            _connection = new SqliteConnection(
                 "Data Source=./././databases/requestDatabase.db;Version=3;FailIfMissing=True;");
             _connection.Open();
         }
@@ -33,7 +33,7 @@ namespace IO.Modules.ResourceManager
                 "INSERT INTO Request(Title, Description, CreatedAt, DateUpdated, Status, User, Address, ResourcesRequired, IsVerified, HandlingOrganization) VALUES(@title, @description, @createdAt, @dateUpdated, @status, @user, @address, @resRequired, @isVerified, @handlingOrganization)";
             try
             {
-                using (var command = new SQLiteCommand(query, _connection))
+                using (var command = new SqliteCommand(query, _connection))
                 {
                     command.Parameters.AddWithValue("@title", request.Title);
                     command.Parameters.AddWithValue("@description", request.Description);
@@ -68,7 +68,7 @@ namespace IO.Modules.ResourceManager
 
             try
             {
-                using (var command = new SQLiteCommand(query, _connection))
+                using (var command = new SqliteCommand(query, _connection))
                 using (var reader = command.ExecuteReader())
                 {
                     var result = new StringBuilder();
@@ -108,7 +108,7 @@ namespace IO.Modules.ResourceManager
                 "DELETE FROM Request WHERE Id = @id";
             try
             {
-                using (var command = new SQLiteCommand(query, _connection))
+                using (var command = new SqliteCommand(query, _connection))
                 {
                     command.Parameters.AddWithValue("@id", id);
 
@@ -132,7 +132,7 @@ namespace IO.Modules.ResourceManager
 
             try
             {
-                using (var command = new SQLiteCommand(query, _connection))
+                using (var command = new SqliteCommand(query, _connection))
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
@@ -174,7 +174,7 @@ namespace IO.Modules.ResourceManager
             try
             {
                 var query = "SELECT * FROM Request WHERE Id = @id";
-                using (var command = new SQLiteCommand(query, _connection))
+                using (var command = new SqliteCommand(query, _connection))
                 {
                     command.Parameters.AddWithValue("@id", id);
 
@@ -221,7 +221,7 @@ namespace IO.Modules.ResourceManager
             try
             {
                 var query = "SELECT ResourcesRequired FROM Request WHERE Id = @id";
-                using (var command = new SQLiteCommand(query, _connection))
+                using (var command = new SqliteCommand(query, _connection))
                 {
                     command.Parameters.AddWithValue("@id", requestId);
 
