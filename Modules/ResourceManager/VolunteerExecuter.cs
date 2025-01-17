@@ -49,7 +49,7 @@ namespace IO.Modules.ResourceManager
 
                 orgCommand.Parameters.AddWithValue("@email", organisation.Email);
                 orgCommand.Parameters.AddWithValue("@name", organisation.OrganisationName);
-                orgCommand.Parameters.AddWithValue("@phone", string.Join("", organisation.PhoneNumber));
+                orgCommand.Parameters.AddWithValue("@phone", organisation.PhoneNumber);
                 orgCommand.Parameters.AddWithValue("@address", organisation.Address);
 
                 int rowsAffected;
@@ -122,7 +122,7 @@ namespace IO.Modules.ResourceManager
                 volCommand.Parameters.AddWithValue("@firstName", volunteer.FirstName);
                 volCommand.Parameters.AddWithValue("@lastName", volunteer.LastName);
                 volCommand.Parameters.AddWithValue("@email", volunteer.Email);
-                volCommand.Parameters.AddWithValue("@phone", string.Join("", volunteer.PhoneNumber));
+                volCommand.Parameters.AddWithValue("@phone", volunteer.PhoneNumber);
                 volCommand.Parameters.AddWithValue("@address", volunteer.Address);
                 volCommand.Parameters.AddWithValue("@orgId", volunteer.OrganisationID);
 
@@ -275,7 +275,7 @@ namespace IO.Modules.ResourceManager
                     volunteer.FirstName = reader.GetString(1);
                     volunteer.LastName = reader.GetString(2);
                     volunteer.Email = reader.GetString(3);
-                    volunteer.PhoneNumber = reader.GetString(4).ToCharArray();
+                    volunteer.PhoneNumber = reader.GetString(4);
                     volunteer.Address = reader.GetString(5);
                     volunteer.OrganisationID = reader.GetInt32(6);
 
@@ -314,7 +314,7 @@ namespace IO.Modules.ResourceManager
                     organisation.OrganisationID = reader.GetInt32(0);
                     organisation.OrganisationName = reader.GetString(1);
                     organisation.Email = reader.GetString(2);
-                    organisation.PhoneNumber = reader.GetString(3).ToCharArray();
+                    organisation.PhoneNumber = reader.GetString(3);
                     organisation.Address = reader.GetString(4);
                     organisations.Add(organisation);
                 }

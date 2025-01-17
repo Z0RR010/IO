@@ -9,43 +9,7 @@
 
 @if (whichForm == 0)
 {
-    <h1>Who are you?</h1>
-
-    <button class="btn btn-primary" @onclick="() => ChangeForm(1)">Volunteer</button>
-    <button class="btn btn-primary" @onclick="() => ChangeForm(2)">Organisation</button>
-    <button class="btn btn-primary" @onclick="() => ChangeForm(3)">Nobody</button>
-
-}
-
-@if(whichForm == 1)
-{
-    <h1>Which one?</h1>
-
-    <p>Choose Volunteer: </p>
-    <select @bind="selectedVolunteerID" class="form-select mt-2">
-        <option value="">Select a volunteer</option>
-        @foreach (var vol in volunteerManager.VolunteerList)
-        {
-            <option value="@vol.VolunteerID">@vol.FirstName @vol.LastName</option>
-        }
-    </select>
-    @if (previousSelectedVolunteerID != selectedVolunteerID)
-    {
-        previousSelectedVolunteerID = selectedVolunteerID;
-        selectedVolunteer = volunteerManager.VolunteerList.FirstOrDefault(v => v.VolunteerID == selectedVolunteerID);
-    }
-    @if (selectedVolunteer != null && selectedVolunteer.FirstName != null) {
-        <button class="btn btn-primary" @onclick="() => ChangeForm(7)">Submit</button>
-    }
-    <button class="btn btn-primary" @onclick="() => ChangeForm(0)">Back</button>
-
-}
-
-@if (whichForm == 2)
-{
-    <h1>Which one?</h1>
-
-    <p>Choose Organisation: </p>
+    <h1>Choose Your Organisation</h1>
     <select @bind="selectedOrganisationID" class="form-select mt-2">
         <option value="">Select an organisation</option>
         @foreach (var org in volunteerManager.OrganisationList)
@@ -60,95 +24,20 @@
     }
     @if (selectedOrganisation != null && selectedOrganisation.OrganisationName != null)
     {
-        <button class="btn btn-primary" @onclick="() => ChangeForm(8)">Submit</button>
+        <button class="btn btn-primary" @onclick="() => OrganisationSelected(selectedOrganisation.OrganisationID)">Submit</button>
     }
-    <button class="btn btn-primary" @onclick="() => ChangeForm(0)">Back</button>
-
 }
-
+@if (whichForm == 2)
+{
+    <h1>0_0 ?Poszkodowany? X_X</h1>
+}
 
 @if (whichForm == 3)
-{
-    <button class="btn btn-primary" @onclick="() => ChangeForm(5)">Volunteer Application</button>
-    <button class="btn btn-primary" @onclick="() => ChangeForm(6)">Organisation Application</button>
-    <button class="btn btn-primary" @onclick="() => ChangeForm(0)">Back</button>
-}
-
-@if (whichForm == 5)
-{
-    <h1>Volunteer Application</h1>
-
-    <div>
-
-        <p>First Name: </p>
-        <input type="text" @bind="firstName" placeholder="Enter first name" class="form-control mt-2" />
-
-        <p>Last Name: </p>
-        <input type="text" @bind="lastName" placeholder="Enter last name" class="form-control mt-2" />
-
-        <p>Email: </p>
-        <input type="email" @bind="email" placeholder="Enter email" class="form-control mt-2" />
-
-        <p>Phone Number: </p>
-        <input type="text" @bind="PhoneNumberString" placeholder="Enter phone number" class="form-control mt-2" />
-
-        <p>Address: </p>
-        <input type="text" @bind="address" placeholder="Enter address" class="form-control mt-2" />
-
-        <p>Organisation: </p>
-        <select @bind="selectedOrganisationID" class="form-select mt-2">
-            <option value="">Select an organisation</option>
-            @foreach (var org in volunteerManager.OrganisationList)
-            {
-                <option value="@org.OrganisationID">@org.OrganisationName</option>
-            }
-        </select>
-
-        <p>Selected Organisation: @selectedOrganisationName</p>
-        <p> </p>
-        <button class="btn btn-primary" @onclick="() => CreateVolunteer(1)">Submit</button>
-
-    </div>
-    <button class="btn btn-primary" @onclick="() => ChangeForm(3)">Back</button>
-
-}
-
-@if (whichForm == 6)
-{
-    <h1>Organisation Application</h1>
-
-    <div>
-
-        <p>Organisation Name: </p>
-        <input type="text" @bind="organisationName" placeholder="Enter name" class="form-control mt-2" />
-
-        <p>Email: </p>
-        <input type="email" @bind="email" placeholder="Enter email" class="form-control mt-2" />
-
-        <p>Phone Number: </p>
-        <input type="text" @bind="PhoneNumberString" placeholder="Enter phone number" class="form-control mt-2" />
-
-        <p>Address: </p>
-        <input type="text" @bind="address" placeholder="Enter address" class="form-control mt-2" />
-        <p> </p>
-
-        <button class="btn btn-primary" @onclick="() => CreateOrganisation(1)">Submit</button>
-
-
-    </div>
-
-    <button class="btn btn-primary" @onclick="() => ChangeForm(3)">Back</button>
-
-}
-
-
-@if (whichForm == 7)
 {
     <h1>Hello @selectedVolunteer.FirstName</h1>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(1)">Available Tasks</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(2)">Your Tasks</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(3)">Profile Information</button>
-    <button class="btn btn-primary" @onclick="() => ChangeForm(0)">Back</button>
 
 
     @if (selectedOption == 1)
@@ -227,7 +116,7 @@
         <p>First Name: <input type="text" value="@selectedVolunteer.FirstName" readonly class="form-control" /></p>
         <p>Last Name: <input type="text" value="@selectedVolunteer.LastName" readonly class="form-control" /></p>
         <p>Email: <input type="text" value="@selectedVolunteer.Email" readonly class="form-control" /></p>
-        <p>Phone Number: <input type="text" value="@PhoneNumberToString(selectedVolunteer.PhoneNumber)" readonly class="form-control" /></p>
+        <p>Phone Number: <input type="text" value="@selectedVolunteer.PhoneNumber" readonly class="form-control" /></p>
         <p>Address: <input type="text" value="@selectedVolunteer.Address" readonly class="form-control" /></p>
         <p>Organisation: <input type="text" value="@volunteerManager.FindOrganisationByID(selectedVolunteer.OrganisationID).OrganisationName" readonly class="form-control" /></p>
 
@@ -236,14 +125,13 @@
 }
 
 
-@if (whichForm == 8)
+@if (whichForm == 4)
 {
     <h1>Hello @selectedOrganisation.OrganisationName</h1>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(1)">Create Task</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(2)">Your Tasks</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(3)">Your Volunteers</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(4)">Edit Your Profile</button>
-    <button class="btn btn-primary" @onclick="() => ChangeForm(0)">Back</button>
 
     @if (selectedOption == 1)
     {
@@ -326,7 +214,7 @@
     private string firstName = string.Empty;
     private string lastName = string.Empty;
     private string email = string.Empty;
-    private char[] phoneNumber = new char[0];
+    private string phoneNumber = string.Empty;
     private string address = string.Empty;
 
 
@@ -358,51 +246,85 @@
         volunteerManager.Load();
         Console.WriteLine("Volunteer Page Initialized");
         string sessionUser = await sessionService.GetUserNameAsync();
-        //CheckUser(sessionUser);
-        Console.WriteLine(sessionUser);
+        CheckUser(sessionUser);
+        if(selectedVolunteer != null) {
+            if(selectedVolunteer.OrganisationID == -1)
+            {
+                ChangeForm(0);
+            }
+        }
+
     }
 
 
     private void CheckUser(string sessionUser)
     {
         UserExecuter userExecuter = new UserExecuter();
-        User user = userExecuter.GetUserFromDataBase(sessionUser);
-
-        bool isVolunteer = false;
-        for(int i = 0; i < volunteerManager.VolunteerList.Count; i++)
+        BasicUser basicUser = userExecuter.GetBasicUser(sessionUser);
+        if (basicUser != null)
         {
-            if(volunteerManager.VolunteerList[i].Email == sessionUser)
+            if (basicUser.Role == "Volunteer")
             {
-                isVolunteer = true;
-                selectedVolunteer = volunteerManager.VolunteerList[i];
-                ChangeForm(7);
-            }
-        }
-        bool isOrganisation = false;
-        if(!isVolunteer)
-        {
-            for (int i = 0; i < volunteerManager.OrganisationList.Count; i++)
-            {
-                if (volunteerManager.OrganisationList[i].Email == sessionUser)
+                if (volunteerManager.VolunteerList.Any(v => v.Email == sessionUser))
                 {
-                    isOrganisation = true;
-                    selectedOrganisation = volunteerManager.OrganisationList[i];
-                    ChangeForm(8);
+                    selectedVolunteer = volunteerManager.VolunteerList.FirstOrDefault(v => v.Email == sessionUser);
+                }
+                else
+                {
+                    IO.Modules.Volunteer.Volunteer vol = new IO.Modules.Volunteer.Volunteer(
+                        basicUser.Name,
+                        basicUser.Surname,
+                        basicUser.Email,
+                        basicUser.PhoneNumber,
+                        basicUser.Address,
+                        -1);
+                    selectedVolunteer = vol;
+                    //volunteerManager.AddVolunteer(vol);
+                }
+                if(selectedVolunteer.OrganisationID == -1)
+                {
+                    ChangeForm(0);
+                }
+                else
+                {
+                    ChangeForm(3);
                 }
             }
+            else if (basicUser.Role == "Charity")
+            {
+                if (volunteerManager.OrganisationList.Any(o => o.Email == sessionUser))
+                {
+                    selectedOrganisation = volunteerManager.OrganisationList.FirstOrDefault(o => o.Email == sessionUser);
+                }
+                else
+                {
+                    Organisation org = new Organisation(
+                        basicUser.Name,
+                        basicUser.Email,
+                        basicUser.PhoneNumber,
+                        basicUser.Address
+                    );
+
+                    volunteerManager.AddOrganisation(org);
+                    selectedOrganisation = org;
+                }
+                ChangeForm(4);
+            }
         }
-        if(!isVolunteer && !isOrganisation)
+        else
         {
-            IO.Modules.Volunteer.Volunteer vol = new IO.Modules.Volunteer.Volunteer(
-            firstName,
-            lastName,
-            email,
-            phoneNumber,
-            address,
-            selectedOrganisation.OrganisationID);
+            ChangeForm(2);
         }
+
     }
 
+    private void OrganisationSelected(int organisationID)
+    {
+        selectedVolunteer.OrganisationID = organisationID;
+        volunteerManager.AddVolunteer(selectedVolunteer);
+        selectedOrganisation = null;
+        ChangeForm(3);
+    }
 
     private void ChangeSelect(int select)
     {
@@ -411,15 +333,9 @@
     }
 
     private void ChangeForm(int form) {
-        phoneNumber = new char[0];
+        phoneNumber = string.Empty;
         address = string.Empty;
         prevoiusForm = whichForm;
-        if(form == 0)
-        {
-            selectedOption = 0;
-            selectedOrganisation = null;
-            selectedVolunteer = null;
-        }
         whichForm = form;
     }
 
@@ -429,16 +345,6 @@
         selectedTask = volunteerTask;
     }
 
-
-    public string PhoneNumberString
-    {
-        get => new string(phoneNumber);
-        set => phoneNumber = value.ToCharArray();
-    }
-    public string PhoneNumberToString(char[] phoneNumber)
-    {
-        return new string(phoneNumber);
-    }
     private void AddAvailabilityDate()
     {
         if (!endDate.Contains(newAvailabilityDate))
