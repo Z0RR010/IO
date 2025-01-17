@@ -39,10 +39,11 @@ else
 
 @code {
     private List<RequestModule.Request> requests;
+    private IO.Modules.ResourceManager.RequestManager requestManager = new IO.Modules.ResourceManager.RequestManager();
 
     protected override async Task OnInitializedAsync()
     {
-        requests = await RequestService.GetRequestsAsync();
+        requests = requestManager.GetAllRequests();
     }
 
     private async Task DeleteRequest(int id)

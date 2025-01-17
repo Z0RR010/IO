@@ -3,9 +3,10 @@
 
 <h3>Add Request</h3>
 
-<EditForm Model="newRequest" OnValidSubmit="HandleValidSubmit">
+<Microsoft.AspNetCore.Components.Forms.EditForm Model="newRequest" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
+    <RequestVerificationToken value="@token" />
 
     <div class="form-group">
         <label for="title">Title</label>
@@ -35,13 +36,8 @@
         <label for="zipCode">Zip Code</label>
         <InputText id="zipCode" class="form-control" @bind-Value="newRequest.Address.ZipCode" />
     </div>
-    <div class="form-group">
-        <label for="resources">Resources</label>
-        <InputText id="resources" class="form-control" @bind-Value="" />
-    </div>
-
     <button type="submit" class="btn btn-primary">Submit</button>
-</EditForm>
+</Microsoft.AspNetCore.Components.Forms.EditForm>
 
 @if (!string.IsNullOrEmpty(message))
 {
@@ -51,52 +47,38 @@
 @code {
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
+    private IO.Modules.ResourceManager.UserExecuter userExecuter = new IO.Modules.ResourceManager.UserExecuter();
 
     private string email;
-
+    private String token;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         var authenticationState = await authenticationStateTask;
         email = authenticationState.User.Identity.Name;
+        token = userExecuter.GetToken(email);
     }
 
     private RequestModule.Request newRequest = new RequestModule.Request
-        {
+    {
             Status = RequestModule.RequestStatus.New,
-            Address = new RequestModule.Address() // Inicjalizacja Address
-        };
+            Address = new RequestModule.Address(), // Inicjalizacja Address
+    };
 
     private string? message;
 
     private IO.Modules.ResourceManager.RequestManager requestManager = new IO.Modules.ResourceManager.RequestManager();
 
-    private List<IO.Modules.ResourceManager.Resource> selectedResource;
-
-    private void AddResource()
-    {
-        if (!newRequest.ResourcesRequired.Contains(selectedResource))
-        {
-            newRequest.ResourcesRequired.Add(selectedResource);
-        }
-    }
+    private List<IO.Modules.ResourceManager.Resource> selectedResources;
 
     private async Task HandleValidSubmit()
     {
 
-
-
-        RequestModule.Request newRequest = new RequestModule.Request
-            {
-
-                Status = RequestModule.RequestStatus.New,
-                Address = new RequestModule.Address(), // Inicjalizacja Address
-                CreatedAt = DateTime.Now,
-
-            };
-
         try
         {
+            newRequest.IsVerified = false;
+            newRequest.User = userExecuter.GetUserFromDataBase(email);
+            newRequest.CreatedAt = DateTime.Now;
             // Dodanie do bazy danych
             bool isAdded = requestManager.AddRequestToDatabase(newRequest);
 
