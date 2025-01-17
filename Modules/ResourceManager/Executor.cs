@@ -7,7 +7,7 @@
         public Executor()
         {
             _handler = new ResourceDataBaseHandler(
-                "Data Source=./Modules/ResourceManager/databases/resourceBase.db;Version=3;FailIfMissing=True;");
+                "Data Source=./databases/resourceBase.db;Version=3;FailIfMissing=True;");
         }
 
         private Resource CreateResource(string name, Category category, int amount)
