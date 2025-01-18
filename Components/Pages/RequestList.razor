@@ -1,12 +1,14 @@
 @page "/requests"
 @rendermode InteractiveServer
 @inject IO.Modules.Security.SessionService sessionService
-@inject RequestModule.IRequestService RequestService
 @using IO.Modules.Security
 @using IO.Modules.ResourceManager
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@inject IStringLocalizer<RequestList> Loc
+@inject NavigationManager nav
 
-
-<h3>Requests</h3>
+<h3>@Loc["Header"]</h3>
 
 @if (requests == null)
 {
@@ -17,10 +19,10 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Title</th>
-                <th>Description</th>
+                <th>@Loc["Title"]</th>
+                <th>@Loc["Description"]</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th>@Loc["Actions"]</th>
             </tr>
         </thead>
         <tbody>
@@ -31,14 +33,18 @@ else
                     <td>@request.Description</td>
                     <td>@request.Status</td>
                     <td>
-                        <a href="/requests/details/@request.Id">Details</a>
-                        <a href="/requests/edit/@request.Id">Edit</a>
-                        <button type="button" class="btn btn-primary" @onclick="() => DeleteRequest(request.Id)">Delete</button>
+                        <a href="@GetDetailsUrl(request.Id)">@Loc["Details"]</a>
+                        <a href="@GetEditUrl(request.Id)">@Loc["Edit"]</a>
+                        <button type="button" class="btn btn-primary" @onclick="() => DeleteRequest(request.Id)">@Loc["Delete"]</button>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
+    <footer class="footer">
+        <button @onclick="Polish" class="lang">Polski</button>
+        <button @onclick="English" class="lang">English</button>
+    </footer>
 }
 
 <style>
@@ -130,11 +136,20 @@ else
     private String email;
     protected override async Task OnInitializedAsync()
     {
+        var uri = nav.ToAbsoluteUri(nav.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        if (!query.ContainsKey("ui-culture"))
+        {
+            nav.NavigateTo($"{uri.AbsolutePath}?ui-culture=en-US", true);
+            return;
+        }
+
         await base.OnInitializedAsync();
         email = await sessionService.GetUserNameAsync();
         UserExecuter userExecuter = new UserExecuter();
         BasicUser basicUser = userExecuter.GetBasicUser(email);
-        switch(basicUser.Role){
+        switch (basicUser.Role)
+        {
             case "Affected":
                 {
                     requests = requestManager.GetUserRequests(email);
@@ -178,4 +193,51 @@ else
             Console.WriteLine("Request deleted.");
         }
     }
+
+    private string GetDetailsUrl(int id)
+    {
+        var uri = nav.ToAbsoluteUri(nav.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        var culture = query.ContainsKey("ui-culture") ? query["ui-culture"].ToString() : "en-US";
+        return $"/requests/details/{id}?ui-culture={culture}";
+    }
+
+    private string GetEditUrl(int id)
+    {
+        var uri = nav.ToAbsoluteUri(nav.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        var culture = query.ContainsKey("ui-culture") ? query["ui-culture"].ToString() : "en-US";
+        return $"/requests/edit/{id}?ui-culture={culture}";
+    }
+
+        private async Task English()
+        {
+            String newUri = nav.Uri;
+            String oldUri = nav.Uri;
+            if (newUri.Contains("?ui-culture=pl"))
+            {
+                newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
+            }
+            if (!newUri.Contains("?ui-culture=en-US"))
+            {
+                newUri += "?ui-culture=en-US";
+            }
+            nav.NavigateTo(newUri, true);
+        }
+
+        private async Task Polish()
+        {
+            String newUri = nav.Uri;
+            if (newUri.Contains("?ui-culture=en-US"))
+            {
+                newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
+            }
+            if (!newUri.Contains("?ui-culture=pl"))
+            {
+                newUri += "?ui-culture=pl";
+            }
+            nav.NavigateTo(newUri, true);
+        }
+
+
 }
