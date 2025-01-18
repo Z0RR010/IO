@@ -62,6 +62,21 @@ namespace IO.Modules.DonorLibrary
             return donations.Where(d => d.AssignedDonor == donor);
         }
 
+        public void UpdateDonationStatus(Donation donation)
+        {
+            var executor = new DonorExecuter();
+
+            if (executor.SendDonationToDatabase(donation))
+            {
+                Console.WriteLine("Donation added or updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to add or update donation.");
+            }
+            executor.Dispose();
+        }
+
         public void Load()
         {
             var executor = new DonorExecuter();

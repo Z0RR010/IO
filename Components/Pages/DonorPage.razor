@@ -2,19 +2,19 @@
 @using IO.Modules.DonorLibrary
 @using IO.Modules.Security
 @using Microsoft.Extensions.Localization
+@using System.Globalization
 @using PdfSharp
 @using PdfSharp.Drawing
 @using RequestModule
 @using IO.Modules.ResourceManager
 @rendermode InteractiveServer
 @inject SessionService sessionService
-@inject IStringLocalizer<Home> Loc
+@inject IStringLocalizer<DonorPage> Loc
 @inject NavigationManager nav
 
-@if (logged)
+@if (loggedDonor)
 {
-<PageTitle>Donor</PageTitle>
-    <h1 style="color: white;">@Loc["Donor"]</h1>
+<h1>@Loc["Donor"]</h1>
 <button class="btn btn-primary" @onclick="Donate">Donate</button>
 <button class="btn btn-primary" @onclick="ShowDonations">Show Donations</button>
 
@@ -39,7 +39,7 @@
 
 @if (whichForm == 2)
 {
-    <h2 style="color: white;">List of Donations</h2>
+        <h2 style="color: white; margin-top: 20px;">List of Donations</h2>
     <table class="table">
         <thead>
             <tr>
@@ -83,9 +83,67 @@
     <button class="btn btn-primary mt-3" @onclick="GenerateReport" disabled="@(!IsAnyDonationSelected)">Generate Report</button>
 }
 }
-@if (whichForm == 3)
+@if (!loggedCharity && !loggedDonor)
 {
-    <h1>Dostęp tylko dla Darczyńców!</h1>
+    @if (whichForm == 3)
+    {
+        <h1>Dostęp tylko dla Darczyńców!</h1>
+    }
+}
+@if (loggedCharity)
+{
+@if (whichForm == 4)
+{
+    <h2 style="color: white;">List of Donations</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="color: white;" @onclick="() => SortById()">
+                    ID
+                    <span>@(sortDirection == SortOrder.Ascending && sortBy == "Id" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Id" ? "↑" : "")</span>
+                </th>
+                <th style="color: white;" @onclick="() => SortByName()">
+                    Item Name
+                    <span>@(sortDirection == SortOrder.Ascending && sortBy == "Name" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Name" ? "↑" : "")</span>
+                </th>
+                <th style="color: white;" @onclick="() => SortByQuantity()">
+                    Quantity
+                    <span>@(sortDirection == SortOrder.Ascending && sortBy == "Quantity" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Quantity" ? "↑" : "")</span>
+                </th>
+                <th style="color: white;" @onclick="() => SortByDate()">
+                    Date
+                    <span>@(sortDirection == SortOrder.Ascending && sortBy == "Date" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Date" ? "↑" : "")</span>
+                </th>
+                <th style="color: white;" @onclick="() => SortByStatus()">
+                    Status
+                    <span>@(sortDirection == SortOrder.Ascending && sortBy == "Status" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Status" ? "↑" : "")</span>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var donation in SortedDonations)
+            {
+                <tr>
+                    <td style="color: white;">@donation.DonationID</td>
+                    <td style="color: white;">@donation.Item</td>
+                    <td style="color: white;">@donation.Quantity</td>
+                    <td style="color: white;">@donation.Date</td>
+                    <td style="color: white;">@donation.DonationStatus</td>
+                    <button class="btn btn-primary" @onclick="()=>ChangeStatus(donation)">Change Status of Donation</button>
+                </tr>
+            }
+            <div style="text-align: center; margin-top: 25px;">
+                <p style="color: white; font-size: 35px;">Choose Status:</p>
+                <select @bind="selectedStatus" style="color: white; font-size: 20px; padding: 10px; width: 200px; margin-top: -15px; border-width:3px">
+                    @foreach (var status in statuses)
+                    {
+                        <option value="@status" style="color: black; background-color: white;">@status</option>
+                    }
+                </select>
+            </div>
+        </tbody>
+    </table>
+}
 }
 
 @if (!string.IsNullOrEmpty(savedFileMessage))
@@ -123,7 +181,10 @@
     private string selectedItem = string.Empty;
     private List<Resource> items = new List<Resource> {};
     private string selectedEmail = string.Empty;
-    private bool logged;
+    private bool loggedCharity = false;
+    private bool loggedDonor = false;
+    private List<Status> statuses = new List<Status> {Status.Registered, Status.Accepted, Status.InMagazine, Status.Archived};
+    private Status selectedStatus = Status.Registered;
 
     private async Task English()
     {
@@ -177,16 +238,27 @@
         donationManager.Load();
         UserExecuter userExecuter = new UserExecuter();
         string sessionUser = await sessionService.GetUserNameAsync();
+        Console.WriteLine(sessionUser);
         IO.Modules.Security.BasicUser basicUser = userExecuter.GetBasicUser(sessionUser);
         whichForm = 3;
-        logged = false;
         if (basicUser != null)
         {
             if (basicUser.Role == "Donor")
             {
                 selectedEmail = basicUser.Email;
-                logged = true;
+                loggedDonor = true;
                 whichForm = 0;
+            }
+            else if (basicUser.Role == "Charity")
+            {
+                loggedCharity = true;
+                whichForm = 4;
+            }
+            else
+            {
+                whichForm = 3;
+                loggedDonor = false;
+                loggedCharity = false;
             }
         }
         Przypisz();
@@ -248,6 +320,12 @@
         {
             donation.Selected = !isSelected;
         }
+    }
+
+    private void ChangeStatus(Donation donation)
+    {
+        donation.SetDonationStatus(selectedStatus);
+        donationManager.UpdateDonationStatus(donation);
     }
 
     private void GenerateReport()
