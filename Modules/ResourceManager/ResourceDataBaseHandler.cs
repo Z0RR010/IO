@@ -35,9 +35,10 @@ namespace IO.Modules.ResourceManager
         /// </summary>
         /// <param name="item"></param>
         /// <returns>True if operation was successful. Otherwise, false</returns>
-        public bool AddItem(Resource item)
+        public bool AddItem(Resource item, string donorEmail)
         {
-            string query = "INSERT INTO resources(hashcode_id, resource) VALUES(@hashcode, @packedResource)";
+            string query =
+                "INSERT INTO resources(hashcode_id, resource, email) VALUES(@hashcode, @packedResource, @donorEmail)";
             try
             {
                 using (var command =
@@ -45,6 +46,7 @@ namespace IO.Modules.ResourceManager
                 {
                     command.Parameters.AddWithValue("@hashcode", item.GetHashCode());
                     command.Parameters.AddWithValue("@packedResource", JsonSerializer.Serialize(item));
+                    command.Parameters.AddWithValue("@donorEmail", donorEmail);
                     Console.WriteLine("Added resource");
                     int rowsAffected = command.ExecuteNonQuery();
                     return rowsAffected > 0;
@@ -216,7 +218,7 @@ namespace IO.Modules.ResourceManager
         /// </summary>
         /// <param name="category">The category to be found</param>
         /// <returns>Size of list of all items ever found in database</returns>
-        public int GetItemsByCategory(Category category)
+        public int GetItemsAmountByCategory(Category category)
         {
             List<Resource> items = GetAllItems();
 
@@ -232,6 +234,7 @@ namespace IO.Modules.ResourceManager
 
             return count;
         }
+
 
         public void Dispose()
         {
@@ -317,6 +320,32 @@ namespace IO.Modules.ResourceManager
                 Console.WriteLine(e);
                 throw;
             }
+        }
+
+        public List<Resource> GetGetItemsByDonor(string donorEmail)
+        {
+            string query = "SELECT * FROM resources where email = @email";
+            List<Resource> items = new List<Resource>();
+
+            using (var command =
+                   new SqliteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
+            {
+
+                command.Parameters.AddWithValue("@email", donorEmail);
+
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                            var item = JsonSerializer.Deserialize<Resource>(reader.GetString(1));
+
+                            items.Add(item);
+                    }
+                }
+            }
+
+            return items;
         }
     }
 }

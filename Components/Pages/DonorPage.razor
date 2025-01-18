@@ -2,6 +2,8 @@
 @using IO.Modules.DonorLibrary
 @using PdfSharp
 @using PdfSharp.Drawing
+@using RequestModule
+@using IO.Modules.ResourceManager
 @rendermode InteractiveServer
 
 <PageTitle>Donor</PageTitle>
@@ -18,7 +20,7 @@
         <select @bind="selectedItem" class="custom-dropdown">
             @foreach (var item in items)
             {
-                <option value="@item">@item</option>
+                <option value="@item.Name">@item.Name</option>
             }
         </select>
 
@@ -103,10 +105,29 @@
     private SortOrder sortDirection = SortOrder.Ascending;
     private List<Donation> SortedDonations => SortDonations(donationManager.GetAllDonations());
     private string selectedItem = string.Empty;
-    private List<string> items = new List<string> { "Item1", "Item2", "Item3" };
+    private List<Resource> items = new List<Resource> {};
+
+    private void Przypisz()
+    {
+        RequestManager requestManager = new RequestManager();
+        List<Request> requests = requestManager.GetAllRequests();
+        HashSet<string> uniqueNames = new HashSet<string>();
+        for (int i = 0; i < requests.Count; i++)
+        {
+            List<Resource> resources = requestManager.GetResourcesForRequest(i);
+            foreach (var resource in resources)
+            {
+                if (uniqueNames.Add(resource.Name))
+                {
+                    items.Add(resource);
+                }
+            }
+        }
+    }
 
     protected override void OnInitialized()
     {
+        Przypisz();
         SortById();
     }
 
