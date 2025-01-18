@@ -94,6 +94,8 @@ namespace IO
                 return new GoogleMapsClient(jsRuntime, apiKey);
             });
 
+            builder.Services.AddScoped<Geolocation>();
+
             builder.Services.AddScoped<RequestModule.IRequestService, RequestModule.RequestService>();
             builder.Services.AddLocalization();
             var supportedCultures = new[] { "en-US", "pl" };
