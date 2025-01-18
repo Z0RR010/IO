@@ -121,7 +121,7 @@ namespace IO.Modules.Volunteer
             executor.Dispose();
         }
 
-        public void AddRate(Rate rate)
+        public void AddRate(Rate rate, int volunteerTaskID)
         {
             if (rate == null)
                 throw new ArgumentNullException(nameof(rate), "Rate cannot be null.");
@@ -130,14 +130,19 @@ namespace IO.Modules.Volunteer
             {
                 rate.RateID = rateList.Last().RateID + 1;
             }
+            if(rate.RateID == 0)
+            {
+                rate.RateID = 1;
+            }
 
             if (rateList.Any(r => r.RateID == rate.RateID))
             {
                 throw new InvalidOperationException($"Rate with ID {rate.RateID} already exists.");
             }
-
+            
             rateList.Add(rate);
-
+            VolunteerTask vt = volunteerTaskList.FirstOrDefault(t => t.VolunteerTaskID == volunteerTaskID);
+            vt.RateID = rate.RateID;
             var executor = new VolunteerExecuter();
 
             if (executor.SendRateToDatabase(rate))
@@ -148,6 +153,15 @@ namespace IO.Modules.Volunteer
             {
                 Console.WriteLine("Failed to add or update rate.");
             }
+            if (executor.SendTaskToDatabase(vt))
+            {
+                Console.WriteLine("VolunteerTask added or updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to add or update volunteerTask.");
+            }
+
             executor.Dispose();
         }
 
@@ -270,6 +284,7 @@ namespace IO.Modules.Volunteer
             organisationList = executor.LoadOrganisationList();
             volunteerList = executor.LoadVolunteerList();
             volunteerTaskList = executor.LoadTaskList();
+            rateList = executor.LoadRateList();
             executor.Dispose();
         }
 

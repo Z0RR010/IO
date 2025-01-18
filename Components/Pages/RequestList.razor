@@ -1,6 +1,10 @@
 @page "/requests"
+@rendermode InteractiveServer
+@inject IO.Modules.Security.SessionService sessionService
 @inject RequestModule.IRequestService RequestService
 @using IO.Modules.Security
+@using IO.Modules.ResourceManager
+
 
 <h3>Requests</h3>
 
@@ -29,7 +33,7 @@ else
                     <td>
                         <a href="/requests/details/@request.Id">Details</a>
                         <a href="/requests/edit/@request.Id">Edit</a>
-                        <button @onclick="() => DeleteRequest(request.Id)">Delete</button>
+                        <button type="button" class="btn btn-primary" @onclick="() => DeleteRequest(request.Id)">Delete</button>
                     </td>
                 </tr>
             }
@@ -37,13 +41,118 @@ else
     </table>
 }
 
+<style>
+    h3 {
+    font-size: 1.5rem;
+    color: #2c3e50; /* Sta³y kolor nag³ówka */
+    margin-bottom: 20px;
+    text-align: center;
+    }
+
+    /* Stylowanie dla tabeli */
+    .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 1rem;
+    text-align: left;
+    background-color: #f9f9f9; /* Jasnoszare t³o */
+    border: 1px solid #ddd;
+    }
+
+    .table th,
+    .table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd; /* Linie siatki tabeli */
+    }
+
+    .table th {
+    background-color: #34495e; /* Kolor t³a nag³ówków tabeli */
+    color: #ffffff; /* Bia³y kolor tekstu w nag³ówkach */
+    text-transform: uppercase;
+    font-weight: bold;
+    }
+
+    .table tbody tr:nth-child(odd) {
+    background-color: #f2f2f2; /* Alternatywne kolory wierszy */
+    }
+
+    .table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+    }
+
+    .table tbody tr:hover {
+    background-color: #dff0d8; /* Kolor podœwietlenia wiersza */
+    }
+
+    /* Stylowanie dla linków w kolumnie akcji */
+    .table a {
+    color: #3498db; /* Kolor linków */
+    text-decoration: none;
+    margin-right: 10px;
+    }
+
+    .table a:hover {
+    text-decoration: underline;
+    }
+
+    /* Stylowanie przycisku Delete */
+    .btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    }
+
+    .btn-primary {
+    background-color: #e74c3c; /* Czerwony kolor przycisku Delete */
+    color: #ffffff;
+    }
+
+    .btn-primary:hover {
+    background-color: #c0392b; /* Ciemniejszy czerwony po najechaniu */
+    }
+
+    /* Stylowanie tekstu ³adowania */
+    em {
+    color: #7f8c8d; /* Neutralny szary kolor */
+    font-style: italic;
+    display: block;
+    text-align: center;
+    margin: 20px 0;
+    }
+</style>
+
 @code {
     private List<RequestModule.Request> requests;
     private IO.Modules.ResourceManager.RequestManager requestManager = new IO.Modules.ResourceManager.RequestManager();
-
+    private String email;
     protected override async Task OnInitializedAsync()
     {
-        requests = requestManager.GetAllRequests();
+        await base.OnInitializedAsync();
+        email = await sessionService.GetUserNameAsync();
+        UserExecuter userExecuter = new UserExecuter();
+        BasicUser basicUser = userExecuter.GetBasicUser(email);
+        switch(basicUser.Role){
+            case "Affected":
+                {
+                    requests = requestManager.GetUserRequests(email);
+                    break;
+                }
+            case "Charity":
+            case "Authority":
+            case "Admin":
+                {
+                    requests = requestManager.GetAllRequests();
+                    break;
+                }
+            default:
+                {
+                    requests = new List<RequestModule.Request>();
+                    break;
+                }
+        }
     }
 
     private async Task DeleteRequest(int id)
@@ -51,7 +160,7 @@ else
         bool deleted = false;
         try
         {
-            deleted = requestManager.RemoveRequestFromDatabase(id);
+            deleted = await requestManager.RemoveRequestFromDatabase(id);
         }
         catch (Exception ex)
         {
@@ -60,6 +169,12 @@ else
         }
         if (deleted)
         {
+            var requestToRemove = requests.FirstOrDefault(r => r.Id == id);
+            if (requestToRemove != null)
+            {
+                requests.Remove(requestToRemove);
+            }
+            StateHasChanged();
             Console.WriteLine("Request deleted.");
         }
     }

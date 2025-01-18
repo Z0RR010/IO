@@ -1,4 +1,7 @@
 @page "/requests/details/{Id:int}"
+@rendermode InteractiveServer
+@using IO.Modules.MapLibrary
+@inject GoogleMapsClient GoogleMaps;
 
 <h3>Request Details</h3>
 
@@ -12,23 +15,102 @@ else if (request == null)
 }
 else
 {
-    <div>
+    <div class="container">
         <h4>@request.Title</h4>
-        <p>@request.Description</p>
-        <p>Status: @request.Status</p>
-        <p>Created At: @request.CreatedAt</p>
-        <p>Updated At: @request.DateUpdated</p>
-        <p>User: @request.User </p>
-        <p>Address: @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
-        <p>Resources Required: @string.Join(", ", request.ResourcesRequired.Select(r => $"{r.Name} (x{r.Amount})"))</p>
-        <p>Is Verified: @request.IsVerified</p>
+        <p><strong>Description:</strong> @request.Description</p>
+        <p><strong>Status:</strong> @request.Status</p>
+        <p><strong>Created At:</strong> @request.CreatedAt</p>
+        <p><strong>Updated At:</strong> @request.DateUpdated</p>
+        <p><strong>User:</strong> @request.User </p>
+
+        <div>
+            <strong>Resources Required:</strong>
+            <ul class="resources-required">
+                @foreach (var resource in request.ResourcesRequired)
+                {
+                    <li>@resource.Name (@resource.Amount)</li>
+                }
+            </ul>
+        </div>
+
+        <p><strong>Is Verified:</strong> @request.IsVerified</p>
+
+        <p><strong>Address:</strong> @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
+        <div id="map01" style="width: 100%; height: 500px; margin-top: 20px;"></div>
+
     </div>
 }
+
+<style>
+    h3 {
+        font-size: 1.8rem;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    h4 {
+        font-size: 1.4rem;
+        color: #34495e;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background-color: #ffffff;
+        color: #2c3e50;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+        .container p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+    em {
+        color: #7f8c8d;
+        font-style: italic;
+        text-align: center;
+        display: block;
+        margin-top: 20px;
+    }
+
+    .container p strong {
+        color: #e74c3c;
+        font-weight: bold;
+    }
+
+    .container p:nth-child(6) {
+        font-weight: bold;
+        font-style: italic;
+        color: #34495e;
+    }
+
+    .resources-required {
+        font-size: 1.1rem;
+        color: #2c3e50;
+        list-style-type: disc;
+        margin-left: 20px;
+    }
+
+    .resources-required li {
+        margin-bottom: 0.5rem;
+    }
+</style>
 
 @code {
     [Parameter]
     public int Id { get; set; }
 
+    MapController map01;
     private IO.Modules.ResourceManager.RequestManager requestManager = new IO.Modules.ResourceManager.RequestManager();
     private RequestModule.Request request;
     private bool isLoading = true;
@@ -38,6 +120,7 @@ else
         try
         {
             request = await requestManager.GetRequestById(Id);
+            map01 = new(GoogleMaps, "map01");
         }
         catch (Exception ex)
         {
@@ -46,6 +129,26 @@ else
         finally
         {
             isLoading = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await GoogleMaps.InitializeApi();
+
+            if (request?.Address != null)
+            {
+                Console.WriteLine($"Setting location: {request.Address.Street}, {request.Address.City}, {request.Address.ZipCode}");
+
+                map01.SetLocation(request.Address);
+                await map01.DrawMap();
+            }
+            else
+            {
+                Console.WriteLine("Request address is null or incomplete.");
+            }
         }
     }
 }
