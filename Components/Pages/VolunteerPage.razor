@@ -232,6 +232,8 @@
             <p>Email: <input type="text" value="@selectedOrganisation.Email" readonly class="form-control" /></p>
             <p>Phone Number: <input type="text" @bind-value="selectedOrganisation.PhoneNumber" class="form-control" /></p>
             <p>Address: <input type="text" @bind-value="selectedOrganisation.Address" class="form-control" /></p>
+            <p>Website: <input type="text" @bind-value="selectedOrganisation.Website" class="form-control" /></p>
+            <p>KRS: <input type="text" @bind-value="selectedOrganisation.KRS" class="form-control" /></p>
             <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>
     }
@@ -249,6 +251,8 @@
     private string email = string.Empty;
     private string phoneNumber = string.Empty;
     private string address = string.Empty;
+    private string website = string.Empty;
+    private string kRS = string.Empty;
     private bool showTaskDetails = false;
 
 
@@ -266,7 +270,7 @@
 
 
     private int selectedOrganisationID;
-    private int previousSelectedOrganisationID;
+    private int previousSelectedOrganisationID; 
     private Request selectedRequestForTask = new Request();
     private int? selectedVolunteerID;
     private int? previousSelectedVolunteerID;
@@ -342,7 +346,9 @@
                         basicUser.Name,
                         basicUser.Email,
                         basicUser.PhoneNumber,
-                        basicUser.Address
+                        basicUser.Address,
+                        basicUser.Website,
+                        basicUser.Krs
                     );
 
                     volunteerManager.AddOrganisation(org);
@@ -402,41 +408,8 @@
     {
         volunteerManager.EditVolunteer(selectedVolunteer);
     }
-    private void CreateVolunteer(int who)
-    {
-        IO.Modules.Volunteer.Volunteer vol = new IO.Modules.Volunteer.Volunteer(
-            firstName,
-            lastName,
-            email,
-            phoneNumber,
-            address,
-            selectedOrganisationID);
 
-        volunteerManager.AddVolunteer(vol);
-        if(who == 1)
-        {
-            selectedVolunteer = vol;
-            ChangeForm(7);
-        }
-    }
-
-    private void CreateOrganisation(int who)
-    {
-        Organisation org = new Organisation(
-            organisationName,
-            email,
-            phoneNumber,
-            address
-        );
-
-        volunteerManager.AddOrganisation(org);
-        if (who == 1)
-        {
-            selectedOrganisation = org;
-            ChangeForm(8);
-        }
-    }
-
+   
     private void CreateTask()
     {
         VolunteerTask volunteerTask = new VolunteerTask(
