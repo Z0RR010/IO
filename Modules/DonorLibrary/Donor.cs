@@ -2,7 +2,7 @@
 {
     public class Donor
     {
-        public int donorID { get; private set; }
+        public int donorID { get;  set; }
         public IDonorType donorType { get; set; }
         public List<Donation> donations { get; private set; }
 
@@ -12,9 +12,9 @@
             this.donorType = donorType;
             donations = new List<Donation>();
         }
-        public void Donate(string item, int quantity, string date, DonationManager donationManager)
+        public void Donate(string item, int quantity, string date, string email, DonationManager donationManager)
         {
-            donationManager.AddDonation(item, quantity, date);
+            donationManager.AddDonation(item, quantity, date, email);
         }
 
         public Donation GetDonationById(int donationID)

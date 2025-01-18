@@ -1,4 +1,7 @@
-﻿namespace IO.Modules.DonorLibrary
+﻿using IO.Modules.ResourceManager;
+using IO.Modules.Volunteer;
+
+namespace IO.Modules.DonorLibrary
 {
     public class DonationManager
     {
@@ -9,11 +12,22 @@
             donations = new List<Donation>();
         }
 
-        public void AddDonation(string itemName, int? quantity, string date)
+        public void AddDonation(string itemName, int? quantity, string date, string email)
         {
             int newId = GetNextId();
-            var donation = new Donation(newId, itemName, quantity, date);
+            var donation = new Donation(newId, itemName, quantity, date, email);
             donations.Add(donation);
+            var executor = new DonorExecuter();
+
+            if (executor.SendDonationToDatabase(donation))
+            {
+                Console.WriteLine("Donation added or updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to add or update donation.");
+            }
+            executor.Dispose();
         }
 
         private int GetNextId()
@@ -46,6 +60,13 @@
         public IEnumerable<Donation> GetDonationsByDonor(Donor donor)
         {
             return donations.Where(d => d.AssignedDonor == donor);
+        }
+
+        public void Load()
+        {
+            var executor = new DonorExecuter();
+            donations = executor.LoadDonationList();
+            executor.Dispose();
         }
     }
 }
