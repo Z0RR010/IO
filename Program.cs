@@ -32,7 +32,7 @@ namespace IO
                 {
                     options.Cookie.Name = "auth_token";
                     options.LoginPath = "/signIn";
-                    options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
+                    options.Cookie.MaxAge = TimeSpan.FromMinutes(60);
                 });
             builder.Services.AddAuthorization();
             builder.Services.AddCascadingAuthenticationState();
