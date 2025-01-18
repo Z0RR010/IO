@@ -152,8 +152,6 @@
                                 {
                                     <div class="mt-2">
                                         <p>Description: @request.Description</p>
-                                        <p>Status: @request.Status</p>
-                                        <button class="btn btn-primary btn-sm mt-2" @onclick="() => ChangeRequestStatus(request, RequestStatus.InProgress)">Change Status</button>
                                         <p>Created at: @request.CreatedAt</p>
                                         <p>Updated At: @request.DateUpdated</p>
                                         <p>User: @request.User</p>
@@ -161,6 +159,7 @@
                                         <p>Address: @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
                                         <p>Is Verified: @request.IsVerified</p>
                                         <button class="btn btn-primary btn-sm mt-2" @onclick="() => SelectRequest(request)">Select</button>
+                                        <button class="btn btn-primary btn-sm mt-2" @onclick="() => ChangeRequestStatus(request, RequestStatus.InProgress)">Change Status</button>
                                     </div>
                                 }
                             </li>
