@@ -25,6 +25,65 @@ else
     </div>
 }
 
+<style>
+    h3 {
+        font-size: 1.5rem;
+        color: #2c3e50; /* Sta³y kolor nag³ówka */
+        margin-bottom: 1rem;
+    }
+
+    h4 {
+        font-size: 1.3rem;
+        color: #34495e; /* Sta³y kolor tytu³u sekcji */
+        margin-bottom: 0.5rem;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #ffffff; /* Bia³e t³o, niezale¿ne od motywu */
+        color: #2c3e50; /* Sta³y kolor tekstu */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+        /* Tekst w paragrafach */
+        .container p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 0.8rem;
+            color: #2c3e50; /* Sta³y kolor tekstu */
+        }
+
+    /* Stylowanie dla sekcji "loading" lub "not found" */
+    em {
+        color: #7f8c8d; /* Neutralny szary kolor */
+        font-style: italic;
+    }
+
+    /* Podkreœlenie adresu */
+    .container p:nth-child(6) {
+        font-weight: bold;
+        font-style: italic;
+        color: #34495e;
+    }
+
+    /* Lista zasobów */
+    .resources-required {
+        font-size: 1rem;
+        color: #2c3e50; /* Sta³y kolor tekstu */
+        list-style-type: disc;
+        margin-left: 20px;
+    }
+
+    /* Dodanie kontrastu dla lepszej czytelnoœci */
+    .container p strong {
+        color: #e74c3c; /* Akcentowany kolor dla wa¿nych informacji */
+    }
+</style>
+
 @code {
     [Parameter]
     public int Id { get; set; }
