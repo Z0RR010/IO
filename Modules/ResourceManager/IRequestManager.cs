@@ -6,7 +6,9 @@ namespace IO.Modules.ResourceManager
     {
         public bool AddRequestToDatabase(Request request);
 
-        public bool RemoveRequestFromDatabase(int id);
+        public Task<bool> RemoveRequestFromDatabase(int id);
+
+        public Task<bool> UpdateRequest(Request updatedRequest);
 
         public List<Request> GetAllRequests();
 
