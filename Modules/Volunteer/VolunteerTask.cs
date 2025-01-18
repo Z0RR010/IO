@@ -6,10 +6,10 @@
         public string Address { get; set; }
         public DateTime EndDate { get; set; }
         public TaskStatus TaskStatus { get; set; }
-        public Rate Rate { get; set; }
         public int OrganisationID { get; set; }
         public int VolunteerID { get; set; }
         public int RequestID { get; set; }
+        public int RateID { get; set; }
 
         public VolunteerTask() { }
 
@@ -20,6 +20,7 @@
             int organisationID,
             int requestID,
             int volunteerID = -1,
+            int rateID = -1,
             TaskStatus taskStatus = TaskStatus.New)
         {
             Description = description;
@@ -28,13 +29,8 @@
             OrganisationID = organisationID;
             RequestID = requestID;
             VolunteerID = volunteerID;
+            RateID = rateID;
             TaskStatus = taskStatus;
-        }
-
-
-        public void AddRate(Rate rate)
-        {
-            Rate = rate;
         }
     }
 }

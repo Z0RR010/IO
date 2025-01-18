@@ -217,6 +217,77 @@ namespace IO.Modules.ResourceManager
                 return false;
             }
         }
+        public bool SendRateToDatabase(Rate rate)
+        {
+            try
+            {
+                using var connection = new SqliteConnection(_connectionString);
+                connection.Open();
+
+                // Sprawdzenie, czy rate już istnieje
+                string checkQuery = "SELECT COUNT(*) FROM Rates WHERE RateID = @rateID";
+                using var checkCommand = new SqliteCommand(checkQuery, connection);
+                checkCommand.Parameters.AddWithValue("@rateID", rate.RateID);
+                int count = Convert.ToInt32(checkCommand.ExecuteScalar());
+
+                string query;
+                if (count > 0)
+                {
+                    // Aktualizacja istniejącego rate
+                    query = @"SELECT RateID FROM Rates WHERE RateID = @rateID";
+                }
+                else
+                {
+                    // Wstawianie nowego rate
+                    query = @"
+                    INSERT INTO Rates (Description)
+                    VALUES (@description);
+                    SELECT last_insert_rowid();";
+                }
+
+                using var command = new SqliteCommand(query, connection);
+
+                command.Parameters.AddWithValue("@rateID", rate.RateID);
+                command.Parameters.AddWithValue("@description", rate.Description);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error sending rate to database: {e.Message}");
+                return false;
+            }
+        }
+
+        public List<Rate> LoadRateList()
+        {
+            var rates = new List<Rate>();
+
+            try
+            {
+                using var connection = new SqliteConnection(_connectionString);
+                connection.Open();
+                string query = @"
+            SELECT RateID, Description
+            FROM Rates";
+
+                using var command = new SqliteCommand(query, connection);
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var rate = new Rate();
+                    rate.RateID = reader.GetInt32(0);
+                    rate.Description = reader.GetString(1);
+                    rates.Add(rate);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error loading rates from database: {e.Message}");
+            }
+
+            return rates;
+        }
 
         public List<VolunteerTask> LoadTaskList()
         {

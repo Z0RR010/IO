@@ -8,20 +8,19 @@ namespace IO.Modules.Volunteer
         private List<Volunteer> volunteerList;
         private List<Organisation> organisationList;
         private List<VolunteerTask> volunteerTaskList;
+        private List<Rate> rateList;
 
         public VolunteerManager()
         {
             volunteerList = new List<Volunteer>();
             organisationList = new List<Organisation>();
             volunteerTaskList = new List<VolunteerTask>();
+            rateList = new List<Rate>();
         }
-
-        public int VolunteerCount => volunteerList.Count;
-        public int OrganisationCount => organisationList.Count;
-        public int VolunteerTaskCount => volunteerTaskList.Count;
         public List<Organisation> OrganisationList => organisationList;
         public List<Volunteer> VolunteerList => volunteerList;
         public List<VolunteerTask> VolunteerTaskList => volunteerTaskList;
+        public List<Rate> RateList => rateList;
 
         public void AddOrganisation(Organisation organisation)
         {
@@ -122,6 +121,36 @@ namespace IO.Modules.Volunteer
             executor.Dispose();
         }
 
+        public void AddRate(Rate rate)
+        {
+            if (rate == null)
+                throw new ArgumentNullException(nameof(rate), "Rate cannot be null.");
+
+            if (rate.RateID == 0 && rateList.Count != 0)
+            {
+                rate.RateID = rateList.Last().RateID + 1;
+            }
+
+            if (rateList.Any(r => r.RateID == rate.RateID))
+            {
+                throw new InvalidOperationException($"Rate with ID {rate.RateID} already exists.");
+            }
+
+            rateList.Add(rate);
+
+            var executor = new VolunteerExecuter();
+
+            if (executor.SendRateToDatabase(rate))
+            {
+                Console.WriteLine("Rate added or updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to add or update rate.");
+            }
+            executor.Dispose();
+        }
+
         public void AssignTask(VolunteerTask volunteerTask, Volunteer volunteer)
         {
             VolunteerTask vt = FindTaskByID(volunteerTask.VolunteerTaskID);
@@ -185,7 +214,6 @@ namespace IO.Modules.Volunteer
             if (volunteerTask == null)
                 throw new KeyNotFoundException($"VolunteerTask with ID {taskID} not found.");
 
-            volunteerTask.AddRate(rate);
         }
 
 
