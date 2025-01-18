@@ -34,15 +34,15 @@ namespace IO.Modules.ResourceManager
                     // Aktualizacja istniejącej organizacji
                     orgQuery = @"
             UPDATE Organisations 
-            SET OrganisationName = @name, Email = @email, PhoneNumber = @phone, Address = @address
+            SET OrganisationName = @name, Email = @email, PhoneNumber = @phone, Address = @address, Website = @website, KRS = @krs
             WHERE OrganisationID = @id";
                 }
                 else
                 {
                     // Wstawianie nowej organizacji
                     orgQuery = @"
-            INSERT INTO Organisations ( OrganisationName, Email, PhoneNumber, Address)
-            VALUES ( @name, @email, @phone, @address);
+            INSERT INTO Organisations ( OrganisationName, Email, PhoneNumber, Address, Website, KRS)
+            VALUES ( @name, @email, @phone, @address, @website, @krs);
             SELECT last_insert_rowid();";
                 }
 
@@ -52,6 +52,8 @@ namespace IO.Modules.ResourceManager
                 orgCommand.Parameters.AddWithValue("@name", organisation.OrganisationName);
                 orgCommand.Parameters.AddWithValue("@phone", organisation.PhoneNumber);
                 orgCommand.Parameters.AddWithValue("@address", organisation.Address);
+                orgCommand.Parameters.AddWithValue("@website", organisation.Website);
+                orgCommand.Parameters.AddWithValue("@krs", organisation.KRS);
 
                 int rowsAffected;
                 if (count > 0)
@@ -376,7 +378,7 @@ namespace IO.Modules.ResourceManager
                 using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
 
-                string query = "SELECT OrganisationID, OrganisationName, Email, PhoneNumber, Address FROM Organisations";
+                string query = "SELECT OrganisationID, OrganisationName, Email, PhoneNumber, Address, Website, KRS FROM Organisations";
 
                 using var command = new SqliteCommand(query, connection);
                 using var reader = command.ExecuteReader();
@@ -390,6 +392,8 @@ namespace IO.Modules.ResourceManager
                     organisation.Email = reader.GetString(2);
                     organisation.PhoneNumber = reader.GetString(3);
                     organisation.Address = reader.GetString(4);
+                    organisation.Website = reader.GetString(5);
+                    organisation.KRS = reader.GetString(6);
                     organisations.Add(organisation);
                 }
 
