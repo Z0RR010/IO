@@ -1,4 +1,5 @@
 @page "/requests"
+@rendermode InteractiveServer
 @inject RequestModule.IRequestService RequestService
 @using IO.Modules.Security
 
@@ -29,7 +30,7 @@ else
                     <td>
                         <a href="/requests/details/@request.Id">Details</a>
                         <a href="/requests/edit/@request.Id">Edit</a>
-                        <button @onclick="() => DeleteRequest(request.Id)">Delete</button>
+                        <button type="button" class="btn btn-primary" @onclick="() => DeleteRequest(request.Id)">Delete</button>
                     </td>
                 </tr>
             }
@@ -51,7 +52,7 @@ else
         bool deleted = false;
         try
         {
-            deleted = requestManager.RemoveRequestFromDatabase(id);
+            deleted = await requestManager.RemoveRequestFromDatabase(id);
         }
         catch (Exception ex)
         {
@@ -60,6 +61,12 @@ else
         }
         if (deleted)
         {
+            var requestToRemove = requests.FirstOrDefault(r => r.Id == id);
+            if (requestToRemove != null)
+            {
+                requests.Remove(requestToRemove);
+            }
+            StateHasChanged();
             Console.WriteLine("Request deleted.");
         }
     }

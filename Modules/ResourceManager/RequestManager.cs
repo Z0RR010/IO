@@ -94,17 +94,16 @@ namespace IO.Modules.ResourceManager
             }
         }
 
-        public bool RemoveRequestFromDatabase(int id)
+        public async Task<bool> RemoveRequestFromDatabase(int id)
         {
-            string query =
-                "DELETE FROM Request WHERE Id = @id";
+            string query = "DELETE FROM Request WHERE Id = @id";
             try
             {
                 using (var command = new SqliteCommand(query, _connection))
                 {
                     command.Parameters.AddWithValue("@id", id);
 
-                    int rowsAffected = command.ExecuteNonQuery();
+                    int rowsAffected = await command.ExecuteNonQueryAsync();
                     return rowsAffected > 0;
                 }
             }
@@ -269,6 +268,47 @@ namespace IO.Modules.ResourceManager
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateRequest(Request updatedRequest)
+        {
+            string query = @"
+        UPDATE Request 
+        SET 
+            Title = @title, 
+            Description = @description, 
+            DateUpdated = @dateUpdated, 
+            Status = @status, 
+            User = @user, 
+            Address = @address, 
+            ResourcesRequired = @resourcesRequired, 
+            IsVerified = @isVerified
+        WHERE 
+            Id = @id";
+
+            try
+            {
+                using (var command = new SqliteCommand(query, _connection))
+                {
+                    command.Parameters.AddWithValue("@id", updatedRequest.Id);
+                    command.Parameters.AddWithValue("@title", updatedRequest.Title ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@description", updatedRequest.Description ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@dateUpdated", DateTime.Now);
+                    command.Parameters.AddWithValue("@status", updatedRequest.Status.ToString());
+                    command.Parameters.AddWithValue("@user", updatedRequest.User ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@address", JsonSerializer.Serialize(updatedRequest.Address) ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@resourcesRequired", JsonSerializer.Serialize(updatedRequest.ResourcesRequired) ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@isVerified", updatedRequest.IsVerified ? 1 : 0);
+
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error in UpdateRequest: {e.Message}");
                 return false;
             }
         }

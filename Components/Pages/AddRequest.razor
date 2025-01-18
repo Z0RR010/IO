@@ -32,6 +32,41 @@
         <label for="zipCode">Zip Code</label>
         <InputText id="zipCode" class="form-control" @bind-Value="newRequest.Address.ZipCode" />
     </div>
+
+<div>
+    <button class="btn btn-primary" @onclick="AddResourceForm">Add Resource</button>
+</div>
+
+@if (selectedResources.Count > 0)
+{
+    <div class="mt-3">
+        @foreach (var resource in selectedResources)
+        {
+            <div class="form-row mb-2">
+                <div class="col">
+                    <InputText class="form-control" placeholder="Name" @bind-Value="resource.Name" />
+                </div>
+                <div class="col">
+                    <InputSelect class="form-control" @bind-Value="resource.Category">
+                        @foreach (IO.Modules.ResourceManager.Category category in Enum.GetValues(typeof(IO.Modules.ResourceManager.Category)))
+                        {
+                            <option value="@category">@category</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col">
+                    <InputNumber class="form-control" placeholder="Amount" @bind-Value="resource.Amount" />
+                </div>
+                <div class="col">
+                    <button class="btn btn-danger" @onclick="() => RemoveResourceForm(resource)">Remove</button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+
+
     <button type="submit" class="btn btn-primary" @onclick="HandleValidSubmit">Submit</button>
 
 @if (!string.IsNullOrEmpty(message))
@@ -45,11 +80,14 @@
 
     private string email;
     private String token;
+    private List<IO.Modules.ResourceManager.Resource> selectedResources;
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         email = await sessionService.GetUserNameAsync();
         token = userExecuter.GetToken(email);
+        selectedResources = new List<IO.Modules.ResourceManager.Resource>();
     }
 
     private RequestModule.Request newRequest = new RequestModule.Request
@@ -63,7 +101,6 @@
 
     private IO.Modules.ResourceManager.RequestManager requestManager = new IO.Modules.ResourceManager.RequestManager();
 
-    private List<IO.Modules.ResourceManager.Resource> selectedResources;
 
     private async Task HandleValidSubmit()
     {
@@ -73,6 +110,7 @@
             newRequest.IsVerified = false;
             newRequest.CreatedAt = DateTime.Now;
             newRequest.DateUpdated = DateTime.Now;
+            newRequest.ResourcesRequired = selectedResources;
             // Dodanie do bazy danych
             bool isAdded = requestManager.AddRequestToDatabase(newRequest);
 
@@ -90,6 +128,16 @@
         {
             message = $"An error occurred: {ex.Message}";
         }
+    }
+
+    private void AddResourceForm()
+    {
+        selectedResources.Add(new IO.Modules.ResourceManager.Resource("", IO.Modules.ResourceManager.Category.Food, 1)); //string nazwa, Category, int ilosc
+    }
+
+    private void RemoveResourceForm(IO.Modules.ResourceManager.Resource resource)
+    {
+        selectedResources.Remove(resource);
     }
 
     private void ResetForm()
