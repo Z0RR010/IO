@@ -31,7 +31,75 @@
 }
 @if (whichForm == 2)
 {
-    <h1>0_0 ?Poszkodowany? X_X</h1>
+    <h1>Hello @selectedAffectedName</h1>
+    <ul class="list-group">
+
+        <h3>Your Requests</h3>
+        @foreach (var request in requestList.Where(r => r.User == selectedAffectedEmail).ToList())
+        {
+            <li class="list-group-item" style="cursor: pointer;" @onclick="() => ToggleRequestDetails(request)">
+                @request.Title - @request.Status
+                @if (selectedRequest == request && showRequestDetails)
+                {
+                    <div class="mt-2">
+                        <p>Description: @request.Description</p>
+                        <p>Created at: @request.CreatedAt</p>
+                        <p>Updated At: @request.DateUpdated</p>
+                        <p>User: @request.User</p>
+                        <p>Resources Required: @string.Join(", ", request.ResourcesRequired.Select(r => $"{r.Name} (x{r.Amount})"))</p>
+                        <p>Address: @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
+                        <p>Is Verified: @request.IsVerified</p>
+                        <button class="btn btn-primary btn-sm mt-2" @onclick="() => SelectRequest(request)">Show Tasks</button>
+                    </div>
+                }
+            </li>
+        }
+        @if (selectedRequestForTask.Title != null)
+        {
+            <h3>Assigned Tasks To Request: @selectedRequestForTask.Title</h3>
+            @foreach (var volunteerTask in volunteerManager.VolunteerTaskList.Where(t => t.RequestID == selectedRequestForTask.Id))
+            {
+                <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowTaskDetails(volunteerTask)">
+                    @volunteerTask.Description - @volunteerTask.TaskStatus
+                    @if (selectedTask == volunteerTask && showTaskDetails)
+                    {
+                        <div class="mt-2">
+                            <p>Address: @selectedTask.Address</p>
+                            <p> @selectedTask.EndDate.ToString()</p>
+                            @if (selectedTask.TaskStatus == IO.Modules.Volunteer.TaskStatus.Assigned)
+                            {
+                                <p>
+                                    Volunteer: @volunteerManager.VolunteerList.FirstOrDefault(
+                                    v => v.VolunteerID == selectedTask.VolunteerID).FirstName  @volunteerManager.VolunteerList.FirstOrDefault(
+                                    v => v.VolunteerID == selectedTask.VolunteerID).LastName
+                                </p>
+                                <p>Request: @requestManager.GetAllRequests().FirstOrDefault(r => r.Id == selectedTask.RequestID).Title</p>
+                            }
+                            <button class="btn btn-primary btn-sm mt-2" @onclick="() => SelectTaskForRate(selectedTask)">Add Rate</button>
+                        </div>
+                    }
+
+                </li>
+            }
+        }
+        @if(selectedTaskForRate.Description != null)
+        {
+            <h3>Create Rate</h3>
+
+            <div>
+                <p>Selected Request: </p>
+                <input type="text" @bind="selectedRequestForTask.Title" readonly class="form-control mt-2" />
+
+                <p>Selected Task Description: </p>
+                <input type="text" @bind="selectedTaskForRate.Description" readonly class="form-control mt-2" />
+
+                <p>Rate Description: </p>
+                <input type="text" @bind="description" placeholder="Description" class="form-control mt-2" />
+
+                <button class="btn btn-primary" @onclick="CreateRate">Submit</button>
+            </div>
+        }
+    </ul>
 }
 
 @if (whichForm == 3)
@@ -40,7 +108,8 @@
     <button class="btn btn-primary" @onclick="() => ChangeSelect(1)">Available Tasks</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(2)">Your Active Tasks</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(3)">Your Completed Tasks</button>
-    <button class="btn btn-primary" @onclick="() => ChangeSelect(4)">Profile Information</button>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(4)">Your Rates</button>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(5)">Profile Information</button>
 
 
     @if (selectedOption == 1)
@@ -111,8 +180,11 @@
             }
         </ul>
     }
-
-    @if(selectedOption == 4)
+    @if (selectedOption == 4)
+    {
+        
+    }
+    @if(selectedOption == 5)
     {
         <h1>Profile Information</h1>
         <form method="post" @onsubmit="editVolunteer">
@@ -136,7 +208,7 @@
     <button class="btn btn-primary" @onclick="() => ChangeSelect(2)">Your Tasks</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(3)">Your Volunteers</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(4)">Your Profile</button>
-
+   
     @if (selectedOption == 1)
     {
         <div class="container-fluid">
@@ -269,6 +341,7 @@
     private int whichForm = 0;
     private int prevoiusForm = 0;
     private int volunteerID = 0;
+    //requestList.Where(r => r.User == selectedAffectedEmail).ToList();
 
     private string firstName = string.Empty;
     private string lastName = string.Empty;
@@ -295,6 +368,10 @@
 
 
     private int selectedOrganisationID;
+    private string selectedAffectedEmail = string.Empty;
+    private string selectedAffectedName = string.Empty;
+    private VolunteerTask selectedTaskForRate = new VolunteerTask();
+
     private int previousSelectedOrganisationID; 
     private Request selectedRequestForTask = new Request();
     private int? selectedVolunteerID;
@@ -312,6 +389,7 @@
     protected override async System.Threading.Tasks.Task OnInitializedAsync()
     {
         volunteerManager.Load();
+        Console.WriteLine(volunteerManager.RateList.Count);
         requestList = requestManager.GetAllRequests();
         Console.WriteLine("Volunteer Page Initialized");
         string sessionUser = await sessionService.GetUserNameAsync();
@@ -330,6 +408,7 @@
     {
         UserExecuter userExecuter = new UserExecuter();
         BasicUser basicUser = userExecuter.GetBasicUser(sessionUser);
+
         if (basicUser != null)
         {
             if (basicUser.Role == "Volunteer")
@@ -381,9 +460,17 @@
                 }
                 ChangeForm(4);
             }
+            else if(basicUser.Role == "Affected")
+            {
+                selectedAffectedEmail = basicUser.Email;
+                selectedAffectedName = basicUser.Name;
+                ChangeForm(2);
+            }
+
         }
         else
         {
+
             ChangeForm(2);
         }
 
@@ -422,7 +509,7 @@
         volunteerManager.EditVolunteer(selectedVolunteer);
     }
 
-   
+
     private void CreateTask()
     {
         VolunteerTask volunteerTask = new VolunteerTask(
@@ -434,6 +521,15 @@
 
         );
         volunteerManager.AddTask(volunteerTask);
+    }
+
+    private void CreateRate()
+    {
+        Rate rate = new Rate(
+            description
+        );
+        volunteerManager.AddRate(rate, selectedTaskForRate.VolunteerTaskID);
+        selectedTaskForRate = new VolunteerTask();
     }
 
     private void AssignTask()
@@ -492,6 +588,9 @@
         requestManager.UpdateRequestStatus(request.Id, requestStatus);
         request.Status = requestStatus;
     }
-
+    private void SelectTaskForRate(VolunteerTask volunteerTask)
+    {
+        selectedTaskForRate = volunteerTask;
+    }
 }
 

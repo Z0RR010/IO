@@ -41,7 +41,7 @@ namespace IO.Modules.ResourceManager
                 {
                     // Wstawianie nowej organizacji
                     orgQuery = @"
-            INSERT INTO Organisations ( OrganisationName, Email, PhoneNumber, Address, Website, KRS)
+            INSERT INTO Organisations (OrganisationName, Email, PhoneNumber, Address, Website, KRS)
             VALUES ( @name, @email, @phone, @address, @website, @krs);
             SELECT last_insert_rowid();";
                 }
@@ -173,15 +173,16 @@ namespace IO.Modules.ResourceManager
                     // Aktualizacja istniejącego taska
                     query = @"
         UPDATE VolunteerTasks 
-        SET Description = @description, Address = @address, TaskStatus = @taskStatus, EndDate = @endDate, OrganisationID = @organisationID, VolunteerID = @volunteerID, RequestID = @requestID
+        SET Description = @description, Address = @address, TaskStatus = @taskStatus, EndDate = @endDate,
+        OrganisationID = @organisationID, VolunteerID = @volunteerID, RequestID = @requestID, RateID = @rateID
         WHERE VolunteerTaskID = @volunteerTaskID";
                 }
                 else
                 {
                     // Wstawianie nowego taska
                     query = @"
-        INSERT INTO VolunteerTasks (Description, Address, TaskStatus, EndDate, OrganisationID, VolunteerID, RequestID)
-        VALUES (@description, @address, @taskStatus, @endDate, @organisationID, @volunteerID, @requestID);
+        INSERT INTO VolunteerTasks (Description, Address, TaskStatus, EndDate, OrganisationID, VolunteerID, RequestID, RateID)
+        VALUES (@description, @address, @taskStatus, @endDate, @organisationID, @volunteerID, @requestID, @rateID);
         SELECT last_insert_rowid();";
                 }
 
@@ -194,6 +195,7 @@ namespace IO.Modules.ResourceManager
                 command.Parameters.AddWithValue("@organisationID", volunteerTask.OrganisationID);
                 command.Parameters.AddWithValue("@volunteerID", volunteerTask.VolunteerID);
                 command.Parameters.AddWithValue("@requestID", volunteerTask.RequestID);
+                command.Parameters.AddWithValue("@rateID", volunteerTask.RateID);
 
 
                 int rowsAffected;
@@ -221,12 +223,13 @@ namespace IO.Modules.ResourceManager
         }
         public bool SendRateToDatabase(Rate rate)
         {
+            if (rate == null) throw new ArgumentNullException(nameof(rate));
             try
             {
                 using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
 
-                // Sprawdzenie, czy rate już istnieje
+                // Sprawdzenie, czy volunteerTask już istnieje
                 string checkQuery = "SELECT COUNT(*) FROM Rates WHERE RateID = @rateID";
                 using var checkCommand = new SqliteCommand(checkQuery, connection);
                 checkCommand.Parameters.AddWithValue("@rateID", rate.RateID);
@@ -235,27 +238,46 @@ namespace IO.Modules.ResourceManager
                 string query;
                 if (count > 0)
                 {
-                    // Aktualizacja istniejącego rate
-                    query = @"SELECT RateID FROM Rates WHERE RateID = @rateID";
+                    // Aktualizacja istniejącego taska
+                    query = @"
+        UPDATE Rates
+        SET Description = @description
+        WHERE RateID = @rateID";
                 }
                 else
                 {
-                    // Wstawianie nowego rate
+                    // Wstawianie nowego taska
                     query = @"
-                    INSERT INTO Rates (Description)
-                    VALUES (@description);
-                    SELECT last_insert_rowid();";
+        INSERT INTO Rates (Description)
+        VALUES (@description);
+        SELECT last_insert_rowid();";
                 }
 
                 using var command = new SqliteCommand(query, connection);
 
-                command.Parameters.AddWithValue("@rateID", rate.RateID);
                 command.Parameters.AddWithValue("@description", rate.Description);
-                return true;
+
+
+                int rowsAffected;
+                if (count > 0)
+                {
+                    command.Parameters.AddWithValue("@rateID", rate.RateID);
+                    rowsAffected = command.ExecuteNonQuery();
+                }
+                else
+                {
+                    rate.RateID = Convert.ToInt32(command.ExecuteScalar());
+                    rowsAffected = 1;
+                }
+
+                Console.WriteLine(rowsAffected > 0
+                    ? $"Rate {rate.RateID} saved/updated in the database."
+                    : $"Failed to save/update rate {rate.RateID} to database.");
+                return rowsAffected > 0;
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error sending rate to database: {e.Message}");
+                Console.WriteLine($"Error saving rate to the database: {e.Message}");
                 return false;
             }
         }
