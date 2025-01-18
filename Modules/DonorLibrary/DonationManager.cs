@@ -9,7 +9,7 @@
             donations = new List<Donation>();
         }
 
-        public void AddDonation(string itemName, int quantity, string date)
+        public void AddDonation(string itemName, int? quantity, string date)
         {
             int newId = GetNextId();
             var donation = new Donation(newId, itemName, quantity, date);

@@ -1,0 +1,75 @@
+@page "/Communication/Reports"
+@using System.IO
+@using System.Text
+@using IO.Modules.Communication
+@using System.Globalization
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Conversation> Loc
+@inject RaportManager RaportService
+
+<div class="container my-5">
+    <h2 class="text-center">@Loc["Report Viewer & Downloader"]</h2>
+
+    <!-- Scrollable Report Display -->
+    <div class="scrollable-report mb-4">
+        <pre>@reportContent</pre>
+    </div>
+
+    <!-- Download Button -->
+    <div class="text-center">
+        <button class="btn btn-primary" @onclick="DownloadReport">@Loc["Download Report"]</button>
+    </div>
+</div>
+
+@code {
+    private string reportContent;
+
+    protected override void OnInitialized()
+    {
+        // Fetch the report content from RaportManager
+        reportContent = RaportService.activeReport ?? "No report available.";
+    }
+
+    private async Task DownloadReport()
+    {
+        // Convert the report content to a stream
+        var fileName = "report.txt";
+        var fileBytes = Encoding.UTF8.GetBytes(reportContent);
+
+        // Use a memory stream for file download
+        using var stream = new MemoryStream(fileBytes);
+        var fileUrl = $"data:text/plain;charset=utf-8,{Uri.EscapeDataString(reportContent)}";
+
+        // Trigger the download in the browser
+        await JSRuntime.InvokeVoidAsync("downloadFile", fileUrl, fileName);
+    }
+}
+<style>
+    .container {
+        max-width: 700px;
+        margin: 0 auto;
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .scrollable-report {
+        max-height: 400px; /* Set a fixed height */
+        overflow-y: auto; /* Enable vertical scrolling */
+        padding: 10px;
+        background-color: #f7f7f7;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 0.95rem;
+        color: #333;
+        white-space: pre-wrap; /* Preserve whitespace for formatting */
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+</style>
+@inject IJSRuntime JSRuntime

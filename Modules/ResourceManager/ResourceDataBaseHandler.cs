@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
-using System.Data.SQLite;
-using MySql.Data.MySqlClient;
+using Microsoft.Data.Sqlite;
 
 namespace IO.Modules.ResourceManager
 {
@@ -12,17 +11,17 @@ namespace IO.Modules.ResourceManager
     public class ResourceDataBaseHandler : IDisposable, IAsyncDisposable
     {
         //private readonly MySqlConnection _resourceConnection;
-        private readonly SQLiteConnection _resourceConnection;
+        private readonly SqliteConnection _resourceConnection;
 
         public ResourceDataBaseHandler(string connectionString)
         {
             try
             {
                 //If connection is not established try downloading mySQL server so far
-                _resourceConnection = new SQLiteConnection(connectionString); //MySqlConnection(connectionString);
+                _resourceConnection = new SqliteConnection(connectionString); //MySqlConnection(connectionString);
                 _resourceConnection.Open();
                 //Diagnostics stuff
-                Console.WriteLine("Connection to " + _resourceConnection.FileName + " established");
+                Console.WriteLine("Connection to " + _resourceConnection.ConnectionString + " established");
             }
             catch (Exception e)
             {
@@ -36,16 +35,18 @@ namespace IO.Modules.ResourceManager
         /// </summary>
         /// <param name="item"></param>
         /// <returns>True if operation was successful. Otherwise, false</returns>
-        public bool AddItem(Resource item)
+        public bool AddItem(Resource item, string donorEmail)
         {
-            string query = "INSERT INTO resources(hashcode_id, resource) VALUES(@hashcode, @packedResource)";
+            string query =
+                "INSERT INTO resources(hashcode_id, resource, email) VALUES(@hashcode, @packedResource, @donorEmail)";
             try
             {
                 using (var command =
-                       new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
+                       new SqliteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
                 {
                     command.Parameters.AddWithValue("@hashcode", item.GetHashCode());
                     command.Parameters.AddWithValue("@packedResource", JsonSerializer.Serialize(item));
+                    command.Parameters.AddWithValue("@donorEmail", donorEmail);
                     Console.WriteLine("Added resource");
                     int rowsAffected = command.ExecuteNonQuery();
                     return rowsAffected > 0;
@@ -69,7 +70,7 @@ namespace IO.Modules.ResourceManager
             try
             {
                 using (var command =
-                       new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
+                       new SqliteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
                 {
                     command.Parameters.AddWithValue("@hashcode", item.GetHashCode());
                     int rowsAffected = command.ExecuteNonQuery();
@@ -105,7 +106,7 @@ namespace IO.Modules.ResourceManager
                     try
                     {
                         using (var command =
-                               new SQLiteCommand(query,
+                               new SqliteCommand(query,
                                    _resourceConnection)) //MySqlCommand(query, _resourceConnection))
                         {
                             command.Parameters.AddWithValue("@hashcode", hash);
@@ -149,7 +150,7 @@ namespace IO.Modules.ResourceManager
                     try
                     {
                         using (var command =
-                               new SQLiteCommand(query,
+                               new SqliteCommand(query,
                                    _resourceConnection)) //MySqlCommand(query, _resourceConnection))
                         {
                             command.Parameters.AddWithValue("@hashcode", hash);
@@ -192,7 +193,7 @@ namespace IO.Modules.ResourceManager
                     try
                     {
                         using (var command =
-                               new SQLiteCommand(query,
+                               new SqliteCommand(query,
                                    _resourceConnection)) //MySqlCommand(query, _resourceConnection))
                         {
                             command.Parameters.AddWithValue("@newResAmount", JsonSerializer.Serialize(res));
@@ -217,7 +218,7 @@ namespace IO.Modules.ResourceManager
         /// </summary>
         /// <param name="category">The category to be found</param>
         /// <returns>Size of list of all items ever found in database</returns>
-        public int GetItemsByCategory(Category category)
+        public int GetItemsAmountByCategory(Category category)
         {
             List<Resource> items = GetAllItems();
 
@@ -233,6 +234,7 @@ namespace IO.Modules.ResourceManager
 
             return count;
         }
+
 
         public void Dispose()
         {
@@ -255,7 +257,7 @@ namespace IO.Modules.ResourceManager
             List<Resource> items = new List<Resource>();
 
             using (var command =
-                   new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
+                   new SqliteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
             {
                 using (var reader = command.ExecuteReader())
                 {
@@ -286,7 +288,7 @@ namespace IO.Modules.ResourceManager
             try
             {
                 using (var command =
-                       new SQLiteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
+                       new SqliteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
                 using (var reader = command.ExecuteReader())
                 {
                     var result = new StringBuilder();
@@ -318,6 +320,32 @@ namespace IO.Modules.ResourceManager
                 Console.WriteLine(e);
                 throw;
             }
+        }
+
+        public List<Resource> GetGetItemsByDonor(string donorEmail)
+        {
+            string query = "SELECT * FROM resources where email = @email";
+            List<Resource> items = new List<Resource>();
+
+            using (var command =
+                   new SqliteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
+            {
+
+                command.Parameters.AddWithValue("@email", donorEmail);
+
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                            var item = JsonSerializer.Deserialize<Resource>(reader.GetString(1));
+
+                            items.Add(item);
+                    }
+                }
+            }
+
+            return items;
         }
     }
 }

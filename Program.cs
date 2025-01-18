@@ -32,7 +32,7 @@ namespace IO
                 {
                     options.Cookie.Name = "auth_token";
                     options.LoginPath = "/signIn";
-                    options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
+                    options.Cookie.MaxAge = TimeSpan.FromMinutes(60);
                 });
             builder.Services.AddAuthorization();
             builder.Services.AddCascadingAuthenticationState();
@@ -53,7 +53,11 @@ namespace IO
             */
 
             builder.Services.AddSingleton<Communicator>();
-
+            builder.Services.AddSingleton(provider =>
+            {
+                var communicator = provider.GetRequiredService<Communicator>();
+                return communicator.manager; // Use the same instance from Communicator
+            });
             builder.Services.AddHttpClient();
             if (builder.Environment.IsDevelopment())
             {
@@ -89,6 +93,8 @@ namespace IO
 
                 return new GoogleMapsClient(jsRuntime, apiKey);
             });
+
+            builder.Services.AddScoped<Geolocation>();
 
             builder.Services.AddScoped<RequestModule.IRequestService, RequestModule.RequestService>();
             builder.Services.AddLocalization();

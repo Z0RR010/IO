@@ -1,0 +1,146 @@
+@page "/Communication/Conversation/ChatMan"
+@inject NavigationManager Navigation
+@using IO.Modules.Communication
+@inject Communicator CommunicatorService
+@using System.Globalization
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Conversation> Loc
+@rendermode InteractiveServer
+<h3 class="chat-header">@Loc["Conversation"]</h3>
+
+<p class="chat-id">@Loc["Chat ID"] @chatId</p>
+
+<div class="chat-container">
+    @foreach (var message in activeChat.Messages)
+    {
+    <div class="message @(message.Email == UserChecking ? "left" : "right")">
+        <div class="message-content">
+            <span class="message-email">@message.Email</span>
+            <div class="message-bubble">
+                <p>@message.content</p>
+            </div>
+        </div>
+    </div>
+    }
+</div>
+<div class="mb-4">
+    <label for="UserSendMessage" class="form-label">@Loc["Message"]</label>
+    <input type="email" id="UserSendMessage" class="form-control" @bind="MessageContent" placeholder=@Loc["Write a Message"] />
+    <button class="btn btn-primary mt-2" @onclick="sendToChat">@Loc["Send Message"]</button>
+</div>
+@code {
+    private int chatId;
+    string MessageContent;
+    string UserChecking = "matiziom72@gmail.com";
+    Chat activeChat;
+    protected override void OnInitialized()
+    {
+        // Access query string parameters manually
+        var uri = Navigation.Uri;
+        var queryString = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(uri).Query);
+
+        if (queryString.ContainsKey("chatId"))
+        {
+            chatId = int.Parse(queryString["chatId"]);
+        }
+
+        Console.WriteLine($"ChatId manually parsed: {chatId}");
+        var userChats = CommunicatorService.GetUserChats("matiziom72@gmail.com");
+        
+        activeChat = userChats.FirstOrDefault(chat => chat.ChatId == chatId);
+        
+    }
+    private void sendToChat()
+    {
+        bool result = false;
+        if (!string.IsNullOrWhiteSpace(MessageContent))
+        {
+            // Simulate sending the message and adding it to the chat
+            result = CommunicatorService.SendMessage(chatId, MessageContent, UserChecking);
+
+            // Clear the input field after sending
+            MessageContent = string.Empty;
+
+            // Optionally, you can add logic to call a backend service to persist this message
+        }
+        
+    }
+    
+}
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+    }
+
+    .chat-header {
+        text-align: center;
+        font-size: 1.5rem;
+        margin: 20px 0;
+    }
+
+    .chat-id {
+        text-align: center;
+        font-size: 0.9rem;
+        color: gray;
+    }
+
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 15px;
+        background-color: #343232;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+
+    .message {
+        display: flex;
+        width: 100%; /* Ensure messages take full container width */
+    }
+
+    .message.left {
+        justify-content: flex-start; /* Align left messages to the start of the container */
+    }
+
+    .message.right {
+        justify-content: flex-end; /* Align right messages to the end of the container */
+    }
+
+    .message-content {
+        display: flex;
+        flex-direction: column;
+        max-width: 70%; /* Limit the width of the content */
+    }
+
+    .message-email {
+        font-size: 0.75rem; /* Small text */
+        font-weight: 500;
+        color: gray;
+        margin-bottom: 2px; /* Add space between email and bubble */
+    }
+
+    .message-bubble {
+        padding: 8px 12px;
+        border-radius: 15px;
+        font-size: 0.95rem;
+        line-height: 1.2;
+        word-wrap: break-word;
+        background-color: #e2e3e5;
+        color: #333;
+    }
+
+    .message.left .message-bubble {
+        background-color: #d1e7dd; /* Left bubble color */
+    }
+
+    .message.right .message-bubble {
+        background-color: #007bff; /* Right bubble color */
+        color: white;
+    }
+   
+</style>

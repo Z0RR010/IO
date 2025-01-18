@@ -1,16 +1,4 @@
-Jeżeli moduł nie jest zdolny się podłączyć do bazy danych, to prawdopodobnie to dlatego, że nie macie zainstalowanego MySQL server.
-Niestety, na razie nie mamy dedykowanego servera, więc musimy się bawić tym, co mamy.
-
-Należy pobrać MySQL ze strony: https://dev.mysql.com/downloads/file/?id=536355
-
-następnie zainstalować go z domyślnymi ustawieniami oraz 
-login: root
-hasło: root
-
-(możecie to zauważyć nawet w kodzie)
-
-jeśli nadal nie działa, to trzeba dodać bazy danych wraz z ich tabelami 
-(OBOWIĄZKOWO pilnować rozmiar wpisywanych literek w nazwy BD i tabeli):
+Poprostu informacja dla potencjalnego rozszerzenia i/lub modyfikacji BD
 
 create database resourceBase
 
@@ -18,7 +6,8 @@ use resourceBase
 
 create table resources (
 hashcode_id INT PRIMARY KEY,
-resource JSON NOT NULL
+resource JSON NOT NULL,
+email VARCHAR(50)
 )
 
 

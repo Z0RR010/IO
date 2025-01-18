@@ -1,0 +1,63 @@
+
+Organisation Details:
+ID: 0
+Name: Red Cross
+Phone: 123456789
+Address: Red Cross Address
+
+
+Organisation Details:
+ID: 1
+Name: UNICEF
+Phone: 987654321
+Address: UNICEF Address
+
+
+Organisation Details:
+ID: 2
+Name: Doctors Without Borders
+Phone: 111222333
+Address: DWB Address
+
+
+Volunteer Details:
+ID: 2
+Name: imie23 nazwisko23
+Email: email23
+Gender: Female
+Phone: 983490822
+Address: adres2
+Experience: fcpsiedmfvgedjmgioj2
+Additional Info: mfkiwsjmodmkcvnh2
+Skills: zerp2
+Availability: 2024-12-06, 2024-12-11, 2024-12-27, 2024-12-22
+Organisation ID: 0
+
+
+Volunteer Details:
+ID: 0
+Name: imie nazwisko
+Email: email
+Gender: Male
+Phone: 98349082
+Address: adres
+Experience: fcpsiedmfvgedjmgioj
+Additional Info: mfkiwsjmodmkcvnh
+Skills: zerp
+Availability: 2024-12-06, 2024-12-11, 2024-12-27, 2024-12-22
+Organisation ID: 1
+
+
+Volunteer Details:
+ID: 1
+Name: imie2 nazwisko2
+Email: email2
+Gender: Other
+Phone: 983490822
+Address: adres2
+Experience: fcpsiedmfvgedjmgioj2
+Additional Info: mfkiwsjmodmkcvnh2
+Skills: zerp2
+Availability: 2024-12-06, 2024-12-11, 2024-12-27, 2024-12-22
+Organisation ID: 2
+

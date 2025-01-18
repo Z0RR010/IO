@@ -2,9 +2,10 @@ using System.Data;
 using System.Text;
 using IO.Modules.Security;
 using MySql.Data.MySqlClient;
-using System.Data.SQLite;
+using Microsoft.Data.Sqlite;
 using System.Text;
 using System.Text.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace IO.Modules.ResourceManager
 {
@@ -14,7 +15,7 @@ namespace IO.Modules.ResourceManager
     public class UserExecuter : IUserManager, IDisposable, IAsyncDisposable
     {
         //private readonly MySqlConnection _userConnection;
-        private readonly SQLiteConnection _userConnection;
+        private readonly SqliteConnection _userConnection;
 
         //If connection is not established try downloading mySQL server so far
         public UserExecuter()
@@ -23,14 +24,14 @@ namespace IO.Modules.ResourceManager
             {
                 _userConnection =
                     //new MySqlConnection("Server=localhost;Port=3306;Database=userDatabase;User Id=root;Password=root;");
-                    new SQLiteConnection(
-                        "Data Source=./././databases/userDatabase.db;Version=3;FailIfMissing=True;");
+                    new SqliteConnection(
+                        "Data Source=./databases/userDatabase.db;Cache=Shared");
                 _userConnection.Open();
                 //Diagnostics stuff
-                Console.WriteLine("Connection to " + _userConnection.FileName + " established");
-                
+                Console.WriteLine("Connection to " + _userConnection.ConnectionString + " established");
+
             }
-            catch (SQLiteException ex)
+            catch (SqliteException ex)
             {
                 Console.WriteLine(ex.Message);
                 throw;
@@ -46,7 +47,7 @@ namespace IO.Modules.ResourceManager
         {
             string query = "SELECT password FROM users WHERE email = @email";
 
-            using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+            using (var command = new SqliteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
             {
                 command.Parameters.AddWithValue("@email", email);
 
@@ -70,7 +71,7 @@ namespace IO.Modules.ResourceManager
         {
             string query = "SELECT * FROM users WHERE email = @email";
 
-            using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+            using (var command = new SqliteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
             {
                 command.Parameters.AddWithValue("@email", email);
                 return command.ExecuteScalar()?.ToString() != null;
@@ -79,18 +80,67 @@ namespace IO.Modules.ResourceManager
             // connection closes automatically as this class implements IDisposable interface
         }
 
+
         /// <summary>
         /// Get a concrete individual user from database as only they have PESEL
         /// </summary>
         /// <param name="email">Email of requested user</param>
         /// <returns>User of type Individual if found in DB. Otherwise, NULL</returns>
+        public BasicUser GetBasicUser(string email)
+        {
+            string query = "SELECT * FROM users WHERE email = @email";
+            using (var command = new SqliteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+            {
+                command.Parameters.AddWithValue("@email", email);
+                using var reader = command.ExecuteReader();
+
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        var readEmail = reader.GetString(0);
+                        var readJSON = reader.GetString(1);
+                        var readEncryptionKey = reader.GetString(2);
+                        var readPassword = reader.GetString(3);
+                        var readEmailVerified = reader.GetBoolean(4);
+                        var readToken = reader.GetString(5);
+                        var readRole = reader.GetString(6);
+                        string readWebsite = "";
+                        if (!reader.IsDBNull(7)) readWebsite = reader.GetString(7);
+                        string readKrs = "";
+                        if (!reader.IsDBNull(8)) readKrs = reader.GetString(8);
+                        string readInstitution = "";
+                        if (!reader.IsDBNull(9)) readInstitution = reader.GetString(9);
+
+                        Individual individual = JsonSerializer.Deserialize<Individual>(readJSON);
+
+                        BasicUser basicUser = new BasicUser(readEmail,
+                                                           individual.Name,
+                                                           individual.PhoneNumber,
+                                                           individual.Address,
+                                                           individual.IsVerified,
+                                                           individual.Surname,
+                                                           individual.Pesel,
+                                                           readInstitution,
+                                                           readWebsite,
+                                                           readKrs,
+                                                           readRole);
+
+                        return basicUser;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         public Individual GetUserFromDataBase(string email)
         {
             if (IsUserInDataBase(email))
             {
                 string query = "SELECT user FROM users WHERE email = @email";
 
-                using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+                using (var command = new SqliteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
                 {
                     command.Parameters.AddWithValue("@email", email);
 
@@ -129,7 +179,7 @@ namespace IO.Modules.ResourceManager
                 "INSERT INTO users(email, user, encryptionKey, password, emailVerified, token, role, website, krs, institution) VALUES(@email, @packedUser, @encryptionKey, @password, @emailVerified, @token, @role, @website, @krs, @institution)";
             try
             {
-                using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+                using (var command = new SqliteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
                 {
                     command.Parameters.AddWithValue("@email", user.Email);
                     command.Parameters.AddWithValue("@packedUser", packedUser);
@@ -139,10 +189,10 @@ namespace IO.Modules.ResourceManager
                     command.Parameters.AddWithValue("@token", token);
                     command.Parameters.AddWithValue("@role", role);
                     command.Parameters.AddWithValue("@website", website);
-					command.Parameters.AddWithValue("@krs", krs);
-					command.Parameters.AddWithValue("@institution", institution);
+                    command.Parameters.AddWithValue("@krs", krs);
+                    command.Parameters.AddWithValue("@institution", institution);
 
-					int rowsAffected = command.ExecuteNonQuery();
+                    int rowsAffected = command.ExecuteNonQuery();
                     return rowsAffected > 0;
                 }
             }
@@ -195,7 +245,7 @@ namespace IO.Modules.ResourceManager
 
             try
             {
-                using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+                using (var command = new SqliteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
                 using (var reader = command.ExecuteReader())
                 {
                     var result = new StringBuilder();
@@ -240,7 +290,7 @@ namespace IO.Modules.ResourceManager
             {
                 string query = "SELECT encryptionKey FROM users WHERE email = @email";
 
-                using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+                using (var command = new SqliteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
                 {
                     command.Parameters.AddWithValue("@email", email);
 
@@ -266,7 +316,7 @@ namespace IO.Modules.ResourceManager
             {
                 string query = "SELECT token FROM users WHERE email = @email";
 
-                using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+                using (var command = new SqliteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
                 {
                     command.Parameters.AddWithValue("@email", email);
 
@@ -292,7 +342,7 @@ namespace IO.Modules.ResourceManager
             string query = "UPDATE users SET emailVerified = @value WHERE email = @email";
             try
             {
-                using (var command = new SQLiteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+                using (var command = new SqliteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
                 {
                     command.Parameters.AddWithValue("@email", email);
                     command.Parameters.AddWithValue("@value", value);

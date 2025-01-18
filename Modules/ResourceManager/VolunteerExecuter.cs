@@ -1,38 +1,74 @@
 ﻿using IO.Modules.Volunteer;
-using MySql.Data.MySqlClient;
-using System.Data.SQLite;
+using System.Data;
+using System.Text.Json;
+using Microsoft.Data.Sqlite;
+
 
 namespace IO.Modules.ResourceManager
 {
-    public class VolunteerExecuter : IDisposable, IAsyncDisposable
+    public class VolunteerExecuter
     {
         private readonly string _connectionString =
-            "Data Source=./databases/volunteerDatabase.db;Version=3;FailIfMissing=True;";
+                    "Data Source=./databases/volunteerDatabase.db;Cache=Shared";
 
-        public bool AddOrganisationToDatabase(Organisation organisation)
+        public bool SendOrganisationToDatabase(Organisation organisation)
         {
             if (organisation == null) throw new ArgumentNullException(nameof(organisation));
 
             try
             {
-                using var connection = new SQLiteConnection(_connectionString); //MySqlConnection(_connectionString);
+                using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
-                Console.WriteLine("Connection to " + connection.FileName + " established");
-                string orgQuery = @"
-            INSERT INTO Organisations (OrganisationID, OrganisationName, PhoneNumber, Address)
-            VALUES (@id, @name, @phone, @address)
-            ON DUPLICATE KEY UPDATE
-                OrganisationName = @name,
-                PhoneNumber = @phone,
-                Address = @address";
+                Console.WriteLine("Connection to " + connection.ConnectionString + " established");
 
-                using var orgCommand = new SQLiteCommand(orgQuery, connection); //MySqlCommand(orgQuery, connection);
-                orgCommand.Parameters.AddWithValue("@id", organisation.OrganisationID);
+                // Sprawdzenie czy organizacja już istnieje
+                string checkQuery = "SELECT COUNT(*) FROM Organisations WHERE OrganisationID = @id";
+                using var checkCommand = new SqliteCommand(checkQuery, connection);
+                checkCommand.Parameters.AddWithValue("@id", organisation.OrganisationID);
+                int count = Convert.ToInt32(checkCommand.ExecuteScalar());
+
+
+                string orgQuery;
+                if (count > 0)
+                {
+                    // Aktualizacja istniejącej organizacji
+                    orgQuery = @"
+            UPDATE Organisations 
+            SET OrganisationName = @name, Email = @email, PhoneNumber = @phone, Address = @address, Website = @website, KRS = @krs
+            WHERE OrganisationID = @id";
+                }
+                else
+                {
+                    // Wstawianie nowej organizacji
+                    orgQuery = @"
+            INSERT INTO Organisations ( OrganisationName, Email, PhoneNumber, Address, Website, KRS)
+            VALUES ( @name, @email, @phone, @address, @website, @krs);
+            SELECT last_insert_rowid();";
+                }
+
+                using var orgCommand = new SqliteCommand(orgQuery, connection);
+
+                orgCommand.Parameters.AddWithValue("@email", organisation.Email);
                 orgCommand.Parameters.AddWithValue("@name", organisation.OrganisationName);
                 orgCommand.Parameters.AddWithValue("@phone", organisation.PhoneNumber);
                 orgCommand.Parameters.AddWithValue("@address", organisation.Address);
+                orgCommand.Parameters.AddWithValue("@website", organisation.Website);
+                orgCommand.Parameters.AddWithValue("@krs", organisation.KRS);
 
-                int rowsAffected = orgCommand.ExecuteNonQuery();
+                int rowsAffected;
+                if (count > 0)
+                {
+                    orgCommand.Parameters.AddWithValue("@id", organisation.OrganisationID);
+                    rowsAffected = orgCommand.ExecuteNonQuery();
+
+                }
+                else
+                {
+                    organisation.OrganisationID = Convert.ToInt32(orgCommand.ExecuteScalar());
+                    rowsAffected = 1;
+                }
+
+
                 Console.WriteLine(rowsAffected > 0
                     ? $"Organisation {organisation.OrganisationName} saved/updated in the database."
                     : $"Failed to save/update organisation {organisation.OrganisationName}.");
@@ -45,50 +81,69 @@ namespace IO.Modules.ResourceManager
             }
         }
 
-        public bool AddVolunteerToDatabase(IO.Modules.Volunteer.Volunteer volunteer, Organisation organisation)
+        public bool SendVolunteerToDatabase(IO.Modules.Volunteer.Volunteer volunteer)
         {
             if (volunteer == null) throw new ArgumentNullException(nameof(volunteer));
-            if (organisation == null) throw new ArgumentNullException(nameof(organisation));
 
             try
             {
-                using var connection = new SQLiteConnection(_connectionString); //MySqlConnection(_connectionString);
+                using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
 
-                string volQuery = @"
-            INSERT INTO Volunteers (VolunteerID, FirstName, LastName, Email, Gender, PhoneNumber, Address, Experience, AdditionalInfo, Skills, Availability, OrganisationID)
-            VALUES (@id, @firstName, @lastName, @email, @gender, @phone, @address, @experience, @additionalInfo, @skills, @availability, @orgId)
-            ON DUPLICATE KEY UPDATE
-                FirstName = @firstName,
-                LastName = @lastName,
-                Email = @email,
-                Gender = @gender,
-                PhoneNumber = @phone,
-                Address = @address,
-                Experience = @experience,
-                AdditionalInfo = @additionalInfo,
-                Skills = @skills,
-                Availability = @availability";
+                // Sprawdzenie, czy wolontariusz już istnieje
+                string checkQuery = "SELECT COUNT(*) FROM Volunteers WHERE VolunteerID = @id";
+                using var checkCommand = new SqliteCommand(checkQuery, connection);
+                checkCommand.Parameters.AddWithValue("@id", volunteer.VolunteerID);
+                int count = Convert.ToInt32(checkCommand.ExecuteScalar());
 
-                using var volCommand = new SQLiteCommand(volQuery, connection); //MySqlCommand(volQuery, connection);
-                volCommand.Parameters.AddWithValue("@id", volunteer.VolunteerID);
+                string volQuery;
+                if (count > 0)
+                {
+                    // Aktualizacja istniejącego wolontariusza
+                    volQuery = @"
+                UPDATE Volunteers
+                SET FirstName = @firstName,
+                    LastName = @lastName,
+                    Email = @email,
+                    PhoneNumber = @phone,
+                    Address = @address,
+                    OrganisationID = @orgId
+                WHERE VolunteerID = @id";
+                }
+                else
+                {
+                    // Wstawianie nowego wolontariusza
+                    volQuery = @"
+            INSERT INTO Volunteers ( FirstName, LastName, Email, PhoneNumber, Address, OrganisationID)
+            VALUES ( @firstName, @lastName, @email, @phone, @address, @orgId);
+            SELECT last_insert_rowid();";
+                }
+
+
+                using var volCommand = new SqliteCommand(volQuery, connection);
+
                 volCommand.Parameters.AddWithValue("@firstName", volunteer.FirstName);
                 volCommand.Parameters.AddWithValue("@lastName", volunteer.LastName);
                 volCommand.Parameters.AddWithValue("@email", volunteer.Email);
-                volCommand.Parameters.AddWithValue("@gender", volunteer.Gender);
                 volCommand.Parameters.AddWithValue("@phone", volunteer.PhoneNumber);
                 volCommand.Parameters.AddWithValue("@address", volunteer.Address);
-                volCommand.Parameters.AddWithValue("@experience", volunteer.Experience);
-                volCommand.Parameters.AddWithValue("@additionalInfo", volunteer.AdditionalInfo);
-                volCommand.Parameters.AddWithValue("@skills", volunteer.Skills);
-                volCommand.Parameters.AddWithValue("@availability",
-                    string.Join(", ", volunteer.Availability.Select(a => a.ToString("yyyy-MM-dd"))));
-                volCommand.Parameters.AddWithValue("@orgId", organisation.OrganisationID);
+                volCommand.Parameters.AddWithValue("@orgId", volunteer.OrganisationID);
 
-                int rowsAffected = volCommand.ExecuteNonQuery();
+                int rowsAffected;
+                if (count > 0)
+                {
+                    volCommand.Parameters.AddWithValue("@id", volunteer.VolunteerID);
+                    rowsAffected = volCommand.ExecuteNonQuery();
+                }
+                else
+                {
+                    volunteer.VolunteerID = Convert.ToInt32(volCommand.ExecuteScalar());
+                    rowsAffected = 1;
+                }
+
                 Console.WriteLine(rowsAffected > 0
-                    ? $"Volunteer {volunteer.FirstName} {volunteer.LastName} saved to database."
-                    : $"Failed to save volunteer {volunteer.FirstName} {volunteer.LastName} to database.");
+                    ? $"Volunteer {volunteer.FirstName} {volunteer.LastName} saved/updated in the database."
+                    : $"Failed to save/update volunteer {volunteer.FirstName} {volunteer.LastName} to database.");
                 return rowsAffected > 0;
             }
             catch (Exception e)
@@ -98,52 +153,208 @@ namespace IO.Modules.ResourceManager
             }
         }
 
+        public bool SendTaskToDatabase(IO.Modules.Volunteer.VolunteerTask volunteerTask)
+        {
+            if (volunteerTask == null) throw new ArgumentNullException(nameof(volunteerTask));
+            try
+            {
+                using var connection = new SqliteConnection(_connectionString);
+                connection.Open();
 
-        public List<IO.Modules.Volunteer.Volunteer> LoadVolunteerList(List<Organisation> organisationList)
+                // Sprawdzenie, czy volunteerTask już istnieje
+                string checkQuery = "SELECT COUNT(*) FROM VolunteerTasks WHERE VolunteerTaskID = @volunteerTaskID";
+                using var checkCommand = new SqliteCommand(checkQuery, connection);
+                checkCommand.Parameters.AddWithValue("@volunteerTaskID", volunteerTask.VolunteerTaskID);
+                int count = Convert.ToInt32(checkCommand.ExecuteScalar());
+
+                string query;
+                if (count > 0)
+                {
+                    // Aktualizacja istniejącego taska
+                    query = @"
+        UPDATE VolunteerTasks 
+        SET Description = @description, Address = @address, TaskStatus = @taskStatus, EndDate = @endDate, OrganisationID = @organisationID, VolunteerID = @volunteerID, RequestID = @requestID
+        WHERE VolunteerTaskID = @volunteerTaskID";
+                }
+                else
+                {
+                    // Wstawianie nowego taska
+                    query = @"
+        INSERT INTO VolunteerTasks (Description, Address, TaskStatus, EndDate, OrganisationID, VolunteerID, RequestID)
+        VALUES (@description, @address, @taskStatus, @endDate, @organisationID, @volunteerID, @requestID);
+        SELECT last_insert_rowid();";
+                }
+
+                using var command = new SqliteCommand(query, connection);
+
+                command.Parameters.AddWithValue("@description", volunteerTask.Description);
+                command.Parameters.AddWithValue("@address", volunteerTask.Address);
+                command.Parameters.AddWithValue("@taskStatus", volunteerTask.TaskStatus.ToString());
+                command.Parameters.AddWithValue("@endDate", volunteerTask.EndDate.ToString());
+                command.Parameters.AddWithValue("@organisationID", volunteerTask.OrganisationID);
+                command.Parameters.AddWithValue("@volunteerID", volunteerTask.VolunteerID);
+                command.Parameters.AddWithValue("@requestID", volunteerTask.RequestID);
+
+
+                int rowsAffected;
+                if (count > 0)
+                {
+                    command.Parameters.AddWithValue("@volunteerTaskID", volunteerTask.VolunteerTaskID);
+                    rowsAffected = command.ExecuteNonQuery();
+                }
+                else
+                {
+                    volunteerTask.VolunteerTaskID = Convert.ToInt32(command.ExecuteScalar());
+                    rowsAffected = 1;
+                }
+
+                Console.WriteLine(rowsAffected > 0
+                    ? $"VolunteerTask {volunteerTask.VolunteerTaskID} saved/updated in the database."
+                    : $"Failed to save/update volunteerTask {volunteerTask.VolunteerTaskID} to database.");
+                return rowsAffected > 0;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error saving volunteerTask to the database: {e.Message}");
+                return false;
+            }
+        }
+        public bool SendRateToDatabase(Rate rate)
+        {
+            try
+            {
+                using var connection = new SqliteConnection(_connectionString);
+                connection.Open();
+
+                // Sprawdzenie, czy rate już istnieje
+                string checkQuery = "SELECT COUNT(*) FROM Rates WHERE RateID = @rateID";
+                using var checkCommand = new SqliteCommand(checkQuery, connection);
+                checkCommand.Parameters.AddWithValue("@rateID", rate.RateID);
+                int count = Convert.ToInt32(checkCommand.ExecuteScalar());
+
+                string query;
+                if (count > 0)
+                {
+                    // Aktualizacja istniejącego rate
+                    query = @"SELECT RateID FROM Rates WHERE RateID = @rateID";
+                }
+                else
+                {
+                    // Wstawianie nowego rate
+                    query = @"
+                    INSERT INTO Rates (Description)
+                    VALUES (@description);
+                    SELECT last_insert_rowid();";
+                }
+
+                using var command = new SqliteCommand(query, connection);
+
+                command.Parameters.AddWithValue("@rateID", rate.RateID);
+                command.Parameters.AddWithValue("@description", rate.Description);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error sending rate to database: {e.Message}");
+                return false;
+            }
+        }
+
+        public List<Rate> LoadRateList()
+        {
+            var rates = new List<Rate>();
+
+            try
+            {
+                using var connection = new SqliteConnection(_connectionString);
+                connection.Open();
+                string query = @"
+            SELECT RateID, Description
+            FROM Rates";
+
+                using var command = new SqliteCommand(query, connection);
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var rate = new Rate();
+                    rate.RateID = reader.GetInt32(0);
+                    rate.Description = reader.GetString(1);
+                    rates.Add(rate);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error loading rates from database: {e.Message}");
+            }
+
+            return rates;
+        }
+
+        public List<VolunteerTask> LoadTaskList()
+        {
+            var tasks = new List<VolunteerTask>();
+
+            try
+            {
+                using var connection = new SqliteConnection(_connectionString);
+                connection.Open();
+                string query = @"
+            SELECT VolunteerTaskID, Description, Address, TaskStatus, EndDate, OrganisationID, VolunteerID, RequestID
+            FROM VolunteerTasks";
+
+                using var command = new SqliteCommand(query, connection);
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var task = new VolunteerTask();
+                    task.VolunteerTaskID = reader.GetInt32(0);
+                    task.Description = reader.GetString(1);
+                    task.Address = reader.GetString(2);
+                    task.TaskStatus = Enum.Parse<IO.Modules.Volunteer.TaskStatus>(reader.GetString(3));
+                    task.EndDate = DateTime.Parse(reader.GetString(4));
+                    task.OrganisationID = reader.GetInt32(5);
+                    task.VolunteerID = reader.GetInt32(6);
+                    task.RequestID = reader.GetInt32(7);
+                    tasks.Add(task);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error loading VolunteerTasks from database: {e.Message}");
+            }
+
+            return tasks;
+        }
+
+
+        public List<IO.Modules.Volunteer.Volunteer> LoadVolunteerList()
         {
             var volunteers = new List<IO.Modules.Volunteer.Volunteer>();
 
             try
             {
-                using var connection = new SQLiteConnection(_connectionString); //MySqlConnection(_connectionString);
+                using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
-
                 string query = @"
-        SELECT v.VolunteerID, v.FirstName, v.LastName, v.Email, v.Gender, v.PhoneNumber, v.Address, v.Experience, v.AdditionalInfo, v.Skills, v.Availability, v.OrganisationID
+        SELECT v.VolunteerID, v.FirstName, v.LastName, v.Email, v.PhoneNumber, v.Address, v.OrganisationID
         FROM Volunteers v";
 
-                using var command = new SQLiteCommand(query, connection); //MySqlCommand(query, connection);
+                using var command = new SqliteCommand(query, connection);
                 using var reader = command.ExecuteReader();
 
                 while (reader.Read())
                 {
                     var volunteer = new IO.Modules.Volunteer.Volunteer();
-                    // Problems encountered that sqlite data reader methods don't accept strings with name of column
-                    volunteer.VolunteerID = reader.GetInt32(0); //"VolunteerID");
-                    volunteer.FirstName = reader.GetString(1); //"FirstName");
-                    volunteer.LastName = reader.GetString(2); //"LastName");
-                    volunteer.Email = reader.GetString(3); //"Email");
-                    volunteer.Gender =
-                        Enum.TryParse(reader.GetString(4), out Gender gender)
-                            ? gender
-                            : Gender
-                                .Female; //"Gender"), out Gender gender) ? gender : Gender.Female; // Default to Female if parsing fails
-                    volunteer.PhoneNumber = reader.GetString(5).ToCharArray(); //"PhoneNumber").ToCharArray();
-                    volunteer.Address = reader.GetString(6); //"Address");
-                    volunteer.Experience = reader.GetString(7); //"Experience");
-                    volunteer.AdditionalInfo = reader.GetString(8); //"AdditionalInfo");
-                    volunteer.Skills = reader.GetString(9); //"Skills");
-                    volunteer.Availability =
-                        reader.GetString(10).Split(", ").Select(DateTime.Parse)
-                            .ToList(); //"Availability").Split(", ").Select(DateTime.Parse).ToList();
-                    volunteer.Organisation =
-                        organisationList.FirstOrDefault(o =>
-                            o.OrganisationID ==
-                            reader.GetInt32(
-                                11)); //"OrganisationID")); // This can be filled later with the Organisation from its ID
+                    volunteer.VolunteerID = reader.GetInt32(0);
+                    volunteer.FirstName = reader.GetString(1);
+                    volunteer.LastName = reader.GetString(2);
+                    volunteer.Email = reader.GetString(3);
+                    volunteer.PhoneNumber = reader.GetString(4);
+                    volunteer.Address = reader.GetString(5);
+                    volunteer.OrganisationID = reader.GetInt32(6);
 
-                    // Optionally, you can also fetch the associated organisation here and set it to the volunteer
-                    // For simplicity, we are not doing this here
 
                     volunteers.Add(volunteer);
                 }
@@ -164,24 +375,25 @@ namespace IO.Modules.ResourceManager
 
             try
             {
-                using var connection = new SQLiteConnection(_connectionString); //MySqlConnection(_connectionString);
+                using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
 
-                string query = "SELECT OrganisationID, OrganisationName, PhoneNumber, Address FROM Organisations";
+                string query = "SELECT OrganisationID, OrganisationName, Email, PhoneNumber, Address, Website, KRS FROM Organisations";
 
-                using var command = new SQLiteCommand(query, connection); //MySqlCommand(query, connection);
+                using var command = new SqliteCommand(query, connection);
                 using var reader = command.ExecuteReader();
 
                 while (reader.Read())
                 {
                     var organisation = new Organisation();
 
-                    organisation.OrganisationID = reader.GetInt32(0); //"OrganisationID");
-                    organisation.OrganisationName = reader.GetString(1); //"OrganisationName");
-                    organisation.PhoneNumber = reader.GetString(2).ToCharArray(); //"PhoneNumber").ToCharArray();
-                    organisation.Address = reader.GetString(3); //"Address");
-
-
+                    organisation.OrganisationID = reader.GetInt32(0);
+                    organisation.OrganisationName = reader.GetString(1);
+                    organisation.Email = reader.GetString(2);
+                    organisation.PhoneNumber = reader.GetString(3);
+                    organisation.Address = reader.GetString(4);
+                    organisation.Website = reader.GetString(5);
+                    organisation.KRS = reader.GetString(6);
                     organisations.Add(organisation);
                 }
 

@@ -73,3 +73,54 @@ h1:focus {
     right: 0;
     transform: translate(10%, -30%);
 }
+
+.custom-dropdown {
+    width: 150px;
+    background-color: white;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.custom-message.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+    .custom-message.error-message .close-btn {
+        background: transparent;
+        border: none;
+        color: #721c24;
+        font-size: 50px;
+        cursor: pointer;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+    }
+
+    
+.gm-control-active > img {
+    box-sizing: content-box;
+    display: none;
+    left: 50%;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.gm-control-active > img:nth-child(1) {
+    display:block;
+}
+
+.gm-control-active:hover > img:nth-child(1),
+.gm-control-active:active > img:nth-child(1) {
+    display:none;
+}
+
+.gm-control-active:hover > img:nth-child(2),
+.gm-control-active:active > img:nth-child(3) {
+    display:block;
+}

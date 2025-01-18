@@ -1,17 +1,11 @@
 ﻿namespace IO.Modules.Volunteer
 {
-    public enum Status
+    public enum TaskStatus
     {
         New,
         Assigned,
         Pending,
         Completed,
         Archived
-    }
-    public enum Gender
-    {
-        Female = 0,
-        Male = 1,
-        Other = 2
     }
 }
