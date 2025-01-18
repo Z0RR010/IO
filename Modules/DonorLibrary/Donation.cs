@@ -2,20 +2,27 @@
 {
     public class Donation
     {
-        public int DonationID { get; private set; }
-        public Status DonationStatus { get; private set; }
-        public Donor AssignedDonor { get; private set; }
-        public string Item { get; private set; }
-        public int? Quantity { get; private set; }
-        public string Date { get; private set; }
+        public int DonationID { get;  set; }
+        public Status DonationStatus { get;  set; }
+        public Donor AssignedDonor { get;  set; }
+        public string Item { get;  set; }
+        public int? Quantity { get;  set; }
+        public string Date { get;  set; }
+        public string Email { get; set; }
         public bool Selected { get; set; }
-        public Donation(int donationID, string item, int? quantity, string date)
+
+        public Donation(int donationID, string item, int? quantity, string date, string email)
         {
             DonationID = donationID;
             DonationStatus = Status.Registered;
             Item = item;
             Quantity = quantity;
             Date = date;
+            Email = email;
+        }
+
+        public Donation()
+        {
         }
 
         public void AssignDonor(Donor donor)

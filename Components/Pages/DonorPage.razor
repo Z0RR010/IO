@@ -1,14 +1,20 @@
 ﻿@page "/donorPage"
 @using IO.Modules.DonorLibrary
+@using IO.Modules.Security
+@using Microsoft.Extensions.Localization
+@using System.Globalization
 @using PdfSharp
 @using PdfSharp.Drawing
 @using RequestModule
 @using IO.Modules.ResourceManager
 @rendermode InteractiveServer
+@inject SessionService sessionService
+@inject IStringLocalizer<DonorPage> Loc
+@inject NavigationManager nav
 
-<PageTitle>Donor</PageTitle>
-
-<h1 style="color: white;">Donor</h1>
+@if (loggedDonor)
+{
+<h1>@Loc["Donor"]</h1>
 <button class="btn btn-primary" @onclick="Donate">Donate</button>
 <button class="btn btn-primary" @onclick="ShowDonations">Show Donations</button>
 
@@ -33,7 +39,7 @@
 
 @if (whichForm == 2)
 {
-    <h2 style="color: white;">List of Donations</h2>
+        <h2 style="color: white; margin-top: 20px;">List of Donations</h2>
     <table class="table">
         <thead>
             <tr>
@@ -61,7 +67,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var donation in SortedDonations)
+            @foreach (var donation in SortedDonations.Where(d => d.Email == selectedEmail))
             {
                 <tr>
                     <td style="color: white;"><input type="checkbox" @bind="donation.Selected" /></td>
@@ -75,6 +81,69 @@
         </tbody>
     </table>
     <button class="btn btn-primary mt-3" @onclick="GenerateReport" disabled="@(!IsAnyDonationSelected)">Generate Report</button>
+}
+}
+@if (!loggedCharity && !loggedDonor)
+{
+    @if (whichForm == 3)
+    {
+        <h1>Dostęp tylko dla Darczyńców!</h1>
+    }
+}
+@if (loggedCharity)
+{
+@if (whichForm == 4)
+{
+    <h2 style="color: white;">List of Donations</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="color: white;" @onclick="() => SortById()">
+                    ID
+                    <span>@(sortDirection == SortOrder.Ascending && sortBy == "Id" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Id" ? "↑" : "")</span>
+                </th>
+                <th style="color: white;" @onclick="() => SortByName()">
+                    Item Name
+                    <span>@(sortDirection == SortOrder.Ascending && sortBy == "Name" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Name" ? "↑" : "")</span>
+                </th>
+                <th style="color: white;" @onclick="() => SortByQuantity()">
+                    Quantity
+                    <span>@(sortDirection == SortOrder.Ascending && sortBy == "Quantity" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Quantity" ? "↑" : "")</span>
+                </th>
+                <th style="color: white;" @onclick="() => SortByDate()">
+                    Date
+                    <span>@(sortDirection == SortOrder.Ascending && sortBy == "Date" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Date" ? "↑" : "")</span>
+                </th>
+                <th style="color: white;" @onclick="() => SortByStatus()">
+                    Status
+                    <span>@(sortDirection == SortOrder.Ascending && sortBy == "Status" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Status" ? "↑" : "")</span>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var donation in SortedDonations)
+            {
+                <tr>
+                    <td style="color: white;">@donation.DonationID</td>
+                    <td style="color: white;">@donation.Item</td>
+                    <td style="color: white;">@donation.Quantity</td>
+                    <td style="color: white;">@donation.Date</td>
+                    <td style="color: white;">@donation.DonationStatus</td>
+                    <button class="btn btn-primary" @onclick="()=>ChangeStatus(donation)">Change Status of Donation</button>
+                </tr>
+            }
+            <div style="text-align: center; margin-top: 25px;">
+                <p style="color: white; font-size: 35px;">Choose Status:</p>
+                <select @bind="selectedStatus" style="color: white; font-size: 20px; padding: 10px; width: 200px; margin-top: -15px; border-width:3px">
+                    @foreach (var status in statuses)
+                    {
+                        <option value="@status" style="color: black; background-color: white;">@status</option>
+                    }
+                </select>
+            </div>
+        </tbody>
+    </table>
+}
 }
 
 @if (!string.IsNullOrEmpty(savedFileMessage))
@@ -93,6 +162,11 @@
     </div>
 }
 
+<footer class="footer">
+    <button @onclick="Polish" class="lang">Polski</button>
+    <button @onclick="English" class="lang">English</button>
+</footer>
+
 @code {
     private int whichForm = 0;
     private int? quantity;
@@ -106,6 +180,40 @@
     private List<Donation> SortedDonations => SortDonations(donationManager.GetAllDonations());
     private string selectedItem = string.Empty;
     private List<Resource> items = new List<Resource> {};
+    private string selectedEmail = string.Empty;
+    private bool loggedCharity = false;
+    private bool loggedDonor = false;
+    private List<Status> statuses = new List<Status> {Status.Registered, Status.Accepted, Status.InMagazine, Status.Archived};
+    private Status selectedStatus = Status.Registered;
+
+    private async Task English()
+    {
+        String newUri = nav.Uri;
+        String oldUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=pl"))
+        {
+            newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
+        }
+        if (!newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri += "?ui-culture=en-US";
+        }
+        nav.NavigateTo(newUri, true);
+    }
+
+    private async Task Polish()
+    {
+        String newUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
+        }
+        if (!newUri.Contains("?ui-culture=pl"))
+        {
+            newUri += "?ui-culture=pl";
+        }
+        nav.NavigateTo(newUri, true);
+    }
 
     private void Przypisz()
     {
@@ -125,8 +233,34 @@
         }
     }
 
-    protected override void OnInitialized()
+    protected override async System.Threading.Tasks.Task OnInitializedAsync()
     {
+        donationManager.Load();
+        UserExecuter userExecuter = new UserExecuter();
+        string sessionUser = await sessionService.GetUserNameAsync();
+        Console.WriteLine(sessionUser);
+        IO.Modules.Security.BasicUser basicUser = userExecuter.GetBasicUser(sessionUser);
+        whichForm = 3;
+        if (basicUser != null)
+        {
+            if (basicUser.Role == "Donor")
+            {
+                selectedEmail = basicUser.Email;
+                loggedDonor = true;
+                whichForm = 0;
+            }
+            else if (basicUser.Role == "Charity")
+            {
+                loggedCharity = true;
+                whichForm = 4;
+            }
+            else
+            {
+                whichForm = 3;
+                loggedDonor = false;
+                loggedCharity = false;
+            }
+        }
         Przypisz();
         SortById();
     }
@@ -172,7 +306,7 @@
             return;
         }
         string date = DateTime.Now.ToString("dd-MM-yyyy");
-        donationManager.AddDonation(selectedItem, quantity, date);
+        donationManager.AddDonation(selectedItem, quantity, date, selectedEmail);
         selectedItem = string.Empty;
         quantity = null;
         whichForm = 0;
@@ -186,6 +320,12 @@
         {
             donation.Selected = !isSelected;
         }
+    }
+
+    private void ChangeStatus(Donation donation)
+    {
+        donation.SetDonationStatus(selectedStatus);
+        donationManager.UpdateDonationStatus(donation);
     }
 
     private void GenerateReport()
