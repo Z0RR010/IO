@@ -21,7 +21,7 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        @if (userType == "Volunteer" || userType == "Charity" || userType == "Affected")
+        @if (userType == "Volunteer" || userType == "Charity" || userType == "Affected" || userType == "Admin")
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="volunteerPage">
@@ -29,7 +29,7 @@
             </NavLink>
             </div>
         }
-        @if (userType == "Charity" || userType == "Donnor")
+        @if (userType == "Charity" || userType == "Donnor" || userType == "Admin")
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="donorPage">
@@ -37,7 +37,7 @@
             </NavLink>
             </div>
         }
-        @if (userType == "Charity" || userType == "Authority" || userType == "Affected")
+        @if (userType == "Charity" || userType == "Authority" || userType == "Affected" || userType == "Admin")
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="requests">
@@ -45,7 +45,7 @@
             </NavLink>
             </div>
         }
-        @if (userType == "Affected")
+        @if (userType == "Affected" || userType == "Admin")
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="requests/add">
