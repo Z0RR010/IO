@@ -29,77 +29,107 @@
         <button class="btn btn-primary" @onclick="() => OrganisationSelected(selectedOrganisation.OrganisationID)">Submit</button>
     }
 }
+@if (whichForm == 1)
+{
+    <h1>!!!!GO AWAY!!!!</h1>
+    <h1>!!!!GO AWAY!!!!</h1>
+    <h1>!!!!GO AWAY!!!!</h1>
+    <h1>!!!!GO AWAY!!!!</h1>
+    <h1>!!!!GO AWAY!!!!</h1>
+    <h1>!!!!GO AWAY!!!!</h1>
+    <h1>!!!!GO AWAY!!!!</h1>
+    <h1>!!!!GO AWAY!!!!</h1>
+    <h1>!!!!GO AWAY!!!!</h1>
+    <h1>!!!!GO AWAY!!!!</h1>
+    <h1>!!!!GO AWAY!!!!</h1>
+    <h1>!!!!GO AWAY!!!!</h1>
+    <h1>!!!!GO AWAY!!!!</h1>
+
+}
 @if (whichForm == 2)
 {
     <h1>Hello @selectedAffectedName</h1>
-    <ul class="list-group">
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(1)">Your Requests</button>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(2)">Your Rates</button>
+    @if (selectedOption == 1)
+    {
+        <ul class="list-group">
 
-        <h3>Your Requests</h3>
-        @foreach (var request in requestList.Where(r => r.User == selectedAffectedEmail).ToList())
-        {
-            <li class="list-group-item" style="cursor: pointer;" @onclick="() => ToggleRequestDetails(request)">
-                @request.Title - @request.Status
-                @if (selectedRequest == request && showRequestDetails)
-                {
-                    <div class="mt-2">
-                        <p>Description: @request.Description</p>
-                        <p>Created at: @request.CreatedAt</p>
-                        <p>Updated At: @request.DateUpdated</p>
-                        <p>User: @request.User</p>
-                        <p>Resources Required: @string.Join(", ", request.ResourcesRequired.Select(r => $"{r.Name} (x{r.Amount})"))</p>
-                        <p>Address: @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
-                        <p>Is Verified: @request.IsVerified</p>
-                        <button class="btn btn-primary btn-sm mt-2" @onclick="() => SelectRequest(request)">Show Tasks</button>
-                    </div>
-                }
-            </li>
-        }
-        @if (selectedRequestForTask.Title != null)
-        {
-            <h3>Assigned Tasks To Request: @selectedRequestForTask.Title</h3>
-            @foreach (var volunteerTask in volunteerManager.VolunteerTaskList.Where(t => t.RequestID == selectedRequestForTask.Id))
+            <h3>Your Requests</h3>
+            @foreach (var request in requestList.Where(r => r.User == selectedAffectedEmail))
             {
-                <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowTaskDetails(volunteerTask)">
-                    @volunteerTask.Description - @volunteerTask.TaskStatus
-                    @if (selectedTask == volunteerTask && showTaskDetails)
+                <li class="list-group-item" style="cursor: pointer;" @onclick="() => ToggleRequestDetails(request)">
+                    @request.Title - @request.Status
+                    @if (selectedRequest == request && showRequestDetails)
                     {
                         <div class="mt-2">
-                            <p>Address: @selectedTask.Address</p>
-                            <p> @selectedTask.EndDate.ToString()</p>
-                            @if (selectedTask.TaskStatus == IO.Modules.Volunteer.TaskStatus.Assigned)
-                            {
-                                <p>
-                                    Volunteer: @volunteerManager.VolunteerList.FirstOrDefault(
-                                    v => v.VolunteerID == selectedTask.VolunteerID).FirstName  @volunteerManager.VolunteerList.FirstOrDefault(
-                                    v => v.VolunteerID == selectedTask.VolunteerID).LastName
-                                </p>
-                                <p>Request: @requestManager.GetAllRequests().FirstOrDefault(r => r.Id == selectedTask.RequestID).Title</p>
-                            }
-                            <button class="btn btn-primary btn-sm mt-2" @onclick="() => SelectTaskForRate(selectedTask)">Add Rate</button>
+                            <p>Description: @request.Description</p>
+                            <p>Created at: @request.CreatedAt</p>
+                            <p>Updated At: @request.DateUpdated</p>
+                            <p>User: @request.User</p>
+                            <p>Resources Required: @string.Join(", ", request.ResourcesRequired.Select(r => $"{r.Name} (x{r.Amount})"))</p>
+                            <p>Address: @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
+                            <p>Is Verified: @request.IsVerified</p>
+                            <button class="btn btn-primary btn-sm mt-2" @onclick="() => SelectRequest(request)">Show Tasks</button>
                         </div>
                     }
-
                 </li>
             }
-        }
-        @if(selectedTaskForRate.Description != null)
-        {
-            <h3>Create Rate</h3>
+            @if (selectedRequestForTask.Title != null)
+            {
+                <h3>Assigned Tasks To Request: @selectedRequestForTask.Title</h3>
+                @foreach (var volunteerTask in volunteerManager.VolunteerTaskList.Where(t => t.RequestID == selectedRequestForTask.Id))
+                {
+                    <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowTaskDetails(volunteerTask)">
+                        @volunteerTask.Description - @volunteerTask.TaskStatus
+                        @if (selectedTask == volunteerTask && showTaskDetails)
+                        {
+                            <div class="mt-2">
+                                <p>Address: @selectedTask.Address</p>
+                                <p> @selectedTask.EndDate.ToString()</p>
+                                @if (selectedTask.TaskStatus == IO.Modules.Volunteer.TaskStatus.Assigned)
+                                {
+                                    <p>
+                                        Volunteer: @volunteerManager.VolunteerList.FirstOrDefault(
+                                        v => v.VolunteerID == selectedTask.VolunteerID).FirstName  @volunteerManager.VolunteerList.FirstOrDefault(
+                                        v => v.VolunteerID == selectedTask.VolunteerID).LastName
+                                    </p>
+                                    <p>Request: @requestManager.GetAllRequests().FirstOrDefault(r => r.Id == selectedTask.RequestID).Title</p>
+                                }
+                                @if (selectedTask.TaskStatus == IO.Modules.Volunteer.TaskStatus.Completed)
+                                {
+                                <button class="btn btn-primary btn-sm mt-2" @onclick="() => SelectTaskForRate(selectedTask)">Add Rate</button>
+                                }
+                            </div>
+                        }
 
-            <div>
-                <p>Selected Request: </p>
-                <input type="text" @bind="selectedRequestForTask.Title" readonly class="form-control mt-2" />
+                    </li>
+                }
+            }
+            @if (selectedTaskForRate.Description != null)
+            {
+                <h3>Create Rate</h3>
 
-                <p>Selected Task Description: </p>
-                <input type="text" @bind="selectedTaskForRate.Description" readonly class="form-control mt-2" />
+                <div>
+                    <p>Selected Request: </p>
+                    <input type="text" @bind="selectedRequestForTask.Title" readonly class="form-control mt-2" />
 
-                <p>Rate Description: </p>
-                <input type="text" @bind="description" placeholder="Description" class="form-control mt-2" />
+                    <p>Selected Task Description: </p>
+                    <input type="text" @bind="selectedTaskForRate.Description" readonly class="form-control mt-2" />
 
-                <button class="btn btn-primary" @onclick="CreateRate">Submit</button>
-            </div>
-        }
-    </ul>
+                    <p>Rate Description: </p>
+                    <input type="text" @bind="description" placeholder="Description" class="form-control mt-2" />
+
+                    <button class="btn btn-primary" @onclick="CreateRate">Submit</button>
+                </div>
+            }
+        </ul>
+    }
+
+    @if (selectedOption == 2)
+    {
+        <h3>Your Rates</h3>
+    }        
 }
 
 @if (whichForm == 3)
@@ -117,7 +147,7 @@
         <h1>Available Tasks</h1>
         <ul class="list-group">
             @foreach (var volunteerTask in volunteerManager.FindTasksByOrganisation(selectedVolunteer.OrganisationID).Where(
-                t => t.TaskStatus == IO.Modules.Volunteer.TaskStatus.New).ToList())
+                t => t.TaskStatus == IO.Modules.Volunteer.TaskStatus.New))
             {
                 <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowTaskDetails(volunteerTask)">
                     @volunteerTask.Description - @volunteerTask.TaskStatus
@@ -141,7 +171,7 @@
         <h1>Your Active Tasks</h1>
         <ul class="list-group">
             @foreach (var volunteerTask in volunteerManager.FindTasksByVolunteer(selectedVolunteer.VolunteerID).Where(
-                t => t.TaskStatus == IO.Modules.Volunteer.TaskStatus.Assigned).ToList())
+                t => t.TaskStatus == IO.Modules.Volunteer.TaskStatus.Assigned))
             {
                 <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowTaskDetails(volunteerTask)">
                     @volunteerTask.Description - @volunteerTask.TaskStatus
@@ -164,25 +194,60 @@
         <h1>Your Completed Tasks</h1>
         <ul class="list-group">
             @foreach (var volunteerTask in volunteerManager.FindTasksByVolunteer(selectedVolunteer.VolunteerID).Where(
-                t => t.TaskStatus == IO.Modules.Volunteer.TaskStatus.Completed || t.TaskStatus == IO.Modules.Volunteer.TaskStatus.Archived).ToList())
+                t => t.TaskStatus == IO.Modules.Volunteer.TaskStatus.Completed || t.TaskStatus == IO.Modules.Volunteer.TaskStatus.Archived))
             {
+                @if(volunteerManager.RateList.Any(r => r.RateID == volunteerTask.RateID))
+                {
                 <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowTaskDetails(volunteerTask)">
-                    @volunteerTask.Description - @volunteerTask.TaskStatus
+                    @volunteerTask.Description - @volunteerTask.TaskStatus   Rated
+
                     @if (selectedTask == volunteerTask && showTaskDetails)
                     {
                         <div class="mt-2">
                             <p>Address: @selectedTask.Address</p>
-                            <p> @selectedTask.EndDate.ToString()</p>
+                            <p>@selectedTask.EndDate.ToString()</p>
+                            <p>Rate: @volunteerManager.RateList.FirstOrDefault(r => r.RateID == selectedTask.RateID).Description </p>
+                        </div>
+                    }
+                    </li>
+                }
+                else
+                {
+                    <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowTaskDetails(volunteerTask)">
+                        @volunteerTask.Description - @volunteerTask.TaskStatus
+
+                        @if (selectedTask == volunteerTask && showTaskDetails)
+                        {
+                            <div class="mt-2">
+                                <p>Address: @selectedTask.Address</p>
+                                <p> @selectedTask.EndDate.ToString()</p>
+                            </div>
+                        }
+                    </li>
+                }
+            }
+        </ul>
+    }
+    @if (selectedOption == 4)
+    {
+        <h1>Your Rates</h1>
+        <ul class="list-group">
+            @foreach (var volunteerTask in volunteerManager.FindTasksByVolunteer(selectedVolunteer.VolunteerID).Where(
+                t => t.RateID > 0))
+            {
+                <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowTaskDetails(volunteerTask)"> Rate Description: 
+                    @volunteerManager.RateList.FirstOrDefault(r => r.RateID == volunteerTask.RateID).Description
+
+                    @if (selectedTask == volunteerTask && showTaskDetails)
+                    {
+                        <div class="mt-2">
+                            <p>This rate was for task: @selectedTask.Description</p>
                         </div>
                     }
 
                 </li>
             }
         </ul>
-    }
-    @if (selectedOption == 4)
-    {
-        
     }
     @if(selectedOption == 5)
     {
@@ -298,7 +363,7 @@
     }
     @if (selectedOption == 3)
     {
-        <h1>Your Tasks</h1>
+        <h1>Your Volunteers</h1>
 
         <ul class="list-group">
             @foreach (var volunteer in volunteerManager.FindVolunteersByOrganisation(selectedOrganisation.OrganisationID))
@@ -341,7 +406,6 @@
     private int whichForm = 0;
     private int prevoiusForm = 0;
     private int volunteerID = 0;
-    //requestList.Where(r => r.User == selectedAffectedEmail).ToList();
 
     private string firstName = string.Empty;
     private string lastName = string.Empty;
@@ -365,13 +429,11 @@
     private int selectedOption = 0;
 
     private DateTime endDate = DateTime.Today;
-
-
     private int selectedOrganisationID;
     private string selectedAffectedEmail = string.Empty;
     private string selectedAffectedName = string.Empty;
     private VolunteerTask selectedTaskForRate = new VolunteerTask();
-
+    private Rate selectedRate = new Rate();
     private int previousSelectedOrganisationID; 
     private Request selectedRequestForTask = new Request();
     private int? selectedVolunteerID;
@@ -389,18 +451,16 @@
     protected override async System.Threading.Tasks.Task OnInitializedAsync()
     {
         volunteerManager.Load();
-        Console.WriteLine(volunteerManager.RateList.Count);
         requestList = requestManager.GetAllRequests();
-        Console.WriteLine("Volunteer Page Initialized");
         string sessionUser = await sessionService.GetUserNameAsync();
         CheckUser(sessionUser);
-        if(selectedVolunteer != null) {
-            if(selectedVolunteer.OrganisationID == -1)
+        if (selectedVolunteer != null)
+        {
+            if (selectedVolunteer.OrganisationID == -1)
             {
                 ChangeForm(0);
             }
         }
-
     }
 
 
@@ -471,7 +531,7 @@
         else
         {
 
-            ChangeForm(2);
+            ChangeForm(1);
         }
 
     }
@@ -529,7 +589,9 @@
             description
         );
         volunteerManager.AddRate(rate, selectedTaskForRate.VolunteerTaskID);
+        volunteerManager.UpdateTaskStatus(selectedTaskForRate, IO.Modules.Volunteer.TaskStatus.Archived);
         selectedTaskForRate = new VolunteerTask();
+
     }
 
     private void AssignTask()

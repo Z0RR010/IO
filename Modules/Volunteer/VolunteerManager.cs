@@ -130,6 +130,10 @@ namespace IO.Modules.Volunteer
             {
                 rate.RateID = rateList.Last().RateID + 1;
             }
+            if(rate.RateID == 0)
+            {
+                rate.RateID = 1;
+            }
 
             if (rateList.Any(r => r.RateID == rate.RateID))
             {
@@ -280,6 +284,7 @@ namespace IO.Modules.Volunteer
             organisationList = executor.LoadOrganisationList();
             volunteerList = executor.LoadVolunteerList();
             volunteerTaskList = executor.LoadTaskList();
+            rateList = executor.LoadRateList();
             executor.Dispose();
         }
 

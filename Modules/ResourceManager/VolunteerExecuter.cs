@@ -2,6 +2,7 @@
 using System.Data;
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
+using Org.BouncyCastle.Crypto.Modes.Gcm;
 
 
 namespace IO.Modules.ResourceManager
@@ -322,7 +323,7 @@ namespace IO.Modules.ResourceManager
                 using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
                 string query = @"
-            SELECT VolunteerTaskID, Description, Address, TaskStatus, EndDate, OrganisationID, VolunteerID, RequestID
+            SELECT VolunteerTaskID, Description, Address, TaskStatus, EndDate, OrganisationID, VolunteerID, RequestID, RateID
             FROM VolunteerTasks";
 
                 using var command = new SqliteCommand(query, connection);
@@ -339,6 +340,7 @@ namespace IO.Modules.ResourceManager
                     task.OrganisationID = reader.GetInt32(5);
                     task.VolunteerID = reader.GetInt32(6);
                     task.RequestID = reader.GetInt32(7);
+                    task.RateID = reader.GetInt32(8);
                     tasks.Add(task);
                 }
             }
