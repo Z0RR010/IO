@@ -94,17 +94,16 @@ namespace IO.Modules.ResourceManager
             }
         }
 
-        public bool RemoveRequestFromDatabase(int id)
+        public async Task<bool> RemoveRequestFromDatabase(int id)
         {
-            string query =
-                "DELETE FROM Request WHERE Id = @id";
+            string query = "DELETE FROM Request WHERE Id = @id";
             try
             {
                 using (var command = new SqliteCommand(query, _connection))
                 {
                     command.Parameters.AddWithValue("@id", id);
 
-                    int rowsAffected = command.ExecuteNonQuery();
+                    int rowsAffected = await command.ExecuteNonQueryAsync();
                     return rowsAffected > 0;
                 }
             }
@@ -154,6 +153,53 @@ namespace IO.Modules.ResourceManager
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка в GetAllRequests: {ex.Message}");
+                throw;
+            }
+
+            return requests;
+        }
+
+        public List<Request> GetUserRequests(string email)
+        {
+            string query = "SELECT * FROM Request WHERE [User] = @user";
+            var requests = new List<Request>();
+
+            try
+            {
+                using (var command = new SqliteCommand(query, _connection))
+                {
+                    command.Parameters.AddWithValue("@user", email);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var request = new Request
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
+                                DateUpdated = reader.IsDBNull(reader.GetOrdinal("DateUpdated"))
+                                    ? (DateTime?)null
+                                    : reader.GetDateTime(reader.GetOrdinal("DateUpdated")),
+                                Status = Enum.Parse<RequestStatus>(reader.GetString(reader.GetOrdinal("Status"))),
+                                User = reader.GetString(reader.GetOrdinal("User")),
+                                Address = JsonSerializer.Deserialize<Address>(reader.GetString(reader.GetOrdinal("Address"))),
+                                IsVerified = reader.GetInt32(reader.GetOrdinal("IsVerified")) == 1,
+                            };
+
+                            string resourcesString = reader.GetString(reader.GetOrdinal("ResourcesRequired"));
+                            request.ResourcesRequired = ParseResources(resourcesString);
+
+                            requests.Add(request);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetUserRequests: {ex.Message}");
                 throw;
             }
 
@@ -269,6 +315,47 @@ namespace IO.Modules.ResourceManager
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateRequest(Request updatedRequest)
+        {
+            string query = @"
+        UPDATE Request 
+        SET 
+            Title = @title, 
+            Description = @description, 
+            DateUpdated = @dateUpdated, 
+            Status = @status, 
+            User = @user, 
+            Address = @address, 
+            ResourcesRequired = @resourcesRequired, 
+            IsVerified = @isVerified
+        WHERE 
+            Id = @id";
+
+            try
+            {
+                using (var command = new SqliteCommand(query, _connection))
+                {
+                    command.Parameters.AddWithValue("@id", updatedRequest.Id);
+                    command.Parameters.AddWithValue("@title", updatedRequest.Title ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@description", updatedRequest.Description ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@dateUpdated", DateTime.Now);
+                    command.Parameters.AddWithValue("@status", updatedRequest.Status.ToString());
+                    command.Parameters.AddWithValue("@user", updatedRequest.User ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@address", JsonSerializer.Serialize(updatedRequest.Address) ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@resourcesRequired", JsonSerializer.Serialize(updatedRequest.ResourcesRequired) ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@isVerified", updatedRequest.IsVerified ? 1 : 0);
+
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error in UpdateRequest: {e.Message}");
                 return false;
             }
         }
