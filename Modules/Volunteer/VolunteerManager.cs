@@ -148,13 +148,26 @@ namespace IO.Modules.Volunteer
         public void EditOrganisation(Organisation organisation)
         {
             Organisation org = FindOrganisationByID(organisation.OrganisationID);
-            org.OrganisationName = organisation.OrganisationName;
-            org.Email = organisation.Email;
-            org.PhoneNumber = organisation.PhoneNumber;
-            org.Address = organisation.Address;
-
+            org = organisation;
             var executor = new VolunteerExecuter();
             if (executor.SendOrganisationToDatabase(org))
+            {
+                Console.WriteLine("VolunteerTask added or updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to add or update volunteerTask.");
+            }
+            executor.Dispose();
+        }
+
+        public void EditVolunteer(Volunteer volunteer)
+        {
+            Volunteer vol = FindVolunteerByID(volunteer.VolunteerID);
+            vol = volunteer;
+
+            var executor = new VolunteerExecuter();
+            if (executor.SendVolunteerToDatabase(vol))
             {
                 Console.WriteLine("VolunteerTask added or updated successfully!");
             }

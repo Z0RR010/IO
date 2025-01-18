@@ -171,15 +171,15 @@ namespace IO.Modules.ResourceManager
                     // Aktualizacja istniejącego taska
                     query = @"
         UPDATE VolunteerTasks 
-        SET Description = @description, Address = @address, TaskStatus = @taskStatus, EndDate = @endDate, OrganisationID = @organisationID, VolunteerID = @volunteerID
+        SET Description = @description, Address = @address, TaskStatus = @taskStatus, EndDate = @endDate, OrganisationID = @organisationID, VolunteerID = @volunteerID, RequestID = @requestID
         WHERE VolunteerTaskID = @volunteerTaskID";
                 }
                 else
                 {
                     // Wstawianie nowego taska
                     query = @"
-        INSERT INTO VolunteerTasks (Description, Address, TaskStatus, EndDate, OrganisationID, VolunteerID)
-        VALUES (@description, @address, @taskStatus, @endDate, @organisationID, @volunteerID);
+        INSERT INTO VolunteerTasks (Description, Address, TaskStatus, EndDate, OrganisationID, VolunteerID, RequestID)
+        VALUES (@description, @address, @taskStatus, @endDate, @organisationID, @volunteerID, @requestID);
         SELECT last_insert_rowid();";
                 }
 
@@ -188,7 +188,7 @@ namespace IO.Modules.ResourceManager
                 command.Parameters.AddWithValue("@description", volunteerTask.Description);
                 command.Parameters.AddWithValue("@address", volunteerTask.Address);
                 command.Parameters.AddWithValue("@taskStatus", volunteerTask.TaskStatus.ToString());
-                command.Parameters.AddWithValue("@endDate", string.Join(",", volunteerTask.EndDate.Select(x => x.ToString("O"))));
+                command.Parameters.AddWithValue("@endDate", volunteerTask.EndDate.ToString());
                 command.Parameters.AddWithValue("@organisationID", volunteerTask.OrganisationID);
                 command.Parameters.AddWithValue("@volunteerID", volunteerTask.VolunteerID);
                 command.Parameters.AddWithValue("@requestID", volunteerTask.RequestID);
@@ -227,7 +227,7 @@ namespace IO.Modules.ResourceManager
                 using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
                 string query = @"
-            SELECT VolunteerTaskID, Description, Address, TaskStatus, EndDate, OrganisationID, VolunteerID
+            SELECT VolunteerTaskID, Description, Address, TaskStatus, EndDate, OrganisationID, VolunteerID, RequestID
             FROM VolunteerTasks";
 
                 using var command = new SqliteCommand(query, connection);
@@ -240,7 +240,7 @@ namespace IO.Modules.ResourceManager
                     task.Description = reader.GetString(1);
                     task.Address = reader.GetString(2);
                     task.TaskStatus = Enum.Parse<IO.Modules.Volunteer.TaskStatus>(reader.GetString(3));
-                    task.EndDate = reader.GetString(4).Split(',').Select(DateTime.Parse).ToList();
+                    task.EndDate = DateTime.Parse(reader.GetString(4));
                     task.OrganisationID = reader.GetInt32(5);
                     task.VolunteerID = reader.GetInt32(6);
                     task.RequestID = reader.GetInt32(7);

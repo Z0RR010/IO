@@ -64,14 +64,7 @@
                 <h3>VolunteerTask Details</h3>
                 <p><strong>Description:</strong> @selectedTask.Description</p>
                 <p><strong>Address:</strong> @selectedTask.Address</p>
-                <p><strong>EndDate:</strong></p>
-
-                <ul>
-                    @foreach (var date in selectedTask.EndDate)
-                    {
-                        <li>@date.ToString("yyyy-MM-dd")</li>
-                    }
-                </ul>
+                <p><strong>EndDate:</strong> @selectedTask.EndDate.ToString()</p>
 
                 <button class="btn btn-primary" @onclick="() => AssignTask()">Assign VolunteerTask</button>
             </div>
@@ -100,14 +93,8 @@
                 <h3>VolunteerTask Details</h3>
                 <p><strong>Description:</strong> @selectedTask.Description</p>
                 <p><strong>Address:</strong> @selectedTask.Address</p>
-                <p><strong>EndDate:</strong></p>
+                <p><strong>EndDate:</strong> @selectedTask.EndDate.ToString()</p>
 
-                <ul>
-                    @foreach (var date in selectedTask.EndDate)
-                    {
-                        <li>@date.ToString("yyyy-MM-dd")</li>
-                    }
-                </ul>
             </div>
         }
 
@@ -115,13 +102,15 @@
     @if(selectedOption == 3)
     {
         <h1>Profile Information</h1>
-        <p>First Name: <input type="text" value="@selectedVolunteer.FirstName" readonly class="form-control" /></p>
-        <p>Last Name: <input type="text" value="@selectedVolunteer.LastName" readonly class="form-control" /></p>
-        <p>Email: <input type="text" value="@selectedVolunteer.Email" readonly class="form-control" /></p>
-        <p>Phone Number: <input type="text" value="@selectedVolunteer.PhoneNumber" readonly class="form-control" /></p>
-        <p>Address: <input type="text" value="@selectedVolunteer.Address" readonly class="form-control" /></p>
-        <p>Organisation: <input type="text" value="@volunteerManager.FindOrganisationByID(selectedVolunteer.OrganisationID).OrganisationName" readonly class="form-control" /></p>
-
+        <form method="post" @onsubmit="editVolunteer">
+            <p>First Name: <input type="text" @bind-value="selectedVolunteer.FirstName" class="form-control" /></p>
+            <p>Last Name: <input type="text" @bind-value="selectedVolunteer.LastName" class="form-control" /></p>
+            <p>Email: <input type="text" value="@selectedVolunteer.Email" readonly class="form-control" /></p>
+            <p>Phone Number: <input type="text" @bind-value="selectedVolunteer.PhoneNumber" class="form-control" /></p>
+            <p>Address: <input type="text" @bind-value="selectedVolunteer.Address" class="form-control" /></p>
+            <p>Organisation: <input type="text" value="@volunteerManager.FindOrganisationByID(selectedVolunteer.OrganisationID).OrganisationName" readonly class="form-control" /></p>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
     }
 
 }
@@ -183,19 +172,8 @@
 
                             <p>EndDate: </p>
                             <div class="d-flex gap-2 align-items-center">
-                                <input type="date" @bind="newAvailabilityDate" class="form-control" />
-                                <button class="btn btn-success" @onclick="AddAvailabilityDate">Add</button>
+                                <input type="date" @bind="endDate" class="form-control" />
                             </div>
-
-                            <ul class="list-group mt-2">
-                                @foreach (var date in endDate)
-                                {
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        @date.ToShortDateString()
-                                        <button class="btn btn-danger btn-sm" @onclick="() => RemoveAvailabilityDate(date)">Remove</button>
-                                    </li>
-                                }
-                            </ul>
 
                             <button class="btn btn-primary" @onclick="CreateTask">Submit</button>
                         </div>
@@ -228,14 +206,8 @@
                 <h3>VolunteerTask Details</h3>
                 <p><strong>Description:</strong> @selectedTask.Description</p>
                 <p><strong>Address:</strong> @selectedTask.Address</p>
-                <p><strong>EndDate:</strong></p>
+                <p><strong>EndDate:</strong> @selectedTask.EndDate.ToString()</p>
 
-                <ul>
-                    @foreach (var date in selectedTask.EndDate)
-                    {
-                        <li>@date.ToString("yyyy-MM-dd")</li>
-                    }
-                </ul>
 
             </div>
         }
@@ -278,8 +250,7 @@
     private string description = string.Empty;
     private int selectedOption = 0;
 
-    private List<DateTime> endDate = new List<DateTime>();
-    private DateTime newAvailabilityDate = DateTime.Today;
+    private DateTime endDate = DateTime.Today;
 
 
     private int selectedOrganisationID;
@@ -402,22 +373,14 @@
         selectedTask = volunteerTask;
     }
 
-    private void AddAvailabilityDate()
-    {
-        if (!endDate.Contains(newAvailabilityDate))
-        {
-            endDate.Add(newAvailabilityDate);
-        }
-    }
 
-    private void RemoveAvailabilityDate(DateTime date)
-    {
-        endDate.Remove(date);
-    }
-
-    private async Task editOrganisation()
+    private void editOrganisation()
     {
         volunteerManager.EditOrganisation(selectedOrganisation);
+    }
+    private void editVolunteer()
+    {
+        volunteerManager.EditVolunteer(selectedVolunteer);
     }
     private void CreateVolunteer(int who)
     {
@@ -460,8 +423,9 @@
             description,
             address,
             endDate,
-            selectedRequestForTask.Id,
-            selectedOrganisation.OrganisationID
+            selectedOrganisation.OrganisationID,
+            selectedRequestForTask.Id
+
         );
         volunteerManager.AddTask(volunteerTask);
     }
@@ -490,6 +454,7 @@
     }
     private void ChangeRequestStatus(Request request, RequestStatus requestStatus)
     {
+        requestManager.UpdateRequestStatus(request.Id, requestStatus);
         request.Status = requestStatus;
     }
 
