@@ -224,14 +224,40 @@
         </ul>
 
     }
+    @if (selectedOption == 3)
+    {
+        <h1>Your Tasks</h1>
+
+        <ul class="list-group">
+            @foreach (var volunteer in volunteerManager.FindVolunteersByOrganisation(selectedOrganisation.OrganisationID))
+            {
+                <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowVolunteerDetails(volunteer)">
+                    @volunteer.FirstName @volunteer.LastName
+                    @if (selectedVolunteer == volunteer && showVolunteerDetails)
+                    {
+                        <div class="mt-2">
+                            <p>Address: @selectedVolunteer.Address</p>
+                            <p>Phone Number: @selectedVolunteer.PhoneNumber</p>
+                            <p>Email: @selectedVolunteer.Email</p>
+                            <p>Tasks: @volunteerManager.FindTasksByVolunteer(selectedVolunteer.VolunteerID).Count</p>
+                        </div>
+                    }
+
+                </li>
+            }
+        </ul>
+
+    }
     @if (selectedOption == 4)
     {
-        <h1>Edit Your Profile</h1>
+        <h1>Profile</h1>
         <form method="post" @onsubmit="editOrganisation">
             <p>Organisation Name: <input type="text" @bind-value="selectedOrganisation.OrganisationName" class="form-control" /></p>
             <p>Email: <input type="text" value="@selectedOrganisation.Email" readonly class="form-control" /></p>
             <p>Phone Number: <input type="text" @bind-value="selectedOrganisation.PhoneNumber" class="form-control" /></p>
             <p>Address: <input type="text" @bind-value="selectedOrganisation.Address" class="form-control" /></p>
+            <p>Website: <input type="text" @bind-value="selectedOrganisation.Website" class="form-control" /></p>
+            <p>KRS: <input type="text" @bind-value="selectedOrganisation.KRS" class="form-control" /></p>
             <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>
     }
@@ -249,7 +275,8 @@
     private string email = string.Empty;
     private string phoneNumber = string.Empty;
     private string address = string.Empty;
-    private bool showTaskDetails = false;
+    private string website = string.Empty;
+    private string kRS = string.Empty;
 
 
     private string organisationName = string.Empty;
@@ -257,6 +284,8 @@
 
     private Request selectedRequest;
     private bool showRequestDetails = false;
+    private bool showTaskDetails = false;
+    private bool showVolunteerDetails = false;
 
 
     private string description = string.Empty;
@@ -266,7 +295,7 @@
 
 
     private int selectedOrganisationID;
-    private int previousSelectedOrganisationID;
+    private int previousSelectedOrganisationID; 
     private Request selectedRequestForTask = new Request();
     private int? selectedVolunteerID;
     private int? previousSelectedVolunteerID;
@@ -342,7 +371,9 @@
                         basicUser.Name,
                         basicUser.Email,
                         basicUser.PhoneNumber,
-                        basicUser.Address
+                        basicUser.Address,
+                        basicUser.Website,
+                        basicUser.Krs
                     );
 
                     volunteerManager.AddOrganisation(org);
@@ -380,18 +411,6 @@
     }
 
 
-    private void ShowTaskDetails(VolunteerTask volunteerTask)
-    {
-        if (selectedTask == volunteerTask)
-        {
-            showTaskDetails = !showTaskDetails;
-        }
-        else
-        {
-            selectedTask = volunteerTask;
-            showTaskDetails = true;
-        }
-    }
 
 
     private void editOrganisation()
@@ -402,41 +421,8 @@
     {
         volunteerManager.EditVolunteer(selectedVolunteer);
     }
-    private void CreateVolunteer(int who)
-    {
-        IO.Modules.Volunteer.Volunteer vol = new IO.Modules.Volunteer.Volunteer(
-            firstName,
-            lastName,
-            email,
-            phoneNumber,
-            address,
-            selectedOrganisationID);
 
-        volunteerManager.AddVolunteer(vol);
-        if(who == 1)
-        {
-            selectedVolunteer = vol;
-            ChangeForm(7);
-        }
-    }
-
-    private void CreateOrganisation(int who)
-    {
-        Organisation org = new Organisation(
-            organisationName,
-            email,
-            phoneNumber,
-            address
-        );
-
-        volunteerManager.AddOrganisation(org);
-        if (who == 1)
-        {
-            selectedOrganisation = org;
-            ChangeForm(8);
-        }
-    }
-
+   
     private void CreateTask()
     {
         VolunteerTask volunteerTask = new VolunteerTask(
@@ -471,6 +457,31 @@
         }
     }
 
+    private void ShowTaskDetails(VolunteerTask volunteerTask)
+    {
+        if (selectedTask == volunteerTask)
+        {
+            showTaskDetails = !showTaskDetails;
+        }
+        else
+        {
+            selectedTask = volunteerTask;
+            showTaskDetails = true;
+        }
+    }
+
+    private void ShowVolunteerDetails(IO.Modules.Volunteer.Volunteer volunteer)
+    {
+        if (selectedVolunteer == volunteer)
+        {
+            showVolunteerDetails = !showVolunteerDetails;
+        }
+        else
+        {
+            selectedVolunteer = volunteer;
+            showVolunteerDetails = true;
+        }
+    }
 
     private void SelectRequest(Request request)
     {

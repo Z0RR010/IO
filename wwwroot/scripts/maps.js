@@ -86,4 +86,83 @@ export async function geocode(address) {
     });
 }
 
+const translations = {
+    en: {
+        distance: 'Total Distance',
+        time: 'Estimated Time',
+        unitDistance: 'km',
+        unitTime: 'minutes',
+    },
+    pl: {
+        distance: 'Całkowita odległość',
+        time: 'Szacowany czas',
+        unitDistance: 'km',
+        unitTime: 'minuty',
+    },
+};
+export async function drawRoute(mapId, routeCoordinates, language) {
+    if (routeCoordinates.length < 2) {
+        throw new Error("At least two coordinates are required to draw a route.");
+    }
 
+    const directionsService = new google.maps.DirectionsService();
+    const directionsRenderer = new google.maps.DirectionsRenderer({
+        map: maps[mapId]
+    });
+
+    const waypoints = routeCoordinates
+        .slice(1, -1)
+        .map(coord => ({
+            location: new google.maps.LatLng(coord.lat, coord.lng),
+            stopover: true,
+        }));
+
+    const request = {
+        origin: new google.maps.LatLng(routeCoordinates[0].lat, routeCoordinates[0].lng),
+        destination: new google.maps.LatLng(
+            routeCoordinates[routeCoordinates.length - 1].lat,
+            routeCoordinates[routeCoordinates.length - 1].lng
+        ),
+        waypoints: waypoints,
+        travelMode: google.maps.TravelMode.DRIVING,
+    };
+
+    try {
+        const result = await directionsService.route(request);
+        directionsRenderer.setDirections(result);
+
+        // Extracting route details (distance and duration)
+        const route = result.routes[0];
+        const legs = route.legs;
+
+        let totalDistance = 0;
+        let totalDuration = 0;
+
+        legs.forEach(leg => {
+            totalDistance += leg.distance.value; // distance in meters
+            totalDuration += leg.duration.value; // duration in seconds
+        });
+
+        // Convert distance to kilometers and duration to minutes
+        totalDistance = (totalDistance / 1000).toFixed(2); // km
+        totalDuration = Math.ceil(totalDuration / 60); // minutes
+
+        const infoDiv = document.createElement('div');
+        infoDiv.style.backgroundColor = 'white';
+        infoDiv.style.padding = '10px';
+        infoDiv.style.margin = '10px';
+        infoDiv.style.borderRadius = '5px';
+        infoDiv.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+
+        const text = translations[language]
+
+        infoDiv.innerHTML = `<strong>${text.distance}:</strong> ${totalDistance} ${text.unitDistance}<br><strong>${text.time}:</strong> ${totalDuration} ${text.unitTime}`;
+        infoDiv.style.color = 'black';
+        
+        maps[mapId].controls[google.maps.ControlPosition.TOP_CENTER].push(infoDiv);
+
+        return result;
+    } catch (error) {
+        throw new Error(`Directions request failed: ${error.message}`);
+    }
+}
