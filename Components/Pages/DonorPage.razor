@@ -1,16 +1,20 @@
 ﻿@page "/donorPage"
 @using IO.Modules.DonorLibrary
 @using IO.Modules.Security
+@using Microsoft.Extensions.Localization
 @using PdfSharp
 @using PdfSharp.Drawing
 @using RequestModule
 @using IO.Modules.ResourceManager
 @rendermode InteractiveServer
 @inject SessionService sessionService
+@inject IStringLocalizer<Home> Loc
+@inject NavigationManager nav
+
 @if (logged)
 {
 <PageTitle>Donor</PageTitle>
-<h1 style="color: white;">Donor</h1>
+    <h1 style="color: white;">@Loc["Donor"]</h1>
 <button class="btn btn-primary" @onclick="Donate">Donate</button>
 <button class="btn btn-primary" @onclick="ShowDonations">Show Donations</button>
 
@@ -81,7 +85,7 @@
 }
 @if (whichForm == 3)
 {
-    <h1>0_0 ?NieDarczyncaToSpierdalaj? X_X</h1>
+    <h1>Dostęp tylko dla Darczyńców!</h1>
 }
 
 @if (!string.IsNullOrEmpty(savedFileMessage))
@@ -100,6 +104,11 @@
     </div>
 }
 
+<footer class="footer">
+    <button @onclick="Polish" class="lang">Polski</button>
+    <button @onclick="English" class="lang">English</button>
+</footer>
+
 @code {
     private int whichForm = 0;
     private int? quantity;
@@ -115,6 +124,35 @@
     private List<Resource> items = new List<Resource> {};
     private string selectedEmail = string.Empty;
     private bool logged;
+
+    private async Task English()
+    {
+        String newUri = nav.Uri;
+        String oldUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=pl"))
+        {
+            newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
+        }
+        if (!newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri += "?ui-culture=en-US";
+        }
+        nav.NavigateTo(newUri, true);
+    }
+
+    private async Task Polish()
+    {
+        String newUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
+        }
+        if (!newUri.Contains("?ui-culture=pl"))
+        {
+            newUri += "?ui-culture=pl";
+        }
+        nav.NavigateTo(newUri, true);
+    }
 
     private void Przypisz()
     {
