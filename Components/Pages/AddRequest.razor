@@ -192,11 +192,10 @@
     }
 
     private RequestModule.Request newRequest = new RequestModule.Request
-    {
+        {
             Status = RequestModule.RequestStatus.New,
             Address = new RequestModule.Address(), // Inicjalizacja Address
-            User = "test"
-    };
+        };
 
     private string? message;
 
@@ -212,6 +211,7 @@
             newRequest.CreatedAt = DateTime.Now;
             newRequest.DateUpdated = DateTime.Now;
             newRequest.ResourcesRequired = selectedResources;
+            newRequest.User = email;
             // Dodanie do bazy danych
             bool isAdded = requestManager.AddRequestToDatabase(newRequest);
 

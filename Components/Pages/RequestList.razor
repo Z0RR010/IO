@@ -1,5 +1,6 @@
 @page "/requests"
 @rendermode InteractiveServer
+@inject IO.Modules.Security.SessionService sessionService
 @inject RequestModule.IRequestService RequestService
 @using IO.Modules.Security
 
@@ -124,10 +125,12 @@ else
 @code {
     private List<RequestModule.Request> requests;
     private IO.Modules.ResourceManager.RequestManager requestManager = new IO.Modules.ResourceManager.RequestManager();
-
+    private String email;
     protected override async Task OnInitializedAsync()
     {
-        requests = requestManager.GetAllRequests();
+        await base.OnInitializedAsync();
+        email = await sessionService.GetUserNameAsync();
+        requests = requestManager.GetUserRequests(email);
     }
 
     private async Task DeleteRequest(int id)

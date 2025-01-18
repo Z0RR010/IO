@@ -159,6 +159,53 @@ namespace IO.Modules.ResourceManager
             return requests;
         }
 
+        public List<Request> GetUserRequests(string email)
+        {
+            string query = "SELECT * FROM Request WHERE [User] = @user";
+            var requests = new List<Request>();
+
+            try
+            {
+                using (var command = new SqliteCommand(query, _connection))
+                {
+                    command.Parameters.AddWithValue("@user", email);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var request = new Request
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
+                                DateUpdated = reader.IsDBNull(reader.GetOrdinal("DateUpdated"))
+                                    ? (DateTime?)null
+                                    : reader.GetDateTime(reader.GetOrdinal("DateUpdated")),
+                                Status = Enum.Parse<RequestStatus>(reader.GetString(reader.GetOrdinal("Status"))),
+                                User = reader.GetString(reader.GetOrdinal("User")),
+                                Address = JsonSerializer.Deserialize<Address>(reader.GetString(reader.GetOrdinal("Address"))),
+                                IsVerified = reader.GetInt32(reader.GetOrdinal("IsVerified")) == 1,
+                            };
+
+                            string resourcesString = reader.GetString(reader.GetOrdinal("ResourcesRequired"));
+                            request.ResourcesRequired = ParseResources(resourcesString);
+
+                            requests.Add(request);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetUserRequests: {ex.Message}");
+                throw;
+            }
+
+            return requests;
+        }
+
         public async Task<Request> GetRequestById(int id)
         {
             try
