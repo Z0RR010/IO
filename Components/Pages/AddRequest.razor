@@ -14,7 +14,8 @@
     </div>
     <div class="form-group">
         <label for="city">City</label>
-        <InputText id="city" class="form-control" @bind-Value="newRequest.Address.City" />
+        <InputText id="city" class="form-control" @bind-Value="newRequest.Address.City"
+               oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').replace(/^\s*(\w)(\w*)/, (match, p1, p2) => p1.toUpperCase() + p2.toLowerCase())" />
     </div>
     <div class="form-group">
         <label for="street">Street</label>
@@ -22,15 +23,16 @@
     </div>
     <div class="form-group">
         <label for="streetNumber">Street Number</label>
-        <InputText id="streetNumber" class="form-control" @bind-Value="newRequest.Address.StreetNumber" />
+        <InputText id="streetNumber" class="form-control" @bind-Value="newRequest.Address.StreetNumber" oninput="this.value = this.value.replace(/[^0-9]/g, '')"/>
     </div>
     <div class="form-group">
         <label for="apartment">Apartment</label>
-        <InputText id="apartment" class="form-control" @bind-Value="newRequest.Address.Apartment" />
+    <InputText id="apartment" class="form-control" @bind-Value="newRequest.Address.Apartment" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
     </div>
     <div class="form-group">
         <label for="zipCode">Zip Code</label>
-        <InputText id="zipCode" class="form-control" @bind-Value="newRequest.Address.ZipCode" />
+    <InputText id="zipCode" class="form-control" @bind-Value="newRequest.Address.ZipCode"
+               oninput="this.value = this.value.replace(/[^0-9\-]/g, '').replace(/^(\d{2})(\d{0,3})?$/, '$1-$2').slice(0, 6).replace(/-$/, '')" />
     </div>
 
 <div>
@@ -55,7 +57,7 @@
                     </InputSelect>
                 </div>
                 <div class="col">
-                    <InputNumber class="form-control" placeholder="Amount" @bind-Value="resource.Amount" />
+                    <InputNumber class="form-control" placeholder="Amount" @bind-Value="resource.Amount" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                 </div>
                 <div class="col">
                     <button class="btn btn-danger" @onclick="() => RemoveResourceForm(resource)">Remove</button>
@@ -75,7 +77,7 @@
 }
 
 @code {
-
+    //oninput="this.value = this.value.replace(/[^0-9\-]/g, '').replace(/^(\d{2})(\d{0,3})$/, '$1-$2').substring(0, 6)"
     private IO.Modules.ResourceManager.UserExecuter userExecuter = new IO.Modules.ResourceManager.UserExecuter();
 
     private string email;
