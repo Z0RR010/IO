@@ -387,7 +387,7 @@
                                 v => v.VolunteerID == selectedTask.VolunteerID).LastName @volunteerManager.VolunteerList.FirstOrDefault(
                                 v => v.VolunteerID == selectedTask.VolunteerID).Email
                                 </p>
-                            <p>Request: @requestManager.GetAllRequests().FirstOrDefault(r => r.Id == selectedTask.RequestID).Title</p>
+                            <p>@Loc["Request"]: @requestManager.GetAllRequests().FirstOrDefault(r => r.Id == selectedTask.RequestID).Title</p>
                                 <p>@Loc["Address"]: @selectedTask.Address</p>
                                 <div id="map01" style="width: 100%; height: 500px; margin-top: 20px;"></div>
                             }
