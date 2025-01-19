@@ -30,13 +30,15 @@ else
         <p><strong>@Loc["User"]:</strong> @request.User </p>
 
         <div>
-            <strong>@Loc["ResourcesRequired"]:</strong>
-            <ul class="resources-required">
-                @foreach (var resource in request.ResourcesRequired)
-                {
-                    <li>@resource.Name (@resource.Amount)</li>
-                }
-            </ul>
+            @if(request.ResourcesRequired.Any()){
+                <strong>@Loc["ResourcesRequired"]:</strong>
+                <ul class="resources-required">
+                    @foreach (var resource in request.ResourcesRequired)
+                    {
+                        <li>@resource.Name (@resource.Amount)</li>
+                    }
+                </ul>
+            }
         </div>
 
         <p><strong>@Loc["IsVerified"]:</strong> @request.IsVerified</p>
