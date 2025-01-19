@@ -121,7 +121,7 @@
     <value>Witamy</value>
     <comment> </comment>
   </data>
-  <data name="notReal" xml:space="preserve">
+  <data name="NotReal" xml:space="preserve">
     <value>To nie jest prawdziwa strona.</value>
     <comment>a</comment>
   </data>
