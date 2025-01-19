@@ -161,4 +161,12 @@
     <value>Welcome donor</value>
     <comment>d</comment>
   </data>
+  <data name="Main" xml:space="preserve">
+    <value>Home page</value>
+    <comment>s</comment>
+  </data>
+  <data name="Aut" xml:space="preserve">
+    <value>Welcome authority representative</value>
+    <comment>c</comment>
+  </data>
 </root>
