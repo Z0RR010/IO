@@ -120,41 +120,46 @@
     {
         var userAccount = appDbContext.UserAccounts.Where(x => x.Email == Model.Email).FirstOrDefault();
         var hashedPassword = Security.hashData(Model.Password);
-        using (var client = new HttpClient())
+        if(userAccount != null)
         {
-            var loginRequest = new LoginRequest() { Username = userAccount.Email, Password = hashedPassword };
-            var response = await client.PostAsJsonAsync(nav.BaseUri + "api/SignIn/SignIn", loginRequest);
-            var responseContent = await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode)
+            using (var client = new HttpClient())
             {
-                try
+                var loginRequest = new LoginRequest() { Username = userAccount.Email, Password = hashedPassword };
+                var response = await client.PostAsJsonAsync(nav.BaseUri + "api/SignIn/SignIn", loginRequest);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                if (!response.IsSuccessStatusCode)
                 {
-                    var errorResponse = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent);
+                    try
+                    {
+                        var errorResponse = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent);
 
-                    errorMessage = errorResponse != null && errorResponse.ContainsKey("message")
-                    ? errorResponse["message"]
-                    : "Wystąpił błąd podczas logowania.";
-                    if (errorMessage.Contains("Zbyt")) {
-                        var emailDto = new EmailDto() { To = "skph@interia.pl", Subject = "Wielokrotna nieudana próba zalogowania", Body = $@"
+                        errorMessage = errorResponse != null && errorResponse.ContainsKey("message")
+                        ? errorResponse["message"]
+                        : "Wystąpił błąd podczas logowania.";
+                        if (errorMessage.Contains("Zbyt"))
+                        {
+                            var emailDto = new EmailDto() { To = "skph@interia.pl", Subject = "Wielokrotna nieudana próba zalogowania", Body = $@"
 				        <p>Użytkownik {userAccount.Email} przekroczył limit nieudanych prób logowania.</p>" };
 
-                        try
-                        {
-                            response = await client.PostAsJsonAsync(nav.BaseUri + "api/Email/SendEmail", emailDto);
-                            Console.WriteLine(response.StatusCode);
-                        }
-                        catch (Exception ex)
-                        {
+                            try
+                            {
+                                response = await client.PostAsJsonAsync(nav.BaseUri + "api/Email/SendEmail", emailDto);
+                                Console.WriteLine(response.StatusCode);
+                            }
+                            catch (Exception ex)
+                            {
+                            }
                         }
                     }
+                    catch
+                    {
+                        errorMessage = "Wystąpił błąd podczas logowania: " + responseContent;
+                    }
+                    return;
                 }
-                catch
-                {
-                    errorMessage = "Wystąpił błąd podczas logowania: " + responseContent;
-                }
-                return;
             }
         }
+        
         if(userAccount is null || userAccount.Password != hashedPassword)
         {
             errorMessage = "Podano niepoprawne dane";
