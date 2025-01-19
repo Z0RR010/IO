@@ -6,6 +6,7 @@ using Microsoft.Data.Sqlite;
 using System.Text;
 using System.Text.Json;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Google.Protobuf.WellKnownTypes;
 
 namespace IO.Modules.ResourceManager
 {
@@ -270,6 +271,30 @@ namespace IO.Modules.ResourceManager
                     }
 
                     return result.ToString();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        public bool VerifyUser(string email)
+        {
+            Individual individual = GetUserFromDataBase(email);
+            individual.IsVerified = true;
+            string query = "UPDATE users SET user = @value WHERE email = @email";
+            var value = JsonSerializer.Serialize(individual);
+            try
+            {
+                using (var command = new SqliteCommand(query, _userConnection)) //MySqlCommand(query, _userConnection))
+                {
+                    command.Parameters.AddWithValue("@email", email);
+                    command.Parameters.AddWithValue("@value", value);
+
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
                 }
             }
             catch (Exception e)
