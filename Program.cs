@@ -126,8 +126,9 @@ namespace IO
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
             app.MapControllers();
-
+            
             app.Run();
         }
     }
+    
 }
