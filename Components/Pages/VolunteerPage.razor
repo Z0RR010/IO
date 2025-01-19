@@ -666,7 +666,7 @@
     {
         if(taskStatus == IO.Modules.Volunteer.TaskStatus.Completed)
         {
-            selectedTask.EndDate = DateTime.Today;
+            selectedTask.EndDate = DateTime.Now;
         }
 
         volunteerManager.UpdateTaskStatus(selectedTask, taskStatus);
