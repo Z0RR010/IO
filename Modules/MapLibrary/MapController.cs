@@ -36,12 +36,14 @@
         
         public void SetLocation(Address address)
         {
-            _location = new AddressWrapper(address);
+            if (address != null)
+                _location = new AddressWrapper(address);
         }
         
         public void SetLocation(string address)
         {
-            _location = new AddressStringWrapper(address);
+            if (address != null)
+                _location = new AddressStringWrapper(address);
         }
         
         public void SetLocation(Coordinates? coordinates)
@@ -74,15 +76,6 @@
             return location.GetCoordinatesAwait(client);
         }
 
-        internal void AddRouteLocation(LocationWrapper location)
-        {
-            if (_route == null)
-            {
-                throw new InvalidOperationException("Route is not set. Use SetRoute() to initialize the route.");
-            }
-
-            _route.AddRouteLocation(location);
-        }
         public async Task<List<Coordinates>> GetRouteCoordinates()
         {
             if (_route == null)
