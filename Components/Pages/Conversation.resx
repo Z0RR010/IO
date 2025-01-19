@@ -78,4 +78,10 @@
     <data name="Undo Archivization" xml:space="preserve">
         <value>Undo Archivization</value>
     </data>
+    <data name="Search Conversation" xml:space="preserve">
+        <value>Search Conversation</value>
+    </data>
+    <data name="The user email does not exist." xml:space="preserve">
+        <value>The user email does not exist.</value>
+    </data>
 </root>

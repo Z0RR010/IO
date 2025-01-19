@@ -12,15 +12,19 @@
 
     <!-- User Email Input -->
     <div class="mb-4">
-        <label for="userEmailToRead" class="form-label"></label>
+        <label for="userEmailToRead" class="form-label text-black">@Loc["User Email"]</label>
         <input type="email" id="userEmailToRead" class="form-control" @bind="newChatUser" placeholder=@Loc["User Email"] />
         <button class="btn btn-primary mt-2" @onclick="beginChatWithSomeone">@Loc["Start Conversation"]</button>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger mt-2">@errorMessage</div>
+        }
     </div>
 
     <!-- Search Input -->
     <div class="mb-4">
-        <label for="searchTerm" class="form-label"></label>
-        <input type="text" id="searchTerm" class="form-control" @bind="searchTerm" placeholder="Search Conversations" @oninput="FilterChats" />
+        <label for="searchTerm" class="form-label text-black">@Loc["Search Conversation"]</label>
+        <input type="text" id="searchTerm" class="form-control" @bind="searchTerm" placeholder=@Loc["Search Conversation"] @oninput="FilterChats" />
     </div>
 
     <!-- Chat List -->
@@ -62,6 +66,7 @@
     private string userEmailToRead;
     private string newChatUser;
     private string searchTerm;
+    private string errorMessage;
     private List<Chat> userChats = new();
     private List<Chat> filteredChats = new();
 
@@ -88,9 +93,17 @@
         string[] usersToAdd = { userEmailToRead, newChatUser };
         if (!string.IsNullOrWhiteSpace(newChatUser) && newChatUser != userEmailToRead)
         {
-            CommunicatorService.CreateChat(Permission.System, usersToAdd);
+            bool chatCreated = CommunicatorService.CreateChat(Permission.System, usersToAdd);
+            if (chatCreated)
+            {
+                errorMessage = string.Empty; // Clear any previous error message
+                GetUserChats(); // Refresh user chats
+            }
+            else
+            {
+                errorMessage = Loc["The user email does not exist."];
+            }
         }
-        GetUserChats();
     }
 
     // Filter chats based on search term
@@ -106,3 +119,42 @@
         }
     }
 }
+<style>
+    .container {
+        max-width: 700px;
+        margin: 0 auto;
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .scrollable-report {
+        max-height: 400px; /* Set a fixed height */
+        overflow-y: auto; /* Enable vertical scrolling */
+        padding: 10px;
+        background-color: #f7f7f7;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 0.95rem;
+        color: #333;
+        white-space: pre-wrap; /* Preserve whitespace for formatting */
+    }
+
+    .form-control-inline {
+        display: inline-block;
+        width: auto;
+        vertical-align: middle;
+        margin: 0 10px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    .text-black {
+        color: black;
+    }
+</style>
