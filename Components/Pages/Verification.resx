@@ -117,56 +117,24 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Hello" xml:space="preserve">
-    <value>Welcome</value>
-    <comment> </comment>
-  </data>
-  <data name="NotReal" xml:space="preserve">
-    <value>This is not a real site.</value>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
     <comment>a</comment>
   </data>
-  <data name="NoAuth" xml:space="preserve">
-    <value>Not authorized</value>
-    <comment>s</comment>
+  <data name="Surname" xml:space="preserve">
+    <value>Surname</value>
+    <comment>dsa</comment>
   </data>
-  <data name="Vol" xml:space="preserve">
-    <value>Welcome volunteer</value>
-    <comment>v</comment>
+  <data name="Address" xml:space="preserve">
+    <value>Address</value>
+    <comment>b</comment>
   </data>
-  <data name="Char" xml:space="preserve">
-    <value>Welcome charity organization</value>
-    <comment>c</comment>
+  <data name="Verify" xml:space="preserve">
+    <value>Verify users</value>
+    <comment>f</comment>
   </data>
-  <data name="NoReal" xml:space="preserve">
-    <value>You should not enter any of your real information on this site as we do not guarantee information entered will be safe</value>
-    <comment>r</comment>
-  </data>
-  <data name="Proj" xml:space="preserve">
-    <value>This site is created as a college project</value>
-    <comment>p</comment>
-  </data>
-  <data name="Adm" xml:space="preserve">
-    <value>Welcome ourselves</value>
+  <data name="Ver" xml:space="preserve">
+    <value>Verify</value>
     <comment>a</comment>
-  </data>
-  <data name="Aff" xml:space="preserve">
-    <value>Welcome affected</value>
-    <comment>a</comment>
-  </data>
-  <data name="NoV" xml:space="preserve">
-    <value>Wait until you are verified by authorities</value>
-    <comment>v</comment>
-  </data>
-  <data name="Don" xml:space="preserve">
-    <value>Welcome donor</value>
-    <comment>d</comment>
-  </data>
-  <data name="Main" xml:space="preserve">
-    <value>Home page</value>
-    <comment>s</comment>
-  </data>
-  <data name="Aut" xml:space="preserve">
-    <value>Welcome authority representative</value>
-    <comment>c</comment>
   </data>
 </root>

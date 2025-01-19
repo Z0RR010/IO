@@ -25,15 +25,15 @@
                 <ValidationMessage For="() => Model.Email"/>
             </div>
             <div class="mb-3">
-                <label>Password</label>
-                <InputText @bind-Value="Model.Password" class="form-control" placeholder="Password" type="password"/>
+                <label>@Loc["Password"]</label>
+                <InputText @bind-Value="Model.Password" class="form-control" placeholder="@Loc["Password"]" type="password"/>
                 <ValidationMessage For="() => Model.Password" />
             </div>
             <div class="mb-3 text-center">
                 <span class="text-danger">@errorMessage</span>
             </div>
             <div class="mb-3 d-grid gap-2">
-                <button type="submit" class="btn btn-primary">Login</button>
+                <button type="submit" class="btn btn-primary">@Loc["LoginButton"]</button>
             </div>
         </Microsoft.AspNetCore.Components.Forms.EditForm>
     </div>
@@ -72,55 +72,11 @@
         return currentUri;
     }
 
-    private async Task HandleSignIn()
-    {
-        if (username != null || password != null)
-        {
-            using (var client = new HttpClient())
-            {
-                var loginRequest = new LoginRequest() { Username = username, Password = Security.hashData(password) };
-
-                try
-                {
-                    Console.WriteLine($"Zawartość loginRequest: Username={loginRequest.Username}, Password={loginRequest.Password}");
-                    var response = await client.PostAsJsonAsync(nav.BaseUri + "api/SignIn/SignIn", loginRequest);
-                    Console.WriteLine(response.StatusCode);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        success = true;
-                        errorMessage = "Poprawnie zalogowano.";
-
-                        var claims = new List<Claim>
-                        {
-                            new Claim(ClaimTypes.Name, username),
-                            new Claim(ClaimTypes.Role, "user")
-                        };
-
-                        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                        var principal = new ClaimsPrincipal(identity);
-
-                        await HttpContext.SignInAsync(principal);
-                        nav.NavigateTo("/");
-                    }
-                    else
-                    {
-                        success = false;
-                        errorMessage = "Nieprawidłowe dane logowania.";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    errorMessage = "Wystąpił błąd podczas logowania.";
-                }
-            }
-        }
-    }
-
     private async Task Authenticate()
     {
         var userAccount = appDbContext.UserAccounts.Where(x => x.Email == Model.Email).FirstOrDefault();
         var hashedPassword = Security.hashData(Model.Password);
-        if(userAccount != null)
+        if (userAccount != null)
         {
             using (var client = new HttpClient())
             {
@@ -144,7 +100,6 @@
                             try
                             {
                                 response = await client.PostAsJsonAsync(nav.BaseUri + "api/Email/SendEmail", emailDto);
-                                Console.WriteLine(response.StatusCode);
                             }
                             catch (Exception ex)
                             {
@@ -158,24 +113,28 @@
                     return;
                 }
             }
-        }
-        
-        if(userAccount is null || userAccount.Password != hashedPassword)
-        {
-            errorMessage = "Podano niepoprawne dane";
-            return;
-        }
-        var claims = new List<Claim>
+            if (userAccount is null || userAccount.Password != hashedPassword)
+            {
+                errorMessage = "Podano niepoprawne dane";
+                return;
+            }
+            if (userAccount.EmailVerified == false)
+            {
+                errorMessage = "Nie zweryfikowano konta";
+                return;
+            }
+            var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, Model.Email),
             new Claim(ClaimTypes.Role, userAccount.Role)
         };
 
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        var principal = new ClaimsPrincipal(identity);
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
 
-        await HttpContext.SignInAsync(principal);
-        nav.NavigateTo("/");
+            await HttpContext.SignInAsync(principal);
+            nav.NavigateTo("/");
+        }
     }
 
     private async Task English()
@@ -205,5 +164,6 @@
             newUri += "?ui-culture=pl";
         }
         nav.NavigateTo(newUri,true);
+    }
     }
 }

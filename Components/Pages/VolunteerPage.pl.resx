@@ -195,7 +195,7 @@
   <data name="Your Tasks" xml:space="preserve">
     <value>Twoje zadania</value>
   </data>
-  <data name="Your Volunteers" xml:space="preserve">
+  <data name="Your Volunteer" xml:space="preserve">
     <value>Twoi wolontariusze</value>
   </data>
   <data name="EndDate" xml:space="preserve">
@@ -249,7 +249,7 @@
   <data name="New" xml:space="preserve">
     <value>Nowy</value>
   </data>
-  <data name="Resources Required" xml:space="preserve">
+  <data name="Resources required" xml:space="preserve">
     <value>Potrzebne zasoby</value>
   </data>
   <data name="Updated At" xml:space="preserve">

@@ -21,7 +21,6 @@ namespace IO.Modules.Security
 		[HttpPost("SendEmail")]
 		public IActionResult SendEmail(EmailDto request)
 		{
-			Console.WriteLine("wysylam");
 			_emailService.SendEmail(request);
 			return Ok();
 		}

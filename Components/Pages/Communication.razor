@@ -3,6 +3,8 @@
 
 @using IO.Modules.Communication
 @inject Communicator CommunicatorService
+@inject NavigationManager nav
+<title>Communication</title>
 
 <div class="container">
     @if (!string.IsNullOrEmpty(status)) {
@@ -100,6 +102,10 @@
         </ul>
     }
 </div>
+<footer class="footer">
+    <button @onclick="Polish" class="lang">Polski</button>
+    <button @onclick="English" class="lang">English</button>
+</footer>
 
 @code {
     private string emailToAdd;
@@ -162,5 +168,33 @@
 
     private void ClearUserTable() {
         userEmails.Clear();
+    }
+    private async Task English()
+    {
+        String newUri = nav.Uri;
+        String oldUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=pl"))
+        {
+            newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
+        }
+        if (!newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri += "?ui-culture=en-US";
+        }
+        nav.NavigateTo(newUri, true);
+    }
+
+    private async Task Polish()
+    {
+        String newUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
+        }
+        if (!newUri.Contains("?ui-culture=pl"))
+        {
+            newUri += "?ui-culture=pl";
+        }
+        nav.NavigateTo(newUri, true);
     }
 }

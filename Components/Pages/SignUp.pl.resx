@@ -117,49 +117,112 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AddResource" xml:space="preserve">
-    <value>Add Resource</value>
+  <data name="RegisterOK" xml:space="preserve">
+    <value>Pomyślnie zarejestrowano. Zweryfikuj swój email poprzez przesłany na niego link.</value>
   </data>
-  <data name="Amount" xml:space="preserve">
-    <value>Amount</value>
+  <data name="WrongEmail" xml:space="preserve">
+    <value>Podaj poprawny adres e-mail.</value>
   </data>
-  <data name="Apartment" xml:space="preserve">
-    <value>Apartment</value>
+  <data name="WrongPassword" xml:space="preserve">
+    <value>Hasło powinno mieć co najmniej 8 znaków.</value>
   </data>
-  <data name="Category" xml:space="preserve">
-    <value>Category</value>
+  <data name="WrongName" xml:space="preserve">
+    <value>Imię może zawierać tylko litery i spacje.</value>
   </data>
-  <data name="City" xml:space="preserve">
-    <value>City</value>
+  <data name="WrongSurname" xml:space="preserve">
+    <value>Nazwisko może zawierać tylko litery i spacje.</value>
   </data>
-  <data name="Description" xml:space="preserve">
-    <value>Description</value>
+  <data name="WrongTel" xml:space="preserve">
+    <value>Podaj poprawny numer telefonu (np. +48123123123).</value>
   </data>
-  <data name="HeaderAdd" xml:space="preserve">
-    <value>Add Request</value>
+  <data name="WrongAddress" xml:space="preserve">
+    <value>Podaj poprawny adres zamieszkania.</value>
+  </data>
+  <data name="WrongPESEL" xml:space="preserve">
+    <value>Podaj poprawny PESEL (11 cyfr).</value>
+  </data>
+  <data name="WrongDate" xml:space="preserve">
+    <value>Podaj poprawną datę urodzenia.</value>
+  </data>
+  <data name="WrongWebsite" xml:space="preserve">
+    <value>Podaj poprawną stronę internetową (np. https://example.com).</value>
+  </data>
+  <data name="WrongKRS" xml:space="preserve">
+    <value>Podaj poprawny numer KRS (10 cyfr).</value>
+  </data>
+  <data name="WrongInst" xml:space="preserve">
+    <value>Podaj nazwę instytucji.</value>
+  </data>
+  <data name="UserType" xml:space="preserve">
+    <value>Typ użytkownika</value>
+  </data>
+  <data name="Donor" xml:space="preserve">
+    <value>Darczyńca</value>
+  </data>
+  <data name="Authority" xml:space="preserve">
+    <value>Przedstawiciel władz</value>
+  </data>
+  <data name="Affected" xml:space="preserve">
+    <value>Poszkodowany</value>
+  </data>
+  <data name="Volunteer" xml:space="preserve">
+    <value>Wolontariusz</value>
+  </data>
+  <data name="Charity" xml:space="preserve">
+    <value>Organizacja pomocowa</value>
+  </data>
+  <data name="DonorType" xml:space="preserve">
+    <value>Typ darczyńcy</value>
+  </data>
+  <data name="Individual" xml:space="preserve">
+    <value>Osoba indywidualna</value>
+  </data>
+  <data name="Company" xml:space="preserve">
+    <value>Firma</value>
+  </data>
+  <data name="CompanyName" xml:space="preserve">
+    <value>Nazwa firmy</value>
+  </data>
+  <data name="PhoneNumber" xml:space="preserve">
+    <value>Numer telefonu</value>
+  </data>
+  <data name="CompanyAddress" xml:space="preserve">
+    <value>Adres firmy</value>
   </data>
   <data name="Name" xml:space="preserve">
-    <value>Resource name</value>
+    <value>Imię</value>
   </data>
-  <data name="Remove" xml:space="preserve">
-    <value>Remove</value>
+  <data name="Surname" xml:space="preserve">
+    <value>Nazwisko</value>
   </data>
-  <data name="RequestAdded" xml:space="preserve">
-    <value>Request added successfully!</value>
+  <data name="Address" xml:space="preserve">
+    <value>Adres zamieszkania</value>
   </data>
-  <data name="Street" xml:space="preserve">
-    <value>Street</value>
+  <data name="Password" xml:space="preserve">
+    <value>Hasło</value>
   </data>
-  <data name="StreetNumber" xml:space="preserve">
-    <value>Street Number</value>
+  <data name="CName" xml:space="preserve">
+    <value>Nazwa</value>
   </data>
-  <data name="Submit" xml:space="preserve">
-    <value>Submit</value>
+  <data name="BirthDate" xml:space="preserve">
+    <value>Data urodzenia</value>
   </data>
-  <data name="Title" xml:space="preserve">
-    <value>Title</value>
+  <data name="Website" xml:space="preserve">
+    <value>Strona internetowa</value>
   </data>
-  <data name="ZipCode" xml:space="preserve">
-    <value>Zip Code</value>
+  <data name="Institution" xml:space="preserve">
+    <value>Instytucja</value>
+  </data>
+  <data name="SignUp" xml:space="preserve">
+    <value>Zarejestruj</value>
+  </data>
+  <data name="Register" xml:space="preserve">
+    <value>Rejestracja</value>
+  </data>
+  <data name="ExistingUser" xml:space="preserve">
+    <value>Taki użytkownik już istnieje</value>
+  </data>
+  <data name="EmailSent" xml:space="preserve">
+    <value>Poprawnie wysłano maila.</value>
   </data>
 </root>

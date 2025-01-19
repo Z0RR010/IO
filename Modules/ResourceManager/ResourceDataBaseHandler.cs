@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
 
@@ -37,6 +37,10 @@ namespace IO.Modules.ResourceManager
         /// <returns>True if operation was successful. Otherwise, false</returns>
         public bool AddItem(Resource item, string donorEmail)
         {
+            if (item.Category == null) {
+                return false;
+            }
+
             string query =
                 "INSERT INTO resources(hashcode_id, name, category, amount) VALUES(@hashcode, @name, @category, @amount)";
             try
@@ -93,7 +97,7 @@ namespace IO.Modules.ResourceManager
         /// <returns>True if operation was successful. Otherwise, false</returns>
         public bool ChangeStatus(string name, bool status)
         {
-            List<Resource> items = GetAllItems();
+            List<Resource> items = GetAllItemsObjects();
 
             foreach (Resource res in items)
             {
@@ -180,7 +184,7 @@ namespace IO.Modules.ResourceManager
         /// <returns>True resource class object operation was successful. Otherwise, null</returns>
         public Resource GetItem(string name, int amount)
         {
-            List<Resource> items = GetAllItems();
+            List<Resource> items = GetAllItemsObjects();
 
             foreach (Resource res in items)
             {
@@ -221,7 +225,7 @@ namespace IO.Modules.ResourceManager
         /// <returns>Size of list of all items ever found in database</returns>
         public int GetItemsAmountByCategory(Category category)
         {
-            List<Resource> items = GetAllItems();
+            List<Resource> items = GetAllItemsObjects();
 
             int count = 0;
 
@@ -253,7 +257,28 @@ namespace IO.Modules.ResourceManager
         /// Get all the item in resource database
         /// </summary>
         /// <returns>List of objects Resource</returns>
-        public List<Resource> GetAllItems()
+        public List<string> GetAllItems()
+        {
+            string query = "SELECT * FROM resources";
+            List<string> items = new List<string>();
+
+            using (var command =
+                   new SqliteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
+            {
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var item = reader.GetString(1) + " - " + reader.GetString(2) + " - " + reader.GetInt32(3).ToString();
+                        items.Add(item);
+                    }
+                }
+            }
+
+            return items;
+        }
+
+        public List<Resource> GetAllItemsObjects()
         {
             string query = "SELECT * FROM resources";
             List<Resource> items = new List<Resource>();
@@ -265,7 +290,7 @@ namespace IO.Modules.ResourceManager
                 {
                     while (reader.Read())
                     {
-                        var item = new Resource(reader.GetString(1),Enum.Parse<Category>(reader.GetString(2)),reader.GetInt32(3));
+                        var item = new Resource(reader.GetString(1), Enum.Parse<Category>(reader.GetString(2)), reader.GetInt32(3));
                         items.Add(item);
                     }
                 }

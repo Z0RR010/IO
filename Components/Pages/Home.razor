@@ -6,7 +6,7 @@
 @rendermode InteractiveServer
 @inject IStringLocalizer<Home> Loc
 @inject NavigationManager nav
-<PageTitle>Home</PageTitle>
+<PageTitle>@Loc["Main"]</PageTitle>
 
 <h1>
     @Loc["Hello"]
@@ -47,6 +47,13 @@
     </Authorized>
 </AuthorizeView>
 
+<AuthorizeView Roles="Authority">
+    <Authorized>
+        <h4>@Loc["Aut"]</h4>
+        <p2>@name</p2>
+    </Authorized>
+</AuthorizeView>
+
 <AuthorizeView Roles="Affected">
     <Authorized>
         @if (isVerified)
@@ -79,13 +86,6 @@
 
     public string name;
     public bool isVerified = false;
-
-    private async Task displayInfo()
-    {
-        var authenticationState = await authenticationStateTask;
-        var message = authenticationState.User.Identity.Name;
-
-    }
 
     private async Task English()
     {
@@ -128,6 +128,5 @@
             BasicUser user = executor.GetBasicUser(name.Trim());
             isVerified = user.IsVerified;
         }
-        
-	}
+    }
 }
