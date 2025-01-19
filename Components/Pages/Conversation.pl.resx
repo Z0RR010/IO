@@ -50,4 +50,25 @@
     <data name="Download Report" xml:space="preserve">
         <value>Pobierz Raport</value>
     </data>
+    <data name="Communicator Report Viewer &amp; Downloader" xml:space="preserve">
+        <value>Pobieranie Raportu Komunikatora</value>
+    </data>
+    <data name="You do not have permission to view this content." xml:space="preserve">
+        <value>Nie masz odpowiednich permisji by przeglądać te zawartość.</value>
+    </data>
+    <data name="Days Before:" xml:space="preserve">
+        <value>Sprzed ilu dni:</value>
+    </data>
+    <data name="Communication" xml:space="preserve">
+        <value>Komunikacja</value>
+    </data>
+    <data name="Archive Chats" xml:space="preserve">
+        <value>Archiwizacja Chatu</value>
+    </data>
+    <data name="Chats in Archive" xml:space="preserve">
+        <value>Konwersacje w Archiwum</value>
+    </data>
+    <data name="Undo Archivization" xml:space="preserve">
+        <value>Cofnij Archiwizacje</value>
+    </data>
 </root>

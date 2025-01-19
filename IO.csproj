@@ -39,13 +39,6 @@
   <ItemGroup>
   <Content Include="databases/**" CopyToOutputDirectory="PreserveNewest" />
 </ItemGroup>
-  <ItemGroup>
-    <Compile Update="Components\Pages\Conversation.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Conversation.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Update="Components\Pages\Conversation.resx">

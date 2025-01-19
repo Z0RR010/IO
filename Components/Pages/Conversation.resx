@@ -57,4 +57,25 @@
     <data name="Download Report" xml:space="preserve">
         <value>Download Report</value>
     </data>
+    <data name="Communicator Report Viewer &amp; Downloader" xml:space="preserve">
+        <value>Communicator Report Viewer &amp; Downloader</value>
+    </data>
+    <data name="You do not have permission to view this content." xml:space="preserve">
+        <value>You do not have permission to view this content.</value>
+    </data>
+    <data name="Days Before:" xml:space="preserve">
+        <value>Days Before:</value>
+    </data>
+    <data name="Communication" xml:space="preserve">
+        <value>Communication</value>
+    </data>
+    <data name="Archive Chats" xml:space="preserve">
+        <value>Archive Chats</value>
+    </data>
+    <data name="Chats in Archive" xml:space="preserve">
+        <value>Chats in Archive</value>
+    </data>
+    <data name="Undo Archivization" xml:space="preserve">
+        <value>Undo Archivization</value>
+    </data>
 </root>
