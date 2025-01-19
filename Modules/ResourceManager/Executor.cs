@@ -1,4 +1,4 @@
-namespace IO.Modules.ResourceManager
+﻿namespace IO.Modules.ResourceManager
 {
     public class Executor : IResManager
     {
@@ -78,13 +78,13 @@ namespace IO.Modules.ResourceManager
         /// <returns>List of string containing info</returns>
         public List<string> GetAllAvailableItems()
         {
-            //List<string> output = new List<string>();
+            List<string> output = new List<string>();
 
-            //foreach (Resource item in 
-            //{
-                //output.Add(item.Name + " - " + item.Category + " - " + item.Amount + " - " + item.Status);
-           // }
-            return _handler.GetAllItems();
+            foreach (Resource item in _handler.GetAllItems())
+            {
+                output.Add(item.Name + " - " + item.Category + " - " + item.Amount + " - " + item.Status);
+            }
+            return output;
         }
         /// <summary>
         /// Get list of resources of wanted category
