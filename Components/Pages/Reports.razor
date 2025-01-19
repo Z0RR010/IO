@@ -7,7 +7,8 @@
 @using Microsoft.Extensions.Localization
 @inject IStringLocalizer<Conversation> Loc
 @inject RaportManager RaportService
-@inject SessionService ses;
+@inject SessionService ses
+
 <div class="container my-5">
     @if (authorized)
     {
@@ -18,9 +19,11 @@
             <pre>@reportContent</pre>
         </div>
 
-        <!-- Download Button -->
+        <!-- Download Section -->
         <div class="text-center">
-            <a class="btn btn-primary" href="/api/Report/download" download>@Loc["Download Report"]</a>
+            <label for="daysBefore" class="text-black">@Loc["Days Before:"]</label>
+            <input type="number" id="daysBefore" @bind="daysBefore" min="0" class="form-control-inline" />
+            <a class="btn btn-primary mt-2" href="@GetDownloadLink()" download>@Loc["Download Report"]</a>
         </div>
     }
     else
@@ -31,12 +34,15 @@
 
 @code {
     private string reportContent;
+    private int daysBefore = 0;
     bool authorized = false;
+
     protected override void OnInitialized()
     {
         // Fetch the report content from RaportManager
-        
+        reportContent = RaportService.activeReport ?? "No report available.";
     }
+
     protected override async Task OnInitializedAsync()
     {
         var user = await ses.GetUserNameAsync();
@@ -45,6 +51,11 @@
             authorized = true;
             reportContent = RaportService.activeReport ?? "No report available.";
         }
+    }
+
+    private string GetDownloadLink()
+    {
+        return $"/api/Report/download?daysBefore={daysBefore}";
     }
 }
 <style>
@@ -70,8 +81,19 @@
         white-space: pre-wrap; /* Preserve whitespace for formatting */
     }
 
+    .form-control-inline {
+        display: inline-block;
+        width: auto;
+        vertical-align: middle;
+        margin: 0 10px;
+    }
+
     .btn {
         padding: 10px 20px;
         font-size: 0.9rem;
+    }
+
+    .text-black {
+        color: black;
     }
 </style>
