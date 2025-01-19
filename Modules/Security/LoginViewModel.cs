@@ -4,10 +4,10 @@ namespace IO.Modules.Security
 {
     public class LoginViewModel
     {
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Proszę podać email")]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Please, provide the email")]
         public string? Email { get; set; }
 
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Proszę podać hasło")]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Please, provide the password")]
         public string? Password { get; set; }
     }
 }

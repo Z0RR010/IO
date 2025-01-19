@@ -1,5 +1,8 @@
-﻿@inherits LayoutComponentBase
+﻿@using IO.Components.Pages
+@using Microsoft.Extensions.Localization
+@inherits LayoutComponentBase
 @inject NavigationManager nav
+@inject IStringLocalizer<MainLayout> Loc
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -8,20 +11,28 @@
     <main>
         <div class="top-row px-4">
             
+            <Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+                <NotAuthorized>
+                    <div class="">
+                        <NavLink class="sign" href="signIn">
+                            @Loc["SignIn"]
+                        </NavLink>
+                    </div>
+                </NotAuthorized>
+            </Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
             <div class="">
-            <NavLink class="sign" href="signIn">Sign In
-            </NavLink>
-            </div>
-            <div class="">
-                <NavLink class="sign" href="signUp">Sign Up
+                <NavLink class="sign" href="signUp">
+                    @Loc["SignUp"]
                 </NavLink>
             </div>
+            <div class="">
             <Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
                 <Authorized>
-                    Zalogowany jako @email
-                    <a href="/signOut">Wyloguj</a>
+                    @Loc["SignedInAs"] @email
+                    <a href="/signOut">@Loc["SignOut"]</a>
                 </Authorized>
-            </Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+				</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+			</div>
         </div>
 
         <article class="content px-4">
