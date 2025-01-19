@@ -253,8 +253,9 @@
                         @if (selectedTask == volunteerTask && showTaskDetails)
                         {
                             <div class="mt-2">
-                                <p>@Loc["Address"]: @selectedTask.Address</p>
                                 <p>@Loc["Complition date"]: @selectedTask.EndDate.ToString()</p>
+                                <p>@Loc["Address"]: @selectedTask.Address</p>
+                                <div id="map01" style="width: 100%; height: 500px; margin-top: 20px;"></div>
                             </div>
                         }
                     </li>
@@ -378,7 +379,6 @@
                     @if (selectedTask == volunteerTask && showTaskDetails)
                     {
                         <div class="mt-2">
-                            <p>@Loc["Address"]: @selectedTask.Address</p>
                             <p>@Loc["Complition date"]: @selectedTask.EndDate.ToString()</p>
                             @if(selectedTask.TaskStatus == IO.Modules.Volunteer.TaskStatus.Assigned)
                             {
@@ -388,6 +388,8 @@
                                 v => v.VolunteerID == selectedTask.VolunteerID).Email
                                 </p>
                             <p>Request: @requestManager.GetAllRequests().FirstOrDefault(r => r.Id == selectedTask.RequestID).Title</p>
+                                <p>@Loc["Address"]: @selectedTask.Address</p>
+                                <div id="map01" style="width: 100%; height: 500px; margin-top: 20px;"></div>
                             }
                         </div>
                     }
@@ -410,10 +412,10 @@
                     @if (selectedVolunteer == volunteer && showVolunteerDetails)
                     {
                         <div class="mt-2">
-                            <p>@Loc["Address"]: @selectedVolunteer.Address</p>
                             <p>@Loc["Phone Number"]: @selectedVolunteer.PhoneNumber</p>
                             <p>@Loc["Email"]: @selectedVolunteer.Email</p>
                             <p>@Loc["Tasks"]: @volunteerManager.FindTasksByVolunteer(selectedVolunteer.VolunteerID).Count</p>
+                            <p>@Loc["Address"]: @selectedVolunteer.Address</p>
                         </div>
                     }
 
