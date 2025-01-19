@@ -223,7 +223,8 @@
         HashSet<string> uniqueNames = new HashSet<string>();
         for (int i = 0; i < requests.Count; i++)
         {
-            List<Resource> resources = requestManager.GetResourcesForRequest(i);
+            int ID = requests[i].Id;
+            List<Resource> resources = requestManager.GetResourcesForRequest(ID);
             foreach (var resource in resources)
             {
                 if (uniqueNames.Add(resource.Name))
