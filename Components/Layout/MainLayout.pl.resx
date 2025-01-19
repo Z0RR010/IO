@@ -117,49 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AddResource" xml:space="preserve">
-    <value>Add Resource</value>
+  <data name="SignedInAs" xml:space="preserve">
+    <value>Zalogowano jako</value>
   </data>
-  <data name="Amount" xml:space="preserve">
-    <value>Amount</value>
+  <data name="SignIn" xml:space="preserve">
+    <value>Logowanie</value>
   </data>
-  <data name="Apartment" xml:space="preserve">
-    <value>Apartment</value>
+  <data name="SignUp" xml:space="preserve">
+    <value>Rejestracja</value>
   </data>
-  <data name="Category" xml:space="preserve">
-    <value>Category</value>
-  </data>
-  <data name="City" xml:space="preserve">
-    <value>City</value>
-  </data>
-  <data name="Description" xml:space="preserve">
-    <value>Description</value>
-  </data>
-  <data name="HeaderAdd" xml:space="preserve">
-    <value>Add Request</value>
-  </data>
-  <data name="Name" xml:space="preserve">
-    <value>Resource name</value>
-  </data>
-  <data name="Remove" xml:space="preserve">
-    <value>Remove</value>
-  </data>
-  <data name="RequestAdded" xml:space="preserve">
-    <value>Request added successfully!</value>
-  </data>
-  <data name="Street" xml:space="preserve">
-    <value>Street</value>
-  </data>
-  <data name="StreetNumber" xml:space="preserve">
-    <value>Street Number</value>
-  </data>
-  <data name="Submit" xml:space="preserve">
-    <value>Submit</value>
-  </data>
-  <data name="Title" xml:space="preserve">
-    <value>Title</value>
-  </data>
-  <data name="ZipCode" xml:space="preserve">
-    <value>Zip Code</value>
+  <data name="SignOut" xml:space="preserve">
+    <value>Wyloguj</value>
   </data>
 </root>

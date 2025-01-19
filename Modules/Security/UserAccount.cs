@@ -18,5 +18,8 @@ namespace IO.Modules.Security
         [Column("role")]
         [MaxLength(20)]
         public string? Role { get; set; }
+
+        [Column("emailVerified")]
+        public bool EmailVerified { get; set; }
     }
 }

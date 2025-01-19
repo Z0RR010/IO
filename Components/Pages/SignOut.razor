@@ -1,8 +1,10 @@
 ﻿@page "/signOut"
 @using Microsoft.AspNetCore.Authentication
+@using Microsoft.Extensions.Localization
 @inject NavigationManager navigationManager;
+@inject IStringLocalizer<SignOut> Loc
 
-<h5>Pomyslnie wylogowano</h5>
+<h5>@Loc["SignedOutSuccessfully"]</h5>
 
 @code
 {
