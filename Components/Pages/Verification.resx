@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!--
     Microsoft ResX Schema
@@ -117,40 +117,24 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+    <comment>a</comment>
+  </data>
+  <data name="Surname" xml:space="preserve">
+    <value>Surname</value>
+    <comment>dsa</comment>
+  </data>
   <data name="Address" xml:space="preserve">
     <value>Address</value>
-    <comment/>
+    <comment>b</comment>
   </data>
-  <data name="Back" xml:space="preserve">
-    <value>Back</value>
-    <comment/>
+  <data name="Verify" xml:space="preserve">
+    <value>Verify users</value>
+    <comment>f</comment>
   </data>
-  <data name="CreatedAt" xml:space="preserve">
-    <value>Created At</value>
-    <comment/>
-  </data>
-  <data name="Description" xml:space="preserve">
-    <value>Description</value>
-    <comment/>
-  </data>
-  <data name="Header" xml:space="preserve">
-    <value>Request Details</value>
-    <comment/>
-  </data>
-  <data name="IsVerified" xml:space="preserve">
-    <value>Is Verified</value>
-    <comment/>
-  </data>
-  <data name="ResourcesRequired" xml:space="preserve">
-    <value>Resources Required</value>
-    <comment/>
-  </data>
-  <data name="UpdatedAt" xml:space="preserve">
-    <value>Updated At</value>
-    <comment/>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>User</value>
-    <comment/>
+  <data name="Ver" xml:space="preserve">
+    <value>Verify</value>
+    <comment>a</comment>
   </data>
 </root>

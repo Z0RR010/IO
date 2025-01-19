@@ -11,7 +11,7 @@
 @using Microsoft.Extensions.Localization
 @using System.Text.RegularExpressions
 @inject AppDbContext appDbContext
-
+<title>@Loc["Login"]</title>
 <div class="row">
     <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
         <Microsoft.AspNetCore.Components.Forms.EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm">
