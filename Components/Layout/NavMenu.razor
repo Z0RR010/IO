@@ -45,7 +45,7 @@
             </NavLink>
             </div>
         }
-        @if (userType == "Affected" || userType == "Admin")
+        @if ((userType == "Affected" && isVerified) || userType == "Admin")
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="requests/add">
@@ -53,17 +53,24 @@
             </NavLink>
             </div>
         }
-        <div class="nav-item px-3">
+        @if (userType == "Admin")
+        {
+            <div class="nav-item px-3">
             <NavLink class="nav-link" href="map">
                 <span class="bi bi-pin-map-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Map Test
             </NavLink>
         </div>
-
-        <div class="nav-item px-3">
+        }
+        
+        @if (userType == "Authority" || userType == "Admin" || userType == "Charity")
+        {
+            <div class="nav-item px-3">
             <NavLink class="nav-link" href="resources">
                 View resources
             </NavLink>
         </div>
+        }
+        
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="communication">
@@ -75,11 +82,23 @@
                 <span class="bi bi-plus-square-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Conversation
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+        @if (userType == "Authority" || userType == "Admin")
+        {
+            <div class="nav-item px-3">
+            <NavLink class="nav-link" href="verification">
+                <span class="bi bi-plus-square-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Conversation
+            </NavLink>
+        </div>
+        }
+        @if (userType == "Authority" || userType == "Admin" || userType == "Charity")
+        {
+            <div class="nav-item px-3">
             <NavLink class="nav-link" href="/Communication/Reports">
                 <span class="bi bi-plus-square-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Reports
             </NavLink>
         </div>
+        }
+        
   
 
     </nav>
@@ -87,6 +106,7 @@
 
 @code{
     string userType = string.Empty;
+    bool isVerified = false;
     protected override async System.Threading.Tasks.Task OnInitializedAsync()
     {
         string sessionUser = await sessionService.GetUserNameAsync();
@@ -96,6 +116,7 @@
         if (basicUser != null)
         {
             userType = basicUser.Role;
+            isVerified = basicUser.IsVerified;
         }
     }
 }

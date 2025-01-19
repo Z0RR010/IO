@@ -138,11 +138,11 @@ else
     {
         var uri = nav.ToAbsoluteUri(nav.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-        if (!query.ContainsKey("ui-culture"))
-        {
-            nav.NavigateTo($"{uri.AbsolutePath}?ui-culture=en-US", true);
-            return;
-        }
+        // if (!query.ContainsKey("ui-culture"))
+        // {
+        //     nav.NavigateTo($"{uri.AbsolutePath}?ui-culture=en-US", true);
+        //     return;
+        // }
 
         await base.OnInitializedAsync();
         email = await sessionService.GetUserNameAsync();

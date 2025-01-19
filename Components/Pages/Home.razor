@@ -1,6 +1,8 @@
 ﻿@page "/"
 @using System.Globalization
+@using IO.Modules.ResourceManager
 @using Microsoft.Extensions.Localization
+@using IO.Modules.Security
 @rendermode InteractiveServer
 @inject IStringLocalizer<Home> Loc
 @inject NavigationManager nav
@@ -10,31 +12,60 @@
     @Loc["Hello"]
 </h1>
 
-Welcome to your new app.
-
 <AuthorizeView>
-	<NotAuthorized>
-		<h5>nie ma autoryzacji</h5>
-	</NotAuthorized>
+    <NotAuthorized>
+        <h5>@Loc["NoAuth"]</h5>
+        <h2 class="validation-message">@Loc["NotReal"]</h2>
+    </NotAuthorized>
 </AuthorizeView>
 
 <AuthorizeView Roles="Volunteer">
-	<Authorized>
-		<h4>witaj darczynco</h4>
-		<p2>@name</p2>
-	</Authorized>
+    <Authorized>
+        <h4>@Loc["Vol"]</h4>
+        <p2>@name</p2>
+    </Authorized>
 </AuthorizeView>
 
 <AuthorizeView Roles="Charity">
-	<Authorized>
-		<h4>witaj organizacjo charytatywna</h4>
-		<p2>@name</p2>
-	</Authorized>
+    <Authorized>
+        <h4>@Loc["Char"]</h4>
+        <p2>@name</p2>
+    </Authorized>
 </AuthorizeView>
 
-<h2 class="validation-message">This is not a real site</h2>
-<h2 class="validation-message">You should not enter any of your real information on this site as we do not guarantee information entered will be safe</h2>
-<p>This site is created as a college project</p>
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <h4>@Loc["Adm"]</h4>
+        <p2>@name</p2>
+    </Authorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Donor">
+    <Authorized>
+        <h4>@Loc["Don"]</h4>
+        <p2>@name</p2>
+    </Authorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Affected">
+    <Authorized>
+        @if (isVerified)
+        {
+            <h4>@Loc["Aff"]</h4>
+            <p2>@name</p2>
+        }
+        @if (!isVerified)
+        {
+        <h4>@Loc["NoV"]</h4>
+        <p2>@name</p2>
+        }
+
+    </Authorized>
+</AuthorizeView>
+
+
+<h2 class="validation-message">@Loc["NoReal"]</h2>
+<p>@Loc["Proj"]</p>
 
 <footer class="footer">
     <button @onclick="Polish" class="lang">Polski</button>
@@ -43,17 +74,18 @@ Welcome to your new app.
 
 @code
 {
-	[CascadingParameter]
-	private Task<AuthenticationState> authenticationStateTask{ get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask{ get; set; }
 
-	public string name;
+    public string name;
+    public bool isVerified = false;
 
-	private async Task displayInfo()
-	{
-		var authenticationState = await authenticationStateTask;
-		var message = authenticationState.User.Identity.Name;
+    private async Task displayInfo()
+    {
+        var authenticationState = await authenticationStateTask;
+        var message = authenticationState.User.Identity.Name;
 
-	}
+    }
 
     private async Task English()
     {
@@ -84,11 +116,18 @@ Welcome to your new app.
         nav.NavigateTo(newUri,true);
     }
 
-	protected override async Task OnInitializedAsync()
-	{
-		await base.OnInitializedAsync();
-		var authenticationState = await authenticationStateTask;
-		var message = authenticationState.User.Identity.Name;
-		name = message;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var authenticationState = await authenticationStateTask;
+        var message = authenticationState.User.Identity.Name;
+        name = message;
+        UserExecuter executor = new UserExecuter();
+        if (name != null)
+        {
+            BasicUser user = executor.GetBasicUser(name.Trim());
+            isVerified = user.IsVerified;
+        }
+        
 	}
 }

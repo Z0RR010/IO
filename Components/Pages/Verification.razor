@@ -1,0 +1,171 @@
+@page "/verification"
+@rendermode InteractiveServer
+@using IO.Modules.Security
+@using IO.Modules.ResourceManager
+@inject NavigationManager nav
+<h1>Verify affected users</h1>
+<table>
+    <thead>
+            <tr>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Address</th>
+                <th>Pesel</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+
+        
+    @foreach (var user in users)
+    {
+        <tr>
+            <td>
+                @user.Name
+            </td>
+            <td>
+                @user.Surname
+            </td>
+            <td>
+                @user.Address
+            </td>
+            <td>
+                @user.Pesel
+            </td>
+            
+            
+            <button class="btn-primary" @onclick="() => Verify(user.Email)">Verify</button>
+        </tr>
+    }
+    </tbody>
+</table>
+
+
+
+
+
+@code
+{
+    List<BasicUser> users = new List<BasicUser>();
+    List<String> emails = new List<String>();
+    UserExecuter userX = new UserExecuter();
+
+	protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        
+        string getAllMails = "SELECT email FROM users";
+        string result = userX.CustomQuery(getAllMails);
+        List<string> res = result.Split('\n').ToList();
+        List<BasicUser> allUsers = new List<BasicUser>();
+        foreach (var s in res)
+        {
+            allUsers.Add(userX.GetBasicUser(s.Trim()));
+        }
+        allUsers = allUsers.Where(x => x != null).ToList();
+        users = allUsers.Where(u => u.Role == "Affected" && !u.IsVerified).ToList();
+        foreach (var u in users)
+        {
+            emails.Add(u.Email);
+        }
+    }
+async Task Verify(string email)
+{
+    userX.VerifyUser(email);    
+    nav.Refresh(true);
+}
+
+
+
+    @* bool NotVerfiedPredicate(BasicUser user)
+    {
+        Console.WriteLine(user.Role);
+        Console.WriteLine(user.IsVerified);
+    } *@
+
+
+}
+
+<style>
+    h3 {
+    font-size: 1.5rem;
+    color: #2c3e50; /* Sta�y kolor nag��wka */
+    margin-bottom: 20px;
+    text-align: center;
+    }
+
+    /* Stylowanie dla tabeli */
+    .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 1rem;
+    text-align: left;
+    background-color: #f9f9f9; /* Jasnoszare t�o */
+    border: 1px solid #ddd;
+    }
+
+    .table th,
+    .table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd; /* Linie siatki tabeli */
+    min-width: 20%;
+    }
+
+    .table th {
+    background-color: #34495e; /* Kolor t�a nag��wk�w tabeli */
+    color: #ffffff; /* Bia�y kolor tekstu w nag��wkach */
+    text-transform: uppercase;
+    font-weight: bold;
+    }
+
+    .table tbody tr:nth-child(odd) {
+    background-color: #f2f2f2; /* Alternatywne kolory wierszy */
+    }
+
+    .table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+    }
+
+    .table tbody tr:hover {
+    background-color: #dff0d8; /* Kolor pod�wietlenia wiersza */
+    }
+
+    /* Stylowanie dla link�w w kolumnie akcji */
+    .table a {
+    color: #3498db; /* Kolor link�w */
+    text-decoration: none;
+    margin-right: 10px;
+    }
+
+    .table a:hover {
+    text-decoration: underline;
+    }
+
+    /* Stylowanie przycisku Delete */
+    .btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    }
+
+    .btn-primary {
+    background-color: #2fec35; /* Czerwony kolor przycisku Delete */
+    color: #ffffff;
+    }
+
+    .btn-primary:hover {
+    background-color: #009f05; /* Ciemniejszy czerwony po najechaniu */
+    }
+
+    /* Stylowanie tekstu �adowania */
+    em {
+    color: #7f8c8d; /* Neutralny szary kolor */
+    font-style: italic;
+    display: block;
+    text-align: center;
+    margin: 20px 0;
+    }
+</style>
