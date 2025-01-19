@@ -123,7 +123,11 @@
         var message = authenticationState.User.Identity.Name;
         name = message;
         UserExecuter executor = new UserExecuter();
-        BasicUser user = executor.GetBasicUser(name.Trim());
-        isVerified = user.IsVerified;
+        if (name != null)
+        {
+            BasicUser user = executor.GetBasicUser(name.Trim());
+            isVerified = user.IsVerified;
+        }
+        
 	}
 }
