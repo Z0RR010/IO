@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @using IO.Modules.Security
 @using IO.Modules.ResourceManager
+@inject NavigationManager nav
 <h1>Verify affected users</h1>
 <table>
     <thead>
@@ -71,6 +72,7 @@
 async Task Verify(string email)
 {
     userX.VerifyUser(email);    
+    nav.Refresh(true);
 }
 
 

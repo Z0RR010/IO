@@ -121,4 +121,44 @@
     <value>Witamy</value>
     <comment> </comment>
   </data>
+  <data name="notReal" xml:space="preserve">
+    <value>To nie jest prawdziwa strona.</value>
+    <comment>a</comment>
+  </data>
+  <data name="NoAuth" xml:space="preserve">
+    <value>Brak autoryzacji</value>
+    <comment>d</comment>
+  </data>
+  <data name="Vol" xml:space="preserve">
+    <value>Witamy wolontariuszu</value>
+    <comment>v</comment>
+  </data>
+  <data name="Char" xml:space="preserve">
+    <value>Witamy organizacjo charytatywna</value>
+    <comment>c</comment>
+  </data>
+  <data name="NoReal" xml:space="preserve">
+    <value>Nie wpisuj prawdziwych informacji na tej stronie, ponieważ nie gwarantujemy że będą bezpieczne</value>
+    <comment>r</comment>
+  </data>
+  <data name="Proj" xml:space="preserve">
+    <value>Ta strona jest stworzona jako projekt studencki</value>
+    <comment>p</comment>
+  </data>
+  <data name="Adm" xml:space="preserve">
+    <value>Witamy nas samych</value>
+    <comment>a</comment>
+  </data>
+  <data name="Aff" xml:space="preserve">
+    <value>Witamy poszkodowanego</value>
+    <comment>p</comment>
+  </data>
+  <data name="NoV" xml:space="preserve">
+    <value>Poczekaj aż będziesz zweryfikowany przez władze</value>
+    <comment>v</comment>
+  </data>
+  <data name="Don" xml:space="preserve">
+    <value>Witamy darczyńcę</value>
+    <comment>a</comment>
+  </data>
 </root>
