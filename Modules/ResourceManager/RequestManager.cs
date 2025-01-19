@@ -279,7 +279,7 @@ namespace IO.Modules.ResourceManager
 
             return resources;
         }
-        private List<Resource> ParseResources(string resourcesString)
+        public List<Resource> ParseResources(string resourcesString)
         {
             var resources = new List<Resource>();
             if (!string.IsNullOrWhiteSpace(resourcesString))
@@ -360,6 +360,35 @@ namespace IO.Modules.ResourceManager
             }
         }
 
+        public async Task<bool> UpdateRequest(Request request, RequestStatus newStatus)
+        {
+            string query = @"
+        UPDATE Request 
+        SET 
+            DateUpdated = @dateUpdated, 
+            Status = @status
+        WHERE 
+            Id = @id";
+
+            try
+            {
+                using (var command = new SqliteCommand(query, _connection))
+                {
+                    command.Parameters.AddWithValue("@id", request.Id);
+                    command.Parameters.AddWithValue("@dateUpdated", DateTime.Now);
+                    command.Parameters.AddWithValue("@status", newStatus.ToString());
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error in UpdateRequest: {e.Message}");
+                return false;
+            }
+        }
+
+      
 
         public void Dispose()
         {

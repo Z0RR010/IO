@@ -145,5 +145,10 @@
         {
             return _handler.CustomQuery(query);
         }
+
+        public Resource GetResourceByName(string name)
+        {
+            return _handler.GetResourceByName(name);
+        }
     }
 }
