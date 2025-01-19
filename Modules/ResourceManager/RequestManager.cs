@@ -159,6 +159,19 @@ namespace IO.Modules.ResourceManager
             return requests;
         }
 
+        public string GetAllRequestsInfo()
+        {
+            var requests = GetAllRequests();
+            var result = new StringBuilder();
+
+            foreach (var request in requests)
+            {
+                result.AppendLine($"Id: {request.Id}, Title: {request.Title}, Description: {request.Description}, CreatedAt: {request.CreatedAt}, DateUpdated: {request.DateUpdated}, Status: {request.Status}, User: {request.User}, Address: {request.Address}, IsVerified: {request.IsVerified}");
+            }
+
+            return result.ToString();
+        }
+
         public List<Request> GetUserRequests(string email)
         {
             string query = "SELECT * FROM Request WHERE [User] = @user";
