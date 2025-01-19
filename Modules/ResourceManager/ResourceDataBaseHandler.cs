@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
 
@@ -253,10 +253,10 @@ namespace IO.Modules.ResourceManager
         /// Get all the item in resource database
         /// </summary>
         /// <returns>List of objects Resource</returns>
-        public List<string> GetAllItems()
+        public List<Resource> GetAllItems()
         {
             string query = "SELECT * FROM resources";
-            List<string> items = new List<string>();
+            List<Resource> items = new List<Resource>();
 
             using (var command =
                    new SqliteCommand(query, _resourceConnection)) //MySqlCommand(query, _resourceConnection))
@@ -265,7 +265,7 @@ namespace IO.Modules.ResourceManager
                 {
                     while (reader.Read())
                     {
-                        var item = reader.GetString(1) + "-" + reader.GetString(2) + "-" + reader.GetInt32(3).ToString();
+                        var item = new Resource(reader.GetString(1),Enum.Parse<Category>(reader.GetString(2)),reader.GetInt32(3));
                         items.Add(item);
                     }
                 }
