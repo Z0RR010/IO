@@ -57,4 +57,7 @@
     <data name="Download Report" xml:space="preserve">
         <value>Download Report</value>
     </data>
+    <data name="Communicator Report Viewer &amp; Downloader" xml:space="preserve">
+        <value>Communicator Report Viewer &amp; Downloader</value>
+    </data>
 </root>

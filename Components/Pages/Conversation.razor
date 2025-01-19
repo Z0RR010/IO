@@ -8,7 +8,6 @@
 @inject Communicator CommunicatorService
 @inject SessionService ses
 
-<title>@Loc["Conversation"]</title>
 <div class="container my-4">
 
     <!-- User Email Input -->
@@ -18,12 +17,18 @@
         <button class="btn btn-primary mt-2" @onclick="beginChatWithSomeone">@Loc["Start Conversation"]</button>
     </div>
 
+    <!-- Search Input -->
+    <div class="mb-4">
+        <label for="searchTerm" class="form-label"></label>
+        <input type="text" id="searchTerm" class="form-control" @bind="searchTerm" placeholder="Search Conversations" @oninput="FilterChats" />
+    </div>
+
     <!-- Chat List -->
     <h3 class="mt-5">@Loc["Conversation"]</h3>
-    @if (userChats.Any())
+    @if (filteredChats.Any())
     {
         <div class="list-group">
-            @foreach (var chat in userChats)
+            @foreach (var chat in filteredChats)
             {
                 <div class="list-group-item">
                     <div class="d-flex justify-content-between align-items-center">
@@ -51,23 +56,21 @@
     {
         <p class="text-muted">@Loc["No Conversations"]</p>
     }
-
-   
 </div>
 
 @code {
-    private string userEmailToRead ;
+    private string userEmailToRead;
     private string newChatUser;
+    private string searchTerm;
     private List<Chat> userChats = new();
+    private List<Chat> filteredChats = new();
 
     protected override async Task OnInitializedAsync()
     {
         userEmailToRead = await ses.GetUserNameAsync();
         userChats = CommunicatorService.GetUserChats(userEmailToRead);
+        FilterChats();
     }
-
-    
-
 
     // Fetch user's chats
     private void GetUserChats()
@@ -75,9 +78,11 @@
         if (!string.IsNullOrWhiteSpace(userEmailToRead))
         {
             userChats = CommunicatorService.GetUserChats(userEmailToRead);
+            FilterChats();
         }
     }
 
+    // Initialize a new chat with a user
     private void beginChatWithSomeone()
     {
         string[] usersToAdd = { userEmailToRead, newChatUser };
@@ -85,7 +90,19 @@
         {
             CommunicatorService.CreateChat(Permission.System, usersToAdd);
         }
-        userChats = CommunicatorService.GetUserChats(userEmailToRead);
+        GetUserChats();
     }
-    
-}
+
+    // Filter chats based on search term
+    private void FilterChats()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredChats = userChats;
+        }
+        else
+        {
+            filteredChats = userChats.Where(chat => chat.Emails.Any(email => email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))).ToList();
+        }
+    }
+}}

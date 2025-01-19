@@ -50,4 +50,7 @@
     <data name="Download Report" xml:space="preserve">
         <value>Pobierz Raport</value>
     </data>
+    <data name="Communicator Report Viewer &amp; Downloader" xml:space="preserve">
+        <value>Pobieranie Raportu Komunikatora</value>
+    </data>
 </root>

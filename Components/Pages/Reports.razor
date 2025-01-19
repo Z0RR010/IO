@@ -3,45 +3,48 @@
 @using System.Text
 @using IO.Modules.Communication
 @using System.Globalization
+@using IO.Modules.Security
 @using Microsoft.Extensions.Localization
 @inject IStringLocalizer<Conversation> Loc
 @inject RaportManager RaportService
-
+@inject SessionService ses;
 <div class="container my-5">
-    <h2 class="text-center">@Loc["Report Viewer & Downloader"]</h2>
+    @if (authorized)
+    {
+        <h2 class="text-center">@Loc["Communicator Report Viewer & Downloader"]</h2>
 
-    <!-- Scrollable Report Display -->
-    <div class="scrollable-report mb-4">
-        <pre>@reportContent</pre>
-    </div>
+        <!-- Scrollable Report Display -->
+        <div class="scrollable-report mb-4">
+            <pre>@reportContent</pre>
+        </div>
 
-    <!-- Download Button -->
-    <div class="text-center">
-        <button class="btn btn-primary" @onclick="DownloadReport">@Loc["Download Report"]</button>
-    </div>
+        <!-- Download Button -->
+        <div class="text-center">
+            <a class="btn btn-primary" href="/api/Report/download" download>@Loc["Download Report"]</a>
+        </div>
+    }
+    else
+    {
+        <p class="text-center text-danger">@Loc["You do not have permission to view this content."]</p>
+    }
 </div>
 
 @code {
     private string reportContent;
-
+    bool authorized = false;
     protected override void OnInitialized()
     {
         // Fetch the report content from RaportManager
-        reportContent = RaportService.activeReport ?? "No report available.";
+        
     }
-
-    private async Task DownloadReport()
+    protected override async Task OnInitializedAsync()
     {
-        // Convert the report content to a stream
-        var fileName = "report.txt";
-        var fileBytes = Encoding.UTF8.GetBytes(reportContent);
-
-        // Use a memory stream for file download
-        using var stream = new MemoryStream(fileBytes);
-        var fileUrl = $"data:text/plain;charset=utf-8,{Uri.EscapeDataString(reportContent)}";
-
-        // Trigger the download in the browser
-        await JSRuntime.InvokeVoidAsync("downloadFile", fileUrl, fileName);
+        var user = await ses.GetUserNameAsync();
+        if (user != null && user == "skph@interia.pl")
+        {
+            authorized = true;
+            reportContent = RaportService.activeReport ?? "No report available.";
+        }
     }
 }
 <style>
@@ -72,4 +75,3 @@
         font-size: 0.9rem;
     }
 </style>
-@inject IJSRuntime JSRuntime
