@@ -94,11 +94,11 @@ namespace IO.Modules.ResourceManager
         public List<string> GetItemsByCategory(string category)
         {
             List<string> output = new List<string>();
-            foreach (Resource item in _handler.GetAllItems())
+            foreach (Resource item in _handler.GetAllItemsObjects())
             {
                 if (item.Category.ToString().ToLower().Equals(category.ToLower()))
                 {
-                    output.Add(item.Name + " - " + item.Category + " - " + item.Amount + " - " + item.Status);
+                    output.Add(item.Name + " - " + item.Category + " - " + item.Amount);
                 }
             }
             return output;
