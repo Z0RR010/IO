@@ -3,9 +3,11 @@
 @using IO.Modules.Communication
 @inject Communicator CommunicatorService
 @using System.Globalization
+@using IO.Modules.Security
 @using Microsoft.Extensions.Localization
 @inject IStringLocalizer<Conversation> Loc
 @rendermode InteractiveServer
+@inject SessionService session
 <h3 class="chat-header">@Loc["Conversation"]</h3>
 
 <p class="chat-id">@Loc["Chat ID"] @chatId</p>
@@ -31,11 +33,11 @@
 @code {
     private int chatId;
     string MessageContent;
-    string UserChecking = "matiziom72@gmail.com";
+    string UserChecking ;
     Chat activeChat;
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        // Access query string parameters manually
+        UserChecking = await session.GetUserNameAsync();
         var uri = Navigation.Uri;
         var queryString = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(uri).Query);
 
@@ -45,11 +47,12 @@
         }
 
         Console.WriteLine($"ChatId manually parsed: {chatId}");
-        var userChats = CommunicatorService.GetUserChats("matiziom72@gmail.com");
+        var userChats = CommunicatorService.GetUserChats(UserChecking);
         
         activeChat = userChats.FirstOrDefault(chat => chat.ChatId == chatId);
-        
+
     }
+    
     private void sendToChat()
     {
         bool result = false;
