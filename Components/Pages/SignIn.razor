@@ -11,7 +11,7 @@
 @using Microsoft.Extensions.Localization
 @using System.Text.RegularExpressions
 @inject AppDbContext appDbContext
-<title>@Loc["Login"]</title>
+
 <div class="row">
     <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
         <Microsoft.AspNetCore.Components.Forms.EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm">
@@ -76,7 +76,7 @@
     {
         var userAccount = appDbContext.UserAccounts.Where(x => x.Email == Model.Email).FirstOrDefault();
         var hashedPassword = Security.hashData(Model.Password);
-        if(userAccount != null)
+        if (userAccount != null)
         {
             using (var client = new HttpClient())
             {
@@ -97,43 +97,44 @@
                             var emailDto = new EmailDto() { To = "skph@interia.pl", Subject = "Wielokrotna nieudana próba zalogowania", Body = $@"
 				        <p>Użytkownik {userAccount.Email} przekroczył limit nieudanych prób logowania.</p>" };
 
-                        try
-                        {
-                            response = await client.PostAsJsonAsync(nav.BaseUri + "api/Email/SendEmail", emailDto);
-                        }
-                        catch (Exception ex)
-                        {
+                            try
+                            {
+                                response = await client.PostAsJsonAsync(nav.BaseUri + "api/Email/SendEmail", emailDto);
+                            }
+                            catch (Exception ex)
+                            {
+                            }
                         }
                     }
+                    catch
+                    {
+                        errorMessage = "Wystąpił błąd podczas logowania: " + responseContent;
+                    }
+                    return;
                 }
-                catch
-                {
-                    errorMessage = "Wystąpił błąd podczas logowania: " + responseContent;
-                }
+            }
+            if (userAccount is null || userAccount.Password != hashedPassword)
+            {
+                errorMessage = "Podano niepoprawne dane";
                 return;
             }
-        }
-        if(userAccount is null || userAccount.Password != hashedPassword)
-        {
-            errorMessage = "Podano niepoprawne dane";
-            return;
-        }
-        if (userAccount.EmailVerified == false)
-        {
-            errorMessage = "Nie zweryfikowano konta";
-            return;
-        }
-        var claims = new List<Claim>
+            if (userAccount.EmailVerified == false)
+            {
+                errorMessage = "Nie zweryfikowano konta";
+                return;
+            }
+            var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, Model.Email),
             new Claim(ClaimTypes.Role, userAccount.Role)
         };
 
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        var principal = new ClaimsPrincipal(identity);
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
 
-        await HttpContext.SignInAsync(principal);
-        nav.NavigateTo("/");
+            await HttpContext.SignInAsync(principal);
+            nav.NavigateTo("/");
+        }
     }
 
     private async Task English()
@@ -163,5 +164,6 @@
             newUri += "?ui-culture=pl";
         }
         nav.NavigateTo(newUri,true);
+    }
     }
 }

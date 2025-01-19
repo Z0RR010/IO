@@ -84,6 +84,9 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask{ get; set; }
 
+    public string name;
+    public bool isVerified = false;
+
     private async Task English()
     {
         String newUri = nav.Uri;
@@ -111,5 +114,19 @@
             newUri += "?ui-culture=pl";
         }
         nav.NavigateTo(newUri,true);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var authenticationState = await authenticationStateTask;
+        var message = authenticationState.User.Identity.Name;
+        name = message;
+        UserExecuter executor = new UserExecuter();
+        if (name != null)
+        {
+            BasicUser user = executor.GetBasicUser(name.Trim());
+            isVerified = user.IsVerified;
+        }
     }
 }
