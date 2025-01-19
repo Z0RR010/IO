@@ -11,7 +11,7 @@
 @using Microsoft.Extensions.Localization
 @using System.Text.RegularExpressions
 @inject AppDbContext appDbContext
-
+<title>@Loc["Login"]</title>
 <div class="row">
     <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
         <Microsoft.AspNetCore.Components.Forms.EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm">
@@ -76,22 +76,25 @@
     {
         var userAccount = appDbContext.UserAccounts.Where(x => x.Email == Model.Email).FirstOrDefault();
         var hashedPassword = Security.hashData(Model.Password);
-        using (var client = new HttpClient())
+        if(userAccount != null)
         {
-            var loginRequest = new LoginRequest() { Username = userAccount.Email, Password = hashedPassword };
-            var response = await client.PostAsJsonAsync(nav.BaseUri + "api/SignIn/SignIn", loginRequest);
-            var responseContent = await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode)
+            using (var client = new HttpClient())
             {
-                try
+                var loginRequest = new LoginRequest() { Username = userAccount.Email, Password = hashedPassword };
+                var response = await client.PostAsJsonAsync(nav.BaseUri + "api/SignIn/SignIn", loginRequest);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                if (!response.IsSuccessStatusCode)
                 {
-                    var errorResponse = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent);
+                    try
+                    {
+                        var errorResponse = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent);
 
-                    errorMessage = errorResponse != null && errorResponse.ContainsKey("message")
-                    ? errorResponse["message"]
-                    : "Wystąpił błąd podczas logowania.";
-                    if (errorMessage.Contains("Zbyt")) {
-                        var emailDto = new EmailDto() { To = "skph@interia.pl", Subject = "Wielokrotna nieudana próba zalogowania", Body = $@"
+                        errorMessage = errorResponse != null && errorResponse.ContainsKey("message")
+                        ? errorResponse["message"]
+                        : "Wystąpił błąd podczas logowania.";
+                        if (errorMessage.Contains("Zbyt"))
+                        {
+                            var emailDto = new EmailDto() { To = "skph@interia.pl", Subject = "Wielokrotna nieudana próba zalogowania", Body = $@"
 				        <p>Użytkownik {userAccount.Email} przekroczył limit nieudanych prób logowania.</p>" };
 
                         try

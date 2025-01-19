@@ -3,9 +3,12 @@
 @using System.Globalization
 @inject IStringLocalizer<Conversation> Loc
 @using IO.Modules.Communication
+@using IO.Modules.Security
 @using Microsoft.Extensions.Localization
 @inject Communicator CommunicatorService
+@inject SessionService ses
 
+<title>@Loc["Conversation"]</title>
 <div class="container my-4">
 
     <!-- User Email Input -->
@@ -53,18 +56,18 @@
 </div>
 
 @code {
-    private string userEmailToRead = "matiziom72@gmail.com";
+    private string userEmailToRead ;
     private string newChatUser;
     private List<Chat> userChats = new();
 
-    
-    // Fetch messages for the selected chat
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        userEmailToRead = await ses.GetUserNameAsync();
         userChats = CommunicatorService.GetUserChats(userEmailToRead);
     }
+
     
-    
+
 
     // Fetch user's chats
     private void GetUserChats()

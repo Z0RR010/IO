@@ -2,37 +2,185 @@
 @rendermode InteractiveServer
 @inject IO.Modules.Security.SessionService sessionService
 @using IO.Modules.Security
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@inject IStringLocalizer<AddRequest> Loc
+@inject NavigationManager nav
+<title>@Loc["HeaderAdd"]</title>
+<h3>@Loc["HeaderAdd"]</h3>
+<div class="container">
 
-<h3>Add Request</h3>
     <div class="form-group">
-        <label for="title">Title</label>
+        <label for="title">@Loc["Title"]</label>
         <InputText id="title" class="form-control" @bind-Value="newRequest.Title" />
     </div>
     <div class="form-group">
-        <label for="description">Description</label>
+        <label for="description">@Loc["Description"]</label>
         <InputTextArea id="description" class="form-control" @bind-Value="newRequest.Description" />
     </div>
     <div class="form-group">
-        <label for="city">City</label>
-        <InputText id="city" class="form-control" @bind-Value="newRequest.Address.City" />
+        <label for="city">@Loc["City"]</label>
+        <InputText id="city" class="form-control" @bind-Value="newRequest.Address.City"
+                   oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').replace(/^\s*(\w)(\w*)/, (match, p1, p2) => p1.toUpperCase() + p2.toLowerCase())" />
     </div>
     <div class="form-group">
-        <label for="street">Street</label>
+        <label for="street">@Loc["Street"]</label>
         <InputText id="street" class="form-control" @bind-Value="newRequest.Address.Street" />
     </div>
     <div class="form-group">
-        <label for="streetNumber">Street Number</label>
-        <InputText id="streetNumber" class="form-control" @bind-Value="newRequest.Address.StreetNumber" />
+        <label for="streetNumber">@Loc["StreetNumber"]</label>
+        <InputText id="streetNumber" class="form-control" @bind-Value="newRequest.Address.StreetNumber" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
     </div>
     <div class="form-group">
-        <label for="apartment">Apartment</label>
-        <InputText id="apartment" class="form-control" @bind-Value="newRequest.Address.Apartment" />
+        <label for="apartment">@Loc["Apartment"]</label>
+        <InputText id="apartment" class="form-control" @bind-Value="newRequest.Address.Apartment" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
     </div>
     <div class="form-group">
-        <label for="zipCode">Zip Code</label>
-        <InputText id="zipCode" class="form-control" @bind-Value="newRequest.Address.ZipCode" />
+        <label for="zipCode">@Loc["ZipCode"]</label>
+        <InputText id="zipCode" class="form-control" @bind-Value="newRequest.Address.ZipCode"
+                   oninput="this.value = this.value.replace(/[^0-9\-]/g, '').replace(/^(\d{2})(\d{0,3})?$/, '$1-$2').slice(0, 6).replace(/-$/, '')" placeholder="XX-XXX" />
     </div>
-    <button type="submit" class="btn btn-primary" @onclick="HandleValidSubmit">Submit</button>
+
+    <div>
+        <button class="btn btn-primary" @onclick="AddResourceForm">@Loc["AddResource"]</button>
+    </div>
+
+    @if (selectedResources.Count > 0)
+    {
+        <div class="mt-3">
+            @foreach (var resource in selectedResources)
+            {
+                <div class="form-row mb-2">
+                    <div class="col">
+                        <InputText class="form-control" placeholder="@Loc["Name"]" @bind-Value="resource.Name" />
+                    </div>
+                    <div class="col">
+                        <label for="category">@Loc["Category"]</label>
+                        <InputSelect id="category" class="form-control" @bind-Value="resource.Category">
+                            @foreach (IO.Modules.ResourceManager.Category category in Enum.GetValues(typeof(IO.Modules.ResourceManager.Category)))
+                            {
+                                <option value="@category">@category</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="col">
+                        <label for="amount">@Loc["Amount"]</label>
+
+                        <InputNumber id="amount" class="form-control" placeholder="@Loc["Amount"]" @bind-Value="resource.Amount" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                    </div>
+                    <div class="col">
+                        <button class="btn btn-danger" @onclick="() => RemoveResourceForm(resource)">@Loc["Remove"]</button>
+                    </div>
+                </div>
+            }
+        </div>
+
+    }
+    <button type="submit" class="btn btn-primary" @onclick="HandleValidSubmit">@Loc["Submit"]</button>
+</div>
+<footer class="footer">
+    <button @onclick="Polish" class="lang">Polski</button>
+    <button @onclick="English" class="lang">English</button>
+</footer>
+
+<style>
+    h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+        color: black;
+    }
+
+    .form-control {
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 10px;
+        font-size: 14px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+        .form-control:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+    button {
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+    /* Resource Section */
+    .mt-3 {
+        margin-top: 20px;
+    }
+
+    .alert {
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+</style>
+
 
 @if (!string.IsNullOrEmpty(message))
 {
@@ -40,30 +188,30 @@
 }
 
 @code {
-
     private IO.Modules.ResourceManager.UserExecuter userExecuter = new IO.Modules.ResourceManager.UserExecuter();
 
     private string email;
     private String token;
+    private List<IO.Modules.ResourceManager.Resource> selectedResources;
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         email = await sessionService.GetUserNameAsync();
         token = userExecuter.GetToken(email);
+        selectedResources = new List<IO.Modules.ResourceManager.Resource>();
     }
 
     private RequestModule.Request newRequest = new RequestModule.Request
-    {
+        {
             Status = RequestModule.RequestStatus.New,
             Address = new RequestModule.Address(), // Inicjalizacja Address
-            User = "test"
-    };
+        };
 
     private string? message;
 
     private IO.Modules.ResourceManager.RequestManager requestManager = new IO.Modules.ResourceManager.RequestManager();
 
-    private List<IO.Modules.ResourceManager.Resource> selectedResources;
 
     private async Task HandleValidSubmit()
     {
@@ -73,23 +221,35 @@
             newRequest.IsVerified = false;
             newRequest.CreatedAt = DateTime.Now;
             newRequest.DateUpdated = DateTime.Now;
+            newRequest.ResourcesRequired = selectedResources;
+            newRequest.User = email;
             // Dodanie do bazy danych
             bool isAdded = requestManager.AddRequestToDatabase(newRequest);
 
             if (isAdded)
             {
-                message = "Request successfully added!";
+                message = Loc["RequestAdded"];
                 ResetForm();
             }
             else
             {
-                message = "Failed to add request. Please try again.";
+                message = Loc["RequestAddFailed"];
             }
         }
         catch (Exception ex)
         {
-            message = $"An error occurred: {ex.Message}";
+            message = $"{Loc["ErrorOccurred"]}: {ex.Message}";
         }
+    }
+
+    private void AddResourceForm()
+    {
+        selectedResources.Add(new IO.Modules.ResourceManager.Resource("", IO.Modules.ResourceManager.Category.Food, 1)); //string nazwa, Category, int ilosc
+    }
+
+    private void RemoveResourceForm(IO.Modules.ResourceManager.Resource resource)
+    {
+        selectedResources.Remove(resource);
     }
 
     private void ResetForm()
@@ -99,5 +259,33 @@
                 Status = RequestModule.RequestStatus.New,
                 Address = new RequestModule.Address() // Inicjalizacja Address
             };
+    }
+    private async Task English()
+    {
+        String newUri = nav.Uri;
+        String oldUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=pl"))
+        {
+            newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
+        }
+        if (!newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri += "?ui-culture=en-US";
+        }
+        nav.NavigateTo(newUri, true);
+    }
+
+    private async Task Polish()
+    {
+        String newUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
+        }
+        if (!newUri.Contains("?ui-culture=pl"))
+        {
+            newUri += "?ui-culture=pl";
+        }
+        nav.NavigateTo(newUri, true);
     }
 }

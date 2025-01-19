@@ -1,1 +1,253 @@
-﻿
+﻿@page "/requests/edit/{Id:int}"
+@rendermode InteractiveServer
+@inject IO.Modules.Security.SessionService sessionService
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@inject IStringLocalizer<EditRequest> Loc
+@inject NavigationManager nav
+@using IO.Modules.Security
+<title>@Loc["HeaderEdit"]</title>
+<h3>@Loc["HeaderEdit"]</h3>
+
+<div class="container">
+    <div class="form-group">
+        <label for="title">@Loc["Title"]</label>
+        <InputText id="title" class="form-control" @bind-Value="editedRequest.Title" />
+    </div>
+    <div class="form-group">
+        <label for="description">@Loc["Description"]</label>
+        <InputTextArea id="description" class="form-control" @bind-Value="editedRequest.Description" />
+    </div>
+    <div class="form-group">
+        <label for="city">@Loc["City"]</label>
+        <InputText id="city" class="form-control" @bind-Value="editedRequest.Address.City"
+                   oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').replace(/^\s*(\w)(\w*)/, (match, p1, p2) => p1.toUpperCase() + p2.toLowerCase())" />
+    </div>
+    <div class="form-group">
+        <label for="street">@Loc["Street"]</label>
+        <InputText id="street" class="form-control" @bind-Value="editedRequest.Address.Street" />
+    </div>
+    <div class="form-group">
+        <label for="streetNumber">@Loc["StreetNumber"]</label>
+        <InputText id="streetNumber" class="form-control" @bind-Value="editedRequest.Address.StreetNumber" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+    </div>
+    <div class="form-group">
+        <label for="apartment">@Loc["Apartment"]</label>
+        <InputText id="apartment" class="form-control" @bind-Value="editedRequest.Address.Apartment" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+    </div>
+    <div class="form-group">
+        <label for="zipCode">@Loc["ZipCode"]</label>
+        <InputText id="zipCode" class="form-control" @bind-Value="editedRequest.Address.ZipCode"
+                   oninput="this.value = this.value.replace(/[^0-9\-]/g, '').replace(/^(\d{2})(\d{0,3})?$/, '$1-$2').slice(0, 6).replace(/-$/, '')" />
+    </div>
+
+    <div>
+        <button class="btn btn-primary" @onclick="AddResourceForm">@Loc["AddResource"]</button>
+    </div>
+
+    @if (editedRequest.ResourcesRequired.Count > 0)
+    {
+        <div class="mt-3">
+            @foreach (var resource in editedRequest.ResourcesRequired)
+            {
+                <div class="form-row mb-2">
+                    <div class="col">
+                        <InputText class="form-control" placeholder="@Loc["Name"]" @bind-Value="resource.Name" />
+                    </div>
+                    <div class="col">
+                        <label for="category">@Loc["Category"]</label>
+
+                        <InputSelect id="category" class="form-control" @bind-Value="resource.Category">
+                            @foreach (IO.Modules.ResourceManager.Category category in Enum.GetValues(typeof(IO.Modules.ResourceManager.Category)))
+                            {
+                                <option value="@category">@category</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="col">
+                        <label for="amount">@Loc["Amount"]</label>
+
+                        <InputNumber id="amount" class="form-control" placeholder="@Loc["Amount"]" @bind-Value="resource.Amount" />
+                    </div>
+                    <div class="col">
+                        <button class="btn btn-danger" @onclick="() => RemoveResourceForm(resource)">@Loc["Remove"]</button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    <button type="button" class="btn btn-primary" @onclick="SaveChanges">@Loc["SaveChanges"]</button>
+</div>
+<footer class="footer">
+    <button @onclick="Polish" class="lang">Polski</button>
+    <button @onclick="English" class="lang">English</button>
+</footer>
+
+<style>
+    h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+            color: black;
+        }
+
+    .form-control {
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 10px;
+        font-size: 14px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+        .form-control:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+    button {
+        cursor: pointer;
+        padding-top: 3px;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+    /* Resource Section */
+    .mt-3 {
+        margin-top: 20px;
+    }
+
+    .alert {
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+</style>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private RequestModule.Request editedRequest;
+    private IO.Modules.ResourceManager.RequestManager requestManager = new IO.Modules.ResourceManager.RequestManager();
+
+    protected override async Task OnInitializedAsync()
+    {
+        editedRequest = await requestManager.GetRequestById(Id);
+        if (editedRequest == null)
+        {
+            Console.WriteLine("Null request");
+        }
+    }
+
+    private void AddResourceForm()
+    {
+        editedRequest.ResourcesRequired.Add(new IO.Modules.ResourceManager.Resource("", IO.Modules.ResourceManager.Category.Food, 1)); //string nazwa, Category, int ilosc
+    }
+
+    private void RemoveResourceForm(IO.Modules.ResourceManager.Resource resource)
+    {
+        editedRequest.ResourcesRequired.Remove(resource);
+    }
+
+    private async Task SaveChanges()
+    {
+        bool result = await requestManager.UpdateRequest(editedRequest);
+        if (result)
+        {
+            Console.WriteLine("Request updated successfully.");
+            nav.NavigateTo("/requests");
+        }
+        else
+        {
+            Console.WriteLine("Failed to update request.");
+        }
+    }
+
+    private async Task English()
+    {
+        String newUri = nav.Uri;
+        String oldUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=pl"))
+        {
+            newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
+        }
+        if (!newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri += "?ui-culture=en-US";
+        }
+        nav.NavigateTo(newUri, true);
+    }
+
+    private async Task Polish()
+    {
+        String newUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
+        }
+        if (!newUri.Contains("?ui-culture=pl"))
+        {
+            newUri += "?ui-culture=pl";
+        }
+        nav.NavigateTo(newUri, true);
+    }
+}

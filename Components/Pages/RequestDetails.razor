@@ -1,34 +1,125 @@
 @page "/requests/details/{Id:int}"
+@rendermode InteractiveServer
+@using IO.Modules.MapLibrary
+@inject GoogleMapsClient GoogleMaps;
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@inject IStringLocalizer<RequestDetails> Loc
+@inject NavigationManager nav
+<title>@Loc["Header"]</title>
+<button class="btn btn-primary" @onclick="GoBack">@Loc["Back"]</button>
 
-<h3>Request Details</h3>
+<h3>@Loc["Header"]</h3>
 
 @if (isLoading)
 {
-    <p><em>Loading...</em></p>
+    <p><em>@Loc["Loading"]</em></p>
 }
 else if (request == null)
 {
-    <p><em>Request not found.</em></p>
+    <p><em>@Loc["RequestNotFound"]</em></p>
 }
 else
 {
-    <div>
+    <div class="container">
         <h4>@request.Title</h4>
-        <p>@request.Description</p>
-        <p>Status: @request.Status</p>
-        <p>Created At: @request.CreatedAt</p>
-        <p>Updated At: @request.DateUpdated</p>
-        <p>User: @request.User </p>
-        <p>Address: @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
-        <p>Resources Required: @string.Join(", ", request.ResourcesRequired.Select(r => $"{r.Name} (x{r.Amount})"))</p>
-        <p>Is Verified: @request.IsVerified</p>
+        <p><strong>@Loc["Description"]:</strong> @request.Description</p>
+        <p><strong>@Loc["Status"]:</strong> @request.Status</p>
+        <p><strong>@Loc["CreatedAt"]:</strong> @request.CreatedAt</p>
+        <p><strong>@Loc["UpdatedAt"]:</strong> @request.DateUpdated</p>
+        <p><strong>@Loc["User"]:</strong> @request.User </p>
+
+        <div>
+            @if(request.ResourcesRequired.Any()){
+                <strong>@Loc["ResourcesRequired"]:</strong>
+                <ul class="resources-required">
+                    @foreach (var resource in request.ResourcesRequired)
+                    {
+                        <li>@resource.Name (@resource.Amount)</li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <p><strong>@Loc["IsVerified"]:</strong> @request.IsVerified</p>
+
+        <p><strong>@Loc["Address"]:</strong> @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
+        <div id="map01" style="width: 100%; height: 500px; margin-top: 20px;"></div>
+
     </div>
+
 }
+
+<style>
+    h3 {
+        font-size: 1.8rem;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    h4 {
+        font-size: 1.4rem;
+        color: #34495e;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background-color: #ffffff;
+        color: #2c3e50;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+        .container p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+    em {
+        color: #7f8c8d;
+        font-style: italic;
+        text-align: center;
+        display: block;
+        margin-top: 20px;
+    }
+
+    .container p strong {
+        color: #e74c3c;
+        font-weight: bold;
+    }
+
+    .container p:nth-child(6) {
+        font-weight: bold;
+        font-style: italic;
+        color: #34495e;
+    }
+
+    .resources-required {
+        font-size: 1.1rem;
+        color: #2c3e50;
+        list-style-type: disc;
+        margin-left: 20px;
+    }
+
+        .resources-required li {
+            margin-bottom: 0.5rem;
+        }
+</style>
 
 @code {
     [Parameter]
     public int Id { get; set; }
 
+    MapController map01;
     private IO.Modules.ResourceManager.RequestManager requestManager = new IO.Modules.ResourceManager.RequestManager();
     private RequestModule.Request request;
     private bool isLoading = true;
@@ -38,6 +129,7 @@ else
         try
         {
             request = await requestManager.GetRequestById(Id);
+            map01 = new(GoogleMaps, "map01");
         }
         catch (Exception ex)
         {
@@ -47,5 +139,62 @@ else
         {
             isLoading = false;
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await GoogleMaps.InitializeApi();
+
+            if (request?.Address != null)
+            {
+                Console.WriteLine($"Setting location: {request.Address.Street}, {request.Address.City}, {request.Address.ZipCode}");
+
+                map01.SetLocation(request.Address);
+                await map01.DrawMap();
+            }
+            else
+            {
+                Console.WriteLine("Request address is null or incomplete.");
+            }
+        }
+    }
+
+    private void GoBack()
+    {
+        var uri = nav.ToAbsoluteUri(nav.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        var culture = query.ContainsKey("ui-culture") ? query["ui-culture"].ToString() : "en-US";
+        nav.NavigateTo($"/requests?ui-culture={culture}");
+    }
+
+    private async Task English()
+    {
+        String newUri = nav.Uri;
+        String oldUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=pl"))
+        {
+            newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
+        }
+        if (!newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri += "?ui-culture=en-US";
+        }
+        nav.NavigateTo(newUri, true);
+    }
+
+    private async Task Polish()
+    {
+        String newUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
+        }
+        if (!newUri.Contains("?ui-culture=pl"))
+        {
+            newUri += "?ui-culture=pl";
+        }
+        nav.NavigateTo(newUri, true);
     }
 }

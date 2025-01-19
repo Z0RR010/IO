@@ -51,15 +51,16 @@ namespace IO.Modules.MapLibrary
         {
             Console.WriteLine("Drawing route on map.");
             var routeCoords = await map.GetRouteCoordinates();
-
-            var points = routeCoords.Select(c => new { lat = c.Latitude, lng = c.Longitude }).ToArray();
-            try
-            {
-                await _module.InvokeVoidAsync("drawRoute", map.id, points, CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
-            }
-            catch (Exception error)
-            {
-                Console.Write(error.Message);
+            if (routeCoords[0] != null) { 
+                var points = routeCoords.Select(c => new { lat = c.Latitude, lng = c.Longitude }).ToArray();
+                try
+                {
+                    await _module.InvokeVoidAsync("drawRoute", map.id, points, CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
+                }
+                catch (Exception error)
+                {
+                    Console.Write(error.Message);
+                }
             }
         }
 

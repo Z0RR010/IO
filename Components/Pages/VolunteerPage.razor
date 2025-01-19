@@ -4,14 +4,23 @@
 @using IO.Modules.Volunteer
 @using IO.Modules.ResourceManager;
 @using RequestModule;
-
+@using IO.Modules.MapLibrary
+@using IO.Modules.DonorLibrary
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@using PdfSharp
+@using PdfSharp.Drawing
 @inject SessionService sessionService
+@inject GoogleMapsClient GoogleMaps;
+@inject Geolocation Geolocation;
+@inject IStringLocalizer<VolunteerPage> Loc
+@inject NavigationManager nav
 
-<PageTitle>Volunteer</PageTitle>
+<PageTitle>@Loc["Volunteer"]</PageTitle>
 
 @if (whichForm == 0)
 {
-    <h1>Choose Your Organisation</h1>
+    <h1>@Loc["Choose Organisation"]</h1>
     <select @bind="selectedOrganisationID" class="form-select mt-2">
         <option value="">Select an organisation</option>
         @foreach (var org in volunteerManager.OrganisationList)
@@ -29,59 +38,182 @@
         <button class="btn btn-primary" @onclick="() => OrganisationSelected(selectedOrganisation.OrganisationID)">Submit</button>
     }
 }
+@if (whichForm == 1)
+{
+}
 @if (whichForm == 2)
 {
-    <h1>0_0 ?Poszkodowany? X_X</h1>
+    <h1>@Loc["Hello"] @selectedAffectedName</h1>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(1)">@Loc["Your Requests"]</button>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(2)">@Loc["Your Rates"]</button>
+    @if (selectedOption == 1)
+    {
+        <ul class="list-group">
+
+            <h3>@Loc["Your Requests"]</h3>
+            @foreach (var request in requestList.Where(r => r.User == selectedAffectedEmail))
+            {
+                <li class="list-group-item" style="cursor: pointer;" @onclick="() => ToggleRequestDetails(request)">
+                    @request.Title - @Loc[$"{request.Status}"]
+                    @if (selectedRequest == request && showRequestDetails)
+                    {
+                        <div class="mt-2">
+                            <p>@Loc["Description"]: @request.Description</p>
+                            <p>@Loc["Created at"]: @request.CreatedAt</p>
+                            <p>@Loc["Updated At"]: @request.DateUpdated</p>
+                            <p>@Loc["Email of affected"]: @request.User</p>
+                            <p>@Loc["Resources Required"]: @string.Join(", ", request.ResourcesRequired.Select(r => $"{r.Name} (x{r.Amount})"))</p>
+                            <p>@Loc["Address"]: @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
+                            <p>@Loc["Is Verified"]: @request.IsVerified</p>
+                            <button class="btn btn-primary btn-sm mt-2" @onclick="() => SelectRequest(request)">@Loc["Show Tasks"]</button>
+                        </div>
+                    }
+                </li>
+            }
+            @if (selectedRequestForTask.Title != null)
+            {
+                <h3>@Loc["Assigned Tasks To Request"]: @selectedRequestForTask.Title</h3>
+                @foreach (var volunteerTask in volunteerManager.VolunteerTaskList.Where(t => t.RequestID == selectedRequestForTask.Id))
+                {
+                    <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowTaskDetails(volunteerTask)">
+                        @volunteerTask.Description - @Loc[$"{volunteerTask.TaskStatus}"]
+                        @if (selectedTask == volunteerTask && showTaskDetails)
+                        {
+                            <div class="mt-2">
+                                <p>@Loc["Address"]: @selectedTask.Address</p>
+                                <p>@Loc["Complition date"]: @selectedTask.EndDate.ToString()</p>
+                                @if (selectedTask.TaskStatus == IO.Modules.Volunteer.TaskStatus.Assigned)
+                                {
+                                    <p>
+                                        @Loc["Volunteer"]: @volunteerManager.VolunteerList.FirstOrDefault(
+                                        v => v.VolunteerID == selectedTask.VolunteerID).FirstName  @volunteerManager.VolunteerList.FirstOrDefault(
+                                        v => v.VolunteerID == selectedTask.VolunteerID).LastName
+                                    </p>
+                                    <p>@Loc["Request"]: @requestManager.GetAllRequests().FirstOrDefault(r => r.Id == selectedTask.RequestID).Title</p>
+                                }
+                                @if (selectedTask.TaskStatus == IO.Modules.Volunteer.TaskStatus.Completed)
+                                {
+                                <button class="btn btn-primary btn-sm mt-2" @onclick="() => SelectTaskForRate(selectedTask)">@Loc["Add Rate"]</button>
+                                }
+                            </div>
+                        }
+
+                    </li>
+                }
+            }
+            @if (selectedTaskForRate.Description != null)
+            {
+                <h3>@Loc["Create Rate"]</h3>
+
+                <div>
+                    <p>@Loc["Selected Request"]: </p>
+                    <input type="text" @bind="selectedRequestForTask.Title" readonly class="form-control mt-2" />
+
+                    <p>@Loc["Selected Task Description"]: </p>
+                    <input type="text" @bind="selectedTaskForRate.Description" readonly class="form-control mt-2" />
+
+                    <p>@Loc["Rate Description"]: </p>
+                    <input type="text" @bind="description" placeholder=@Loc["Description"] class="form-control mt-2" />
+
+                    <button class="btn btn-primary" @onclick="CreateRate">@Loc["Submit"]</button>
+                </div>
+            }
+        </ul>
+    }
+
+    @if (selectedOption == 2)
+    {
+        <h3>@Loc["Your Rates"]</h3>
+    }        
 }
 
 @if (whichForm == 3)
 {
-    <h1>Hello @selectedVolunteer.FirstName</h1>
-    <button class="btn btn-primary" @onclick="() => ChangeSelect(1)">Available Tasks</button>
-    <button class="btn btn-primary" @onclick="() => ChangeSelect(2)">Your Active Tasks</button>
-    <button class="btn btn-primary" @onclick="() => ChangeSelect(3)">Your Completed Tasks</button>
-    <button class="btn btn-primary" @onclick="() => ChangeSelect(4)">Profile Information</button>
+    <h1>@Loc["Hello"] @selectedVolunteer.FirstName</h1>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(1)">@Loc["Available Tasks"]</button>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(2)">@Loc["Your Active Tasks"]</button>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(3)">@Loc["Your Completed Tasks"]</button>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(4)">@Loc["Your Rates"]</button>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(5)">@Loc["Your profile"]</button>
 
 
     @if (selectedOption == 1)
     {
-        <h1>Available Tasks</h1>
+        <h3>@Loc["Available Tasks"]</h3>
         <ul class="list-group">
             @foreach (var volunteerTask in volunteerManager.FindTasksByOrganisation(selectedVolunteer.OrganisationID).Where(
-                t => t.TaskStatus == IO.Modules.Volunteer.TaskStatus.New).ToList())
+                t => t.TaskStatus == IO.Modules.Volunteer.TaskStatus.New))
             {
-                <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowTaskDetails(volunteerTask)">
-                    @volunteerTask.Description - @volunteerTask.TaskStatus
+                <li class="list-group-item" style="cursor: pointer;" >
+                    <p @onclick="() => ShowTaskDetails(volunteerTask)">@volunteerTask.Description - @Loc[$"{volunteerTask.TaskStatus}"]</p>
+                
                     @if (selectedTask == volunteerTask && showTaskDetails)
                     {
                         <div class="mt-2">
-                            <p>Address: @selectedTask.Address</p>
-                            <p> @selectedTask.EndDate.ToString()</p>
-                            <button class="btn btn-primary btn-sm mt-2" @onclick="() => AssignTask()">Assign VolunteerTask</button>
+                            <p>@Loc["Complition date"]: @selectedTask.EndDate.ToString()</p>
+                            <p>@Loc["Address"]: @selectedTask.Address</p>
+                            <div id="map01" style="width: 100%; height: 500px; margin-top: 20px;"></div>
+                            <button class="btn btn-primary btn-sm mt-2" @onclick="() => AssignTask()">@Loc["Assign Task"]</button>
                         </div>
                     }
 
                 </li>
             }
         </ul>
-
     }
 
     @if(selectedOption == 2)
     {
-        <h1>Your Active Tasks</h1>
+        <h3>@Loc["Your Active Tasks"]</h3>
         <ul class="list-group">
             @foreach (var volunteerTask in volunteerManager.FindTasksByVolunteer(selectedVolunteer.VolunteerID).Where(
-                t => t.TaskStatus == IO.Modules.Volunteer.TaskStatus.Assigned).ToList())
+                t => t.TaskStatus == IO.Modules.Volunteer.TaskStatus.Assigned))
             {
-                <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowTaskDetails(volunteerTask)">
-                    @volunteerTask.Description - @volunteerTask.TaskStatus
+                <li class="list-group-item" style="cursor: pointer;">
+                    <p @onclick="() => ShowTaskDetails(volunteerTask)">@volunteerTask.Description - @Loc[$"{volunteerTask.TaskStatus}"]</p>
                     @if (selectedTask == volunteerTask && showTaskDetails)
                     {
                         <div class="mt-2">
-                            <p>Address: @selectedTask.Address</p>
-                            <p> @selectedTask.EndDate.ToString()</p>
-                            <button class="btn btn-primary btn-sm mt-2" @onclick="() => UpdateTaskStatus(IO.Modules.Volunteer.TaskStatus.Completed)">Complete Task</button>
+                            <p>@Loc["Complition date"]: @selectedTask.EndDate.ToString()</p>
+                            <p>@Loc["Address"]: @selectedTask.Address</p>
+                            <div id="map01" style="width: 100%; height: 500px; margin-top: 20px;"></div>
+                            <div style="display: flex; flex-direction: column-reverse; gap: 10px;">
+                                @for (var index = fieldValues.Count - 1; index >= 0; index--)
+                                {
+                                    Console.WriteLine(index);
+                                    var i = index;
+                                    <div id="textfield-container" style="display: flex; align-items: center; gap: 5px;">
+                                        <input class="form-control" type="text" @bind="fieldValues[i]" placeholder="Enter address or location" style="flex: 1;" />
+
+                                        <div class="d-flex flex-column justify-content-between" style="height: 100%; width: 40px;">
+                                            @if (i != 0)
+                                            {
+                                                <button class="btn btn-primary btn-sm p-0 w-100" style="height: 45%;" @onclick="() => MoveFieldUp(i)">
+                                                    <span class="bi bi-caret-up-fill" style="font-size: 75%;"></span>
+                                                </button>
+                                            }
+                                            @if (i != fieldCount - 1)
+                                            {
+                                                <button class="btn btn-primary btn-sm p-0 w-100" style="height: 45%;" @onclick="() => MoveFieldDown(i)">
+                                                    <span class="bi bi-caret-down-fill" style="font-size: 75%;"></span>
+                                                </button>
+                                            }
+                                        </div>
+
+                                        @if (fieldValues.Count > 1)
+                                        {
+                                            <button class="btn btn-danger" @onclick="() => RemoveField(i)">-</button>
+                                        }
+                                    </div>
+                                }
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn btn-success" @onclick="AddField">+</button>
+                                    <button class="btn btn-primary" @onclick="() => ConfirmFields()">
+                                        @Loc["Update midpoints"]
+                                    </button>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-sm mt-2" @onclick="() => UpdateTaskStatus(IO.Modules.Volunteer.TaskStatus.Completed)">@Loc["Complete Task"]</button>
                         </div>
                     }
 
@@ -92,18 +224,59 @@
 
     @if (selectedOption == 3)
     {
-        <h1>Your Completed Tasks</h1>
+        <h3>@Loc["Your Completed Tasks"]</h3>
         <ul class="list-group">
             @foreach (var volunteerTask in volunteerManager.FindTasksByVolunteer(selectedVolunteer.VolunteerID).Where(
-                t => t.TaskStatus == IO.Modules.Volunteer.TaskStatus.Completed || t.TaskStatus == IO.Modules.Volunteer.TaskStatus.Archived).ToList())
+                t => t.TaskStatus == IO.Modules.Volunteer.TaskStatus.Completed || t.TaskStatus == IO.Modules.Volunteer.TaskStatus.Archived))
             {
-                <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowTaskDetails(volunteerTask)">
-                    @volunteerTask.Description - @volunteerTask.TaskStatus
+                @if(volunteerManager.RateList.Any(r => r.RateID == volunteerTask.RateID))
+                {
+                <li class="list-group-item" style="cursor: pointer;">
+                        <p @onclick="() => ShowTaskDetails(volunteerTask)">@volunteerTask.Description - @Loc[$"{volunteerTask.TaskStatus}"] @Loc["Rated"]</p>
+
                     @if (selectedTask == volunteerTask && showTaskDetails)
                     {
                         <div class="mt-2">
-                            <p>Address: @selectedTask.Address</p>
-                            <p> @selectedTask.EndDate.ToString()</p>
+                                <p>@Loc["Address"]: @selectedTask.Address</p>
+                                <p>@Loc["Complition date"]: @selectedTask.EndDate.ToString()</p>
+                            <p>@Loc["Rate"]: @volunteerManager.RateList.FirstOrDefault(r => r.RateID == selectedTask.RateID).Description </p>
+                        </div>
+                    }
+                    </li>
+                }
+                else
+                {
+                    <li class="list-group-item" style="cursor: pointer;">
+                        <p @onclick="() => ShowTaskDetails(volunteerTask)">@volunteerTask.Description - @Loc[$"{volunteerTask.TaskStatus}"]</p>
+                       
+
+                        @if (selectedTask == volunteerTask && showTaskDetails)
+                        {
+                            <div class="mt-2">
+                                <p>@Loc["Complition date"]: @selectedTask.EndDate.ToString()</p>
+                                <p>@Loc["Address"]: @selectedTask.Address</p>
+                                <div id="map01" style="width: 100%; height: 500px; margin-top: 20px;"></div>
+                            </div>
+                        }
+                    </li>
+                }
+            }
+        </ul>
+    }
+    @if (selectedOption == 4)
+    {
+        <h3>@Loc["Your Rates"]</h3>
+        <ul class="list-group">
+            @foreach (var volunteerTask in volunteerManager.FindTasksByVolunteer(selectedVolunteer.VolunteerID).Where(
+                t => t.RateID > 0))
+            {
+                <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowTaskDetails(volunteerTask)"> Rate Description: 
+                    @volunteerManager.RateList.FirstOrDefault(r => r.RateID == volunteerTask.RateID).Description
+
+                    @if (selectedTask == volunteerTask && showTaskDetails)
+                    {
+                        <div class="mt-2">
+                            <p>@Loc["This rate was for task"]: @selectedTask.Description</p>
                         </div>
                     }
 
@@ -111,18 +284,17 @@
             }
         </ul>
     }
-
-    @if(selectedOption == 4)
+    @if(selectedOption == 5)
     {
-        <h1>Profile Information</h1>
+        <h3>@Loc["Your profile"]</h3>
         <form method="post" @onsubmit="editVolunteer">
-            <p>First Name: <input type="text" @bind-value="selectedVolunteer.FirstName" class="form-control" /></p>
-            <p>Last Name: <input type="text" @bind-value="selectedVolunteer.LastName" class="form-control" /></p>
-            <p>Email: <input type="text" value="@selectedVolunteer.Email" readonly class="form-control" /></p>
-            <p>Phone Number: <input type="text" @bind-value="selectedVolunteer.PhoneNumber" class="form-control" /></p>
-            <p>Address: <input type="text" @bind-value="selectedVolunteer.Address" class="form-control" /></p>
-            <p>Organisation: <input type="text" value="@volunteerManager.FindOrganisationByID(selectedVolunteer.OrganisationID).OrganisationName" readonly class="form-control" /></p>
-            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <p>@Loc["First Name"]: <input type="text" @bind-value="selectedVolunteer.FirstName" class="form-control" /></p>
+            <p>@Loc["Surname"]: <input type="text" @bind-value="selectedVolunteer.LastName" class="form-control" /></p>
+            <p>@Loc["Email"]: <input type="text" value="@selectedVolunteer.Email" readonly class="form-control" /></p>
+            <p>@Loc["Phone Number"]: <input type="text" @bind-value="selectedVolunteer.PhoneNumber" class="form-control" /></p>
+            <p>@Loc["Address"]: <input type="text" @bind-value="selectedVolunteer.Address" class="form-control" /></p>
+            <p>@Loc["Organisation"]: <input type="text" value="@volunteerManager.FindOrganisationByID(selectedVolunteer.OrganisationID).OrganisationName" readonly class="form-control" /></p>
+            <button type="submit" class="btn btn-primary">@Loc["Save Changes"]</button>
         </form>
     }
 
@@ -132,34 +304,36 @@
 @if (whichForm == 4)
 {
     <h1>Hello @selectedOrganisation.OrganisationName</h1>
-    <button class="btn btn-primary" @onclick="() => ChangeSelect(1)">Create Task</button>
-    <button class="btn btn-primary" @onclick="() => ChangeSelect(2)">Your Tasks</button>
-    <button class="btn btn-primary" @onclick="() => ChangeSelect(3)">Your Volunteers</button>
-    <button class="btn btn-primary" @onclick="() => ChangeSelect(4)">Your Profile</button>
-
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(1)">@Loc["Create Task"]</button>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(2)">@Loc["Your Tasks"]</button>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(3)">@Loc["Your Volunteers"]</button>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(4)">@Loc["Your Profile"]</button>
+   
     @if (selectedOption == 1)
     {
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-4">
-                    <h2>Requests</h2>
+                    <h3>Requests</h3>
                     <ul class="list-group">
                         @foreach (var request in requestList)
                         {
-                            <li class="list-group-item" style="cursor: pointer;" @onclick="() => ToggleRequestDetails(request)">
-                                @request.Title - @request.Status
+                            <li class="list-group-item" style="cursor: pointer;">
+                                <p @onclick="() => ToggleRequestDetails(request)">@request.Title - @Loc[$"{request.Status}"]</p>
+                                
                                 @if (selectedRequest == request && showRequestDetails)
                                 {
                                     <div class="mt-2">
-                                        <p>Description: @request.Description</p>
-                                        <p>Created at: @request.CreatedAt</p>
-                                        <p>Updated At: @request.DateUpdated</p>
-                                        <p>User: @request.User</p>
-                                        <p>Resources Required: @string.Join(", ", request.ResourcesRequired.Select(r => $"{r.Name} (x{r.Amount})"))</p>
-                                        <p>Address: @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
-                                        <p>Is Verified: @request.IsVerified</p>
-                                        <button class="btn btn-primary btn-sm mt-2" @onclick="() => SelectRequest(request)">Select</button>
-                                        <button class="btn btn-primary btn-sm mt-2" @onclick="() => ChangeRequestStatus(request, RequestStatus.InProgress)">Change Status</button>
+                                        <p>@Loc["Description"]: @request.Description</p>
+                                        <p>@Loc["Created at"]: @request.CreatedAt</p>
+                                        <p>@Loc["Updated At"]: @request.DateUpdated</p>
+                                        <p>@Loc["Email of affected"]: @request.User</p>
+                                        <p>@Loc["Resources Required"]: @string.Join(", ", request.ResourcesRequired.Select(r => $"{r.Name} (x{r.Amount})"))</p>
+                                        <p>@Loc["Is Verified"]: @request.IsVerified</p>
+                                        <p>@Loc["Address"]: @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
+                                        <div id="map01" style="width: 100%; height: 500px; margin-top: 20px;"></div>
+                                        <button class="btn btn-primary btn-sm mt-2" @onclick="() => SelectRequest(request)">@Loc["Select"]</button>
+                                        <button class="btn btn-primary btn-sm mt-2" @onclick="() => ChangeRequestStatus(request, RequestStatus.InProgress)">@Loc["Change Status"]</button>
                                     </div>
                                 }
                             </li>
@@ -168,28 +342,25 @@
                 </div>
 
                 <div class="col-md-8">
-                    @if (selectedOption == 1)
-                    {
-                        <h1>Create Task</h1>
+                    <h3>@Loc["Create Task"]</h3>
 
-                        <div>
-                            <p>Description: </p>
-                            <input type="text" @bind="description" placeholder="Description" class="form-control mt-2" />
+                    <div>
+                        <p>@Loc["Description"]: </p>
+                        <input type="text" @bind="description" class="form-control mt-2" />
 
-                            <p>Address: </p>
-                            <input type="text" @bind="address" placeholder="Enter address" class="form-control mt-2" />
+                        <p>@Loc["Address"]: </p>
+                        <input type="text" @bind="address" class="form-control mt-2" />
 
-                            <p>Selected Request: </p>
-                            <input type="text" @bind="selectedRequestForTask.Title" readonly class="form-control mt-2" />
+                        <p>@Loc["Selected Request"]: </p>
+                        <input type="text" @bind="selectedRequestForTask.Title" readonly class="form-control mt-2" />
 
-                            <p>EndDate: </p>
-                            <div class="d-flex gap-2 align-items-center">
-                                <input type="date" @bind="endDate" class="form-control" />
-                            </div>
-
-                            <button class="btn btn-primary" @onclick="CreateTask">Submit</button>
+                        <p>@Loc["EndDate"]: </p>
+                        <div class="d-flex gap-2 align-items-center">
+                            <input type="date" @bind="endDate" class="form-control" />
                         </div>
-                    }
+
+                        <button class="btn btn-primary" @onclick="CreateTask">@Loc["Submit"]</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -197,24 +368,28 @@
 
     @if (selectedOption == 2)
     {
-        <h1>Your Tasks</h1>
+        <h3>@Loc["Your Tasks"]</h3>
 
         <ul class="list-group">
             @foreach (var volunteerTask in volunteerManager.FindTasksByOrganisation(selectedOrganisation.OrganisationID))
             {
-                <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowTaskDetails(volunteerTask)">
-                    @volunteerTask.Description - @volunteerTask.TaskStatus
+                <li class="list-group-item" style="cursor: pointer;">
+                    <p @onclick="() => ShowTaskDetails(volunteerTask)">@volunteerTask.Description - @Loc[$"{volunteerTask.TaskStatus}"]</p>
+                    
                     @if (selectedTask == volunteerTask && showTaskDetails)
                     {
                         <div class="mt-2">
-                            <p>Address: @selectedTask.Address</p>
-                            <p> @selectedTask.EndDate.ToString()</p>
+                            <p>@Loc["Complition date"]: @selectedTask.EndDate.ToString()</p>
                             @if(selectedTask.TaskStatus == IO.Modules.Volunteer.TaskStatus.Assigned)
                             {
-                            <p>Volunteer: @volunteerManager.VolunteerList.FirstOrDefault(
+                            <p>@Loc["Volunteer"]: @volunteerManager.VolunteerList.FirstOrDefault(
                                 v => v.VolunteerID == selectedTask.VolunteerID).FirstName  @volunteerManager.VolunteerList.FirstOrDefault(
-                                    v => v.VolunteerID == selectedTask.VolunteerID).LastName </p>
+                                v => v.VolunteerID == selectedTask.VolunteerID).LastName @volunteerManager.VolunteerList.FirstOrDefault(
+                                v => v.VolunteerID == selectedTask.VolunteerID).Email
+                                </p>
                             <p>Request: @requestManager.GetAllRequests().FirstOrDefault(r => r.Id == selectedTask.RequestID).Title</p>
+                                <p>@Loc["Address"]: @selectedTask.Address</p>
+                                <div id="map01" style="width: 100%; height: 500px; margin-top: 20px;"></div>
                             }
                         </div>
                     }
@@ -226,20 +401,21 @@
     }
     @if (selectedOption == 3)
     {
-        <h1>Your Tasks</h1>
+        <h1>@Loc["Your Volunteers"]</h1>
 
         <ul class="list-group">
             @foreach (var volunteer in volunteerManager.FindVolunteersByOrganisation(selectedOrganisation.OrganisationID))
             {
-                <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowVolunteerDetails(volunteer)">
-                    @volunteer.FirstName @volunteer.LastName
+                <li class="list-group-item" style="cursor: pointer;">
+                    <p @onclick="() => ShowVolunteerDetails(volunteer)">@volunteer.FirstName @volunteer.LastName</p>
+                    
                     @if (selectedVolunteer == volunteer && showVolunteerDetails)
                     {
                         <div class="mt-2">
-                            <p>Address: @selectedVolunteer.Address</p>
-                            <p>Phone Number: @selectedVolunteer.PhoneNumber</p>
-                            <p>Email: @selectedVolunteer.Email</p>
-                            <p>Tasks: @volunteerManager.FindTasksByVolunteer(selectedVolunteer.VolunteerID).Count</p>
+                            <p>@Loc["Phone Number"]: @selectedVolunteer.PhoneNumber</p>
+                            <p>@Loc["Email"]: @selectedVolunteer.Email</p>
+                            <p>@Loc["Tasks"]: @volunteerManager.FindTasksByVolunteer(selectedVolunteer.VolunteerID).Count</p>
+                            <p>@Loc["Address"]: @selectedVolunteer.Address</p>
                         </div>
                     }
 
@@ -250,20 +426,23 @@
     }
     @if (selectedOption == 4)
     {
-        <h1>Profile</h1>
+        <h1>@Loc["Your Profile"]</h1>
         <form method="post" @onsubmit="editOrganisation">
-            <p>Organisation Name: <input type="text" @bind-value="selectedOrganisation.OrganisationName" class="form-control" /></p>
-            <p>Email: <input type="text" value="@selectedOrganisation.Email" readonly class="form-control" /></p>
-            <p>Phone Number: <input type="text" @bind-value="selectedOrganisation.PhoneNumber" class="form-control" /></p>
-            <p>Address: <input type="text" @bind-value="selectedOrganisation.Address" class="form-control" /></p>
-            <p>Website: <input type="text" @bind-value="selectedOrganisation.Website" class="form-control" /></p>
+            <p>@Loc["Organisation Name"]: <input type="text" @bind-value="selectedOrganisation.OrganisationName" class="form-control" /></p>
+              <p>@Loc["Email"]: <input type="text" value="@selectedOrganisation.Email" readonly class="form-control" /></p>
+              <p>@Loc["Phone Number"]: <input type="text" @bind-value="selectedOrganisation.PhoneNumber" class="form-control" /></p>
+              <p>@Loc["Address"]: <input type="text" @bind-value="selectedOrganisation.Address" class="form-control" /></p>
+              <p>@Loc["Website"]: <input type="text" @bind-value="selectedOrganisation.Website" class="form-control" /></p>
             <p>KRS: <input type="text" @bind-value="selectedOrganisation.KRS" class="form-control" /></p>
-            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="submit" class="btn btn-primary">@Loc["Save Changes"]</button>
         </form>
     }
 
 }
-
+<footer class="footer">
+    <button @onclick="Polish" class="lang">Polski</button>
+    <button @onclick="English" class="lang">English</button>
+</footer>
 
 @code {
     private int whichForm = 0;
@@ -292,9 +471,11 @@
     private int selectedOption = 0;
 
     private DateTime endDate = DateTime.Today;
-
-
     private int selectedOrganisationID;
+    private string selectedAffectedEmail = string.Empty;
+    private string selectedAffectedName = string.Empty;
+    private VolunteerTask selectedTaskForRate = new VolunteerTask();
+    private Rate selectedRate = new Rate();
     private int previousSelectedOrganisationID; 
     private Request selectedRequestForTask = new Request();
     private int? selectedVolunteerID;
@@ -309,29 +490,48 @@
 
     VolunteerManager volunteerManager = new VolunteerManager();
 
+
+    private MapController map01;
+    private int fieldCount = 1;
+    private List<string> fieldValues = new List<string> { "" };
+    private string globalAddress = string.Empty;
+
+
+
+
     protected override async System.Threading.Tasks.Task OnInitializedAsync()
     {
         volunteerManager.Load();
+        map01 = new(GoogleMaps, "map01");
+
         requestList = requestManager.GetAllRequests();
-        Console.WriteLine("Volunteer Page Initialized");
         string sessionUser = await sessionService.GetUserNameAsync();
         CheckUser(sessionUser);
-        if(selectedVolunteer != null) {
-            if(selectedVolunteer.OrganisationID == -1)
+        if (selectedVolunteer != null)
+        {
+            if (selectedVolunteer.OrganisationID == -1)
             {
                 ChangeForm(0);
             }
         }
-
     }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
 
+        if (firstRender)
+        {
+            await GoogleMaps.InitializeApi();
+        }
+    }
 
     private void CheckUser(string sessionUser)
     {
         UserExecuter userExecuter = new UserExecuter();
         BasicUser basicUser = userExecuter.GetBasicUser(sessionUser);
+
         if (basicUser != null)
         {
+
             if (basicUser.Role == "Volunteer")
             {
                 if (volunteerManager.VolunteerList.Any(v => v.Email == sessionUser))
@@ -358,6 +558,7 @@
                 {
                     ChangeForm(3);
                 }
+                globalAddress = selectedVolunteer.Address;
             }
             else if (basicUser.Role == "Charity")
             {
@@ -380,11 +581,21 @@
                     selectedOrganisation = org;
                 }
                 ChangeForm(4);
+                globalAddress = selectedOrganisation.Address;
             }
+            else if(basicUser.Role == "Affected")
+            {
+                selectedAffectedEmail = basicUser.Email;
+                selectedAffectedName = basicUser.Name;
+                ChangeForm(2);
+                globalAddress = basicUser.Address;
+            }
+
         }
         else
         {
-            ChangeForm(2);
+
+            ChangeForm(1);
         }
 
     }
@@ -422,7 +633,7 @@
         volunteerManager.EditVolunteer(selectedVolunteer);
     }
 
-   
+
     private void CreateTask()
     {
         VolunteerTask volunteerTask = new VolunteerTask(
@@ -436,6 +647,17 @@
         volunteerManager.AddTask(volunteerTask);
     }
 
+    private void CreateRate()
+    {
+        Rate rate = new Rate(
+            description
+        );
+        volunteerManager.AddRate(rate, selectedTaskForRate.VolunteerTaskID);
+        volunteerManager.UpdateTaskStatus(selectedTaskForRate, IO.Modules.Volunteer.TaskStatus.Archived);
+        selectedTaskForRate = new VolunteerTask();
+
+    }
+
     private void AssignTask()
     {
         volunteerManager.AssignTask(selectedTask, selectedVolunteer);
@@ -444,7 +666,7 @@
     {
         volunteerManager.UpdateTaskStatus(selectedTask, taskStatus);
     }
-    private void ToggleRequestDetails(Request request)
+    private async void ToggleRequestDetails(Request request)
     {
         if (selectedRequest == request)
         {
@@ -453,20 +675,35 @@
         else
         {
             selectedRequest = request;
+            map01.SetLocation(selectedRequest.Address);
             showRequestDetails = true;
+        }
+        if (showRequestDetails)
+        {
+
+            await map01.DrawMap();
+
         }
     }
 
-    private void ShowTaskDetails(VolunteerTask volunteerTask)
+    private async void ShowTaskDetails(VolunteerTask volunteerTask)
     {
         if (selectedTask == volunteerTask)
         {
             showTaskDetails = !showTaskDetails;
+
         }
         else
         {
             selectedTask = volunteerTask;
+            map01.SetLocation(selectedTask.Address);
             showTaskDetails = true;
+        }
+        if (showTaskDetails == true)
+        {
+
+            await map01.DrawMap();
+
         }
     }
 
@@ -486,11 +723,99 @@
     private void SelectRequest(Request request)
     {
         selectedRequestForTask = request;
+        address = request.Address.Street + " " + request.Address.StreetNumber + " " + request.Address.City + " " + request.Address.ZipCode;
     }
     private void ChangeRequestStatus(Request request, RequestStatus requestStatus)
     {
         requestManager.UpdateRequestStatus(request.Id, requestStatus);
         request.Status = requestStatus;
+    }
+    private void SelectTaskForRate(VolunteerTask volunteerTask)
+    {
+        selectedTaskForRate = volunteerTask;
+    }
+
+
+    private void AddField()
+    {
+        fieldValues.Add("");
+    }
+
+    private void RemoveField(int i)
+    {
+        if (fieldValues.Count > 1)
+        {
+            fieldValues.RemoveAt(i);
+        }
+    }
+
+    private void MoveFieldUp(int i)
+    {
+        if (i > 0)
+        {
+            (fieldValues[i], fieldValues[i - 1]) = (fieldValues[i - 1], fieldValues[i]);
+        }
+    }
+
+    private void MoveFieldDown(int i)
+    {
+        if (i < fieldValues.Count - 1)
+        {
+            (fieldValues[i], fieldValues[i + 1]) = (fieldValues[i + 1], fieldValues[i]);
+        }
+    }
+
+    private async void ConfirmFields()
+    {
+        Route rt;
+        Coordinates coordinates = await Geolocation.GetUserLocation();
+        if (coordinates == null)
+        {
+            rt = new Route(new AddressStringWrapper(globalAddress), map01.GetLocation());
+        }
+        else
+        {
+            rt = new Route(new CoordinatesWrapper(coordinates), map01.GetLocation());
+        }
+        foreach (string location in fieldValues)
+        {
+            if (!string.IsNullOrEmpty(location))
+            {
+                rt.AddRouteLocation(new AddressStringWrapper(location));
+            }
+            
+        }
+        map01.SetRoute(rt);
+        await map01.DrawMap();
+    }
+
+    private async Task English()
+    {
+        String newUri = nav.Uri;
+        String oldUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=pl"))
+        {
+            newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
+        }
+        if (!newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri += "?ui-culture=en-US";
+        }
+        nav.NavigateTo(newUri, true);
+    }
+
+    private async Task Polish()
+    {
+        String newUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
+        }
+        if (!newUri.Contains("?ui-culture=pl"))
+        {
+            newUri += "?ui-culture=pl";
+        }
+        nav.NavigateTo(newUri, true);
     }
 
 }

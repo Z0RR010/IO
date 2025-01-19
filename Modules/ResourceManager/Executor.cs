@@ -1,4 +1,4 @@
-﻿namespace IO.Modules.ResourceManager
+namespace IO.Modules.ResourceManager
 {
     public class Executor : IResManager
     {
@@ -78,13 +78,13 @@
         /// <returns>List of string containing info</returns>
         public List<string> GetAllAvailableItems()
         {
-            List<string> output = new List<string>();
+            //List<string> output = new List<string>();
 
-            foreach (Resource item in _handler.GetAllItems())
-            {
-                output.Add(item.Name + " - " + item.Category + " - " + item.Amount + " - " + item.Status);
-            }
-            return output;
+            //foreach (Resource item in 
+            //{
+                //output.Add(item.Name + " - " + item.Category + " - " + item.Amount + " - " + item.Status);
+           // }
+            return _handler.GetAllItems();
         }
         /// <summary>
         /// Get list of resources of wanted category
@@ -94,11 +94,11 @@
         public List<string> GetItemsByCategory(string category)
         {
             List<string> output = new List<string>();
-            foreach (Resource item in _handler.GetAllItems())
+            foreach (Resource item in _handler.GetAllItemsObjects())
             {
                 if (item.Category.ToString().ToLower().Equals(category.ToLower()))
                 {
-                    output.Add(item.Name + " - " + item.Category + " - " + item.Amount + " - " + item.Status);
+                    output.Add(item.Name + " - " + item.Category + " - " + item.Amount);
                 }
             }
             return output;
@@ -144,6 +144,11 @@
         public string CustomQuery(string query)
         {
             return _handler.CustomQuery(query);
+        }
+
+        public Resource GetResourceByName(string name)
+        {
+            return _handler.GetResourceByName(name);
         }
     }
 }

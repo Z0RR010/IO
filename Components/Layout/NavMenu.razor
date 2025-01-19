@@ -1,4 +1,12 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@rendermode InteractiveServer
+@using IO.Modules.Security
+@using IO.Modules.Volunteer
+@using IO.Modules.ResourceManager;
+@using RequestModule;
+@inject SessionService sessionService
+
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">IO</a>
     </div>
@@ -13,38 +21,56 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="volunteerPage">
+        @if (userType == "Volunteer" || userType == "Charity" || userType == "Affected" || userType == "Admin")
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="volunteerPage">
                 <span class="bi bi-person-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Volunteer
             </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="donorPage">
+            </div>
+        }
+        @if (userType == "Charity" || userType == "Donor" || userType == "Admin")
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="donorPage">
                 <span class="bi bi-person-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Donor
             </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="requests">
+            </div>
+        }
+        @if (userType == "Charity" || userType == "Authority" || userType == "Affected" || userType == "Admin")
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="requests">
                 <span class="bi bi-person-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Requests
             </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="requests/add">
+            </div>
+        }
+        @if ((userType == "Affected" && isVerified) || userType == "Admin")
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="requests/add">
                 <span class="bi bi-person-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Add Requests
             </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
+            </div>
+        }
+        @if (userType == "Admin")
+        {
+            <div class="nav-item px-3">
             <NavLink class="nav-link" href="map">
                 <span class="bi bi-pin-map-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Map Test
             </NavLink>
         </div>
-
-        <div class="nav-item px-3">
+        }
+        
+        @if (userType == "Authority" || userType == "Admin" || userType == "Charity")
+        {
+            <div class="nav-item px-3">
             <NavLink class="nav-link" href="resources">
                 View resources
             </NavLink>
         </div>
+        }
+        
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="communication">
@@ -56,13 +82,41 @@
                 <span class="bi bi-plus-square-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Conversation
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+        @if (userType == "Authority" || userType == "Admin")
+        {
+            <div class="nav-item px-3">
+            <NavLink class="nav-link" href="verification">
+                <span class="bi bi-plus-square-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Verification
+            </NavLink>
+        </div>
+        }
+        @if (userType == "Authority" || userType == "Admin" || userType == "Charity")
+        {
+            <div class="nav-item px-3">
             <NavLink class="nav-link" href="/Communication/Reports">
                 <span class="bi bi-plus-square-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Reports
             </NavLink>
         </div>
+        }
+        
   
 
     </nav>
 </div>
 
+@code{
+    string userType = string.Empty;
+    bool isVerified = false;
+    protected override async System.Threading.Tasks.Task OnInitializedAsync()
+    {
+        string sessionUser = await sessionService.GetUserNameAsync();
+        UserExecuter userExecuter = new UserExecuter();
+        BasicUser basicUser = userExecuter.GetBasicUser(sessionUser);
+
+        if (basicUser != null)
+        {
+            userType = basicUser.Role;
+            isVerified = basicUser.IsVerified;
+        }
+    }
+}

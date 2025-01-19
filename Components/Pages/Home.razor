@@ -1,20 +1,78 @@
 ﻿@page "/"
 @using System.Globalization
+@using IO.Modules.ResourceManager
 @using Microsoft.Extensions.Localization
+@using IO.Modules.Security
 @rendermode InteractiveServer
 @inject IStringLocalizer<Home> Loc
 @inject NavigationManager nav
-<PageTitle>Home</PageTitle>
+<PageTitle>@Loc["Main"]</PageTitle>
 
 <h1>
     @Loc["Hello"]
 </h1>
 
-Welcome to your new app.
+<AuthorizeView>
+    <NotAuthorized>
+        <h5>@Loc["NoAuth"]</h5>
+        <h2 class="validation-message">@Loc["NotReal"]</h2>
+    </NotAuthorized>
+</AuthorizeView>
 
-<h2 class="validation-message">This is not a real site</h2>
-<h2 class="validation-message">You should not enter any of your real information on this site as we do not guarantee information entered will be safe</h2>
-<p>This site is created as a college project</p>
+<AuthorizeView Roles="Volunteer">
+    <Authorized>
+        <h4>@Loc["Vol"]</h4>
+        <p2>@name</p2>
+    </Authorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Charity">
+    <Authorized>
+        <h4>@Loc["Char"]</h4>
+        <p2>@name</p2>
+    </Authorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <h4>@Loc["Adm"]</h4>
+        <p2>@name</p2>
+    </Authorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Donor">
+    <Authorized>
+        <h4>@Loc["Don"]</h4>
+        <p2>@name</p2>
+    </Authorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Authority">
+    <Authorized>
+        <h4>@Loc["Aut"]</h4>
+        <p2>@name</p2>
+    </Authorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Affected">
+    <Authorized>
+        @if (isVerified)
+        {
+            <h4>@Loc["Aff"]</h4>
+            <p2>@name</p2>
+        }
+        @if (!isVerified)
+        {
+        <h4>@Loc["NoV"]</h4>
+        <p2>@name</p2>
+        }
+
+    </Authorized>
+</AuthorizeView>
+
+
+<h2 class="validation-message">@Loc["NoReal"]</h2>
+<p>@Loc["Proj"]</p>
 
 <footer class="footer">
     <button @onclick="Polish" class="lang">Polski</button>
@@ -23,8 +81,8 @@ Welcome to your new app.
 
 @code
 {
-	[CascadingParameter]
-	private Task<AuthenticationState> authenticationStateTask{ get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask{ get; set; }
 
     private async Task English()
     {

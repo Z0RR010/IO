@@ -22,5 +22,7 @@
         public List<Resource> GetItemsByDonor(string donorEmail);
 
         public string CustomQuery(string query);
+
+        public Resource GetResourceByName(string name);
     }
 }

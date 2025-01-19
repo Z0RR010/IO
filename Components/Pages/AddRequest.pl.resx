@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -117,47 +117,49 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Donor" xml:space="preserve">
-    <value>Donor</value>
-    <comment>qw</comment>
+  <data name="AddResource" xml:space="preserve">
+    <value>Dodaj Zasób</value>
   </data>
-  <data name="Donate" xml:space="preserve">
-    <value>Donate</value>
+  <data name="Amount" xml:space="preserve">
+    <value>Ilość</value>
   </data>
-  <data name="Show Donations" xml:space="preserve">
-    <value>Show Donations</value>
+  <data name="Apartment" xml:space="preserve">
+    <value>Mieszkanie</value>
   </data>
-  <data name="Submit" xml:space="preserve">
-    <value>Submit</value>
+  <data name="Category" xml:space="preserve">
+    <value>Kategoria</value>
   </data>
-  <data name="Item Name" xml:space="preserve">
-    <value>Item Name</value>
+  <data name="City" xml:space="preserve">
+    <value>Miasto</value>
   </data>
-  <data name="Quantity" xml:space="preserve">
-    <value>Quantity</value>
+  <data name="Description" xml:space="preserve">
+    <value>Opis</value>
   </data>
-  <data name="Enter item quantity" xml:space="preserve">
-    <value>Enter item quantity</value>
-  </data>
-  <data name="List of Donations" xml:space="preserve">
-    <value>List of Donations</value>
+  <data name="HeaderAdd" xml:space="preserve">
+    <value>Dodaj Zgłoszenie</value>
   </data>
   <data name="Name" xml:space="preserve">
-    <value>Name</value>
+    <value>Nazwa zasobu</value>
   </data>
-  <data name="Date" xml:space="preserve">
-    <value>Date</value>
+  <data name="Remove" xml:space="preserve">
+    <value>Usuń</value>
   </data>
-  <data name="Access" xml:space="preserve">
-    <value>Access only for Donors</value>
+  <data name="RequestAdded" xml:space="preserve">
+    <value>Zgłoszenie prawidłowo dodane!</value>
   </data>
-  <data name="Choose Status" xml:space="preserve">
-    <value>Choose Status</value>
+  <data name="Street" xml:space="preserve">
+    <value>Ulica</value>
   </data>
-  <data name="Generate Report" xml:space="preserve">
-    <value>Generate Report</value>
+  <data name="StreetNumber" xml:space="preserve">
+    <value>Numer Ulicy</value>
   </data>
-  <data name="Change Status" xml:space="preserve">
-    <value>Change Status of Donation</value>
+  <data name="Submit" xml:space="preserve">
+    <value>Wstaw</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Tytuł</value>
+  </data>
+  <data name="ZipCode" xml:space="preserve">
+    <value>Kod Pocztowy</value>
   </data>
 </root>

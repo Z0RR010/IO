@@ -3,6 +3,7 @@
 using ResourceManager;
 using System.Linq;
 
+
 public class Communicator : ICommunication
 {
     public Server testServer { get; private set; }
@@ -100,6 +101,6 @@ public class Communicator : ICommunication
         manager.activeReport += log + "     " + DateTime.Now.ToShortTimeString() + "\n";
     }
 
-
+    
 
 }

@@ -117,47 +117,163 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Donor" xml:space="preserve">
-    <value>Donor</value>
-    <comment>qw</comment>
+  <data name="Address" xml:space="preserve">
+    <value>Adres</value>
   </data>
-  <data name="Donate" xml:space="preserve">
-    <value>Donate</value>
+  <data name="Is Verified" xml:space="preserve">
+    <value>Czy zweryfikowane</value>
   </data>
-  <data name="Show Donations" xml:space="preserve">
-    <value>Show Donations</value>
+  <data name="Show Tasks" xml:space="preserve">
+    <value>Pokaż zadania</value>
+  </data>
+  <data name="Assigned Tasks To Request" xml:space="preserve">
+    <value>Przypisane zadania do zgłoszenia</value>
+  </data>
+  <data name="Complition date" xml:space="preserve">
+    <value>Data ukończenia</value>
+  </data>
+  <data name="Volunteer" xml:space="preserve">
+    <value>Wolontariusz</value>
+  </data>
+  <data name="Request" xml:space="preserve">
+    <value>Zgłoszenie</value>
+  </data>
+  <data name="Add Rate" xml:space="preserve">
+    <value>Dodaj ocenę</value>
+  </data>
+  <data name="Create Rate" xml:space="preserve">
+    <value>Dodaj ocenę</value>
+  </data>
+  <data name="Assigned" xml:space="preserve">
+    <value>Przypisane</value>
+  </data>
+  <data name="Completed" xml:space="preserve">
+    <value>Ukończony</value>
+  </data>
+  <data name="Archived" xml:space="preserve">
+    <value>Zarchiwizowane</value>
+  </data>
+  <data name="Selected Request" xml:space="preserve">
+    <value>Wybrane zgłosznie </value>
+  </data>
+  <data name="Available Tasks" xml:space="preserve">
+    <value>Dostepne zadania</value>
+  </data>
+  <data name="Selected Task Description" xml:space="preserve">
+    <value>Opis wybranego zadania</value>
+  </data>
+  <data name="Rate Description" xml:space="preserve">
+    <value>Opis oceny</value>
   </data>
   <data name="Submit" xml:space="preserve">
-    <value>Submit</value>
+    <value>Potwierdzenie</value>
   </data>
-  <data name="Item Name" xml:space="preserve">
-    <value>Item Name</value>
+  <data name="Surname" xml:space="preserve">
+    <value>Nazwisko</value>
   </data>
-  <data name="Quantity" xml:space="preserve">
-    <value>Quantity</value>
+  <data name="This rate was for task" xml:space="preserve">
+    <value>Ta ocena jest do zadania</value>
   </data>
-  <data name="Enter item quantity" xml:space="preserve">
-    <value>Enter item quantity</value>
+  <data name="First Name" xml:space="preserve">
+    <value>Imię</value>
   </data>
-  <data name="List of Donations" xml:space="preserve">
-    <value>List of Donations</value>
+  <data name="Email" xml:space="preserve">
+    <value>E-mail</value>
   </data>
-  <data name="Name" xml:space="preserve">
-    <value>Name</value>
+  <data name="Phone Number" xml:space="preserve">
+    <value>Numer telefonu</value>
   </data>
-  <data name="Date" xml:space="preserve">
-    <value>Date</value>
+  <data name="Organisation" xml:space="preserve">
+    <value>Organizacja</value>
   </data>
-  <data name="Access" xml:space="preserve">
-    <value>Access only for Donors</value>
+  <data name="Save Changes" xml:space="preserve">
+    <value>Zapis Zmiany</value>
   </data>
-  <data name="Choose Status" xml:space="preserve">
-    <value>Choose Status</value>
+  <data name="Create Task" xml:space="preserve">
+    <value>Stwórz zadanie</value>
   </data>
-  <data name="Generate Report" xml:space="preserve">
-    <value>Generate Report</value>
+  <data name="Your Tasks" xml:space="preserve">
+    <value>Twoje zadania</value>
+  </data>
+  <data name="Your Volunteer" xml:space="preserve">
+    <value>Twoi wolontariusze</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>Data ukończenia</value>
+  </data>
+  <data name="Organisation Name" xml:space="preserve">
+    <value>Nazwa organizacji</value>
+  </data>
+  <data name="Select" xml:space="preserve">
+    <value>Wybierz</value>
   </data>
   <data name="Change Status" xml:space="preserve">
-    <value>Change Status of Donation</value>
+    <value>Zmień status</value>
+  </data>
+  <data name="Website" xml:space="preserve">
+    <value>Strona internetowa</value>
+  </data>
+  <data name="InProgress" xml:space="preserve">
+    <value>W toku</value>
+  </data>
+  <data name="Rejected" xml:space="preserve">
+    <value>Odrzucone</value>
+  </data>
+  <data name="Tasks" xml:space="preserve">
+    <value>Zadania</value>
+  </data>
+  <data name="Update midpoints" xml:space="preserve">
+    <value>Zaaktualizuj mapę</value>
+  </data>
+  <data name="Complete Task" xml:space="preserve">
+    <value>Zadanie ukończone</value>
+  </data>
+  <data name="Rate" xml:space="preserve">
+    <value>Ocena</value>
+  </data>
+  <data name="Your Completed Tasks" xml:space="preserve">
+    <value>Twoje ukończone zadania</value>
+  </data>
+  <data name="Your Profile" xml:space="preserve">
+    <value>Twój profil</value>
+  </data>
+  <data name="Assign Task" xml:space="preserve">
+    <value>Przypisz zadanie</value>
+  </data>
+  <data name="Rated" xml:space="preserve">
+    <value>Ocenione</value>
+  </data>
+  <data name="Your Active Tasks" xml:space="preserve">
+    <value>Twoje aktywne zadania</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>Nowy</value>
+  </data>
+  <data name="Resources required" xml:space="preserve">
+    <value>Potrzebne zasoby</value>
+  </data>
+  <data name="Updated At" xml:space="preserve">
+    <value>Zaktualizowane dnia</value>
+  </data>
+  <data name="Created at" xml:space="preserve">
+    <value>Utworzone dnia</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Opis</value>
+  </data>
+  <data name="Your Rates" xml:space="preserve">
+    <value>Twoje oceny</value>
+  </data>
+  <data name="Your Requests" xml:space="preserve">
+    <value>Twoje zgłoszenia</value>
+  </data>
+  <data name="Hello" xml:space="preserve">
+    <value>Witaj</value>
+  </data>
+  <data name="Choose Organisation" xml:space="preserve">
+    <value>Wybierz organizację</value>
+  </data>
+  <data name="Email of affected" xml:space="preserve">
+    <value>E-mail poszkodowanego</value>
   </data>
 </root>

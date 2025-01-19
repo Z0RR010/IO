@@ -11,18 +11,18 @@
 @inject SessionService sessionService
 @inject IStringLocalizer<DonorPage> Loc
 @inject NavigationManager nav
-
+<PageTitle>@Loc["Donor"]</PageTitle>
 @if (loggedDonor)
 {
 <h1>@Loc["Donor"]</h1>
-<button class="btn btn-primary" @onclick="Donate">Donate</button>
-<button class="btn btn-primary" @onclick="ShowDonations">Show Donations</button>
+<button class="btn btn-primary" @onclick="Donate">@Loc["Donate"]</button>
+<button class="btn btn-primary" @onclick="ShowDonations">@Loc["Show Donations"]</button>
 
 @if (whichForm == 1)
 {
-    <h1 style="color: white; margin-top: 20px;">Donate</h1>
+        <h1 style="color: white; margin-top: 20px;">@Loc["Donate"]</h1>
     <div>
-        <p style="color: white; margin-bottom: 5px;">Item Name:</p>
+        <p style="color: white; margin-bottom: 5px;">@Loc["Item Name"]:</p>
         <select @bind="selectedItem" class="custom-dropdown">
             @foreach (var item in items)
             {
@@ -30,16 +30,16 @@
             }
         </select>
 
-        <p style="color: white; margin-top: 10px; margin-bottom: 5px;">Quantity:</p>
-        <input type="text" @bind="quantity" placeholder="Enter item quantity" class="custom-dropdown" style="margin-bottom: 30px;" />
+        <p style="color: white; margin-top: 10px; margin-bottom: 5px;">@Loc["Quantity"]:</p>
+        <input type="text" @bind="quantity" placeholder="@Loc["Enter item quantity"]" class="custom-dropdown" style="margin-bottom: 30px;" />
 
-        <button class="btn btn-success" @onclick="SubmitDonation">Submit</button>
+        <button class="btn btn-success" @onclick="SubmitDonation">@Loc["Submit"]</button>
     </div>
 }
 
 @if (whichForm == 2)
 {
-        <h2 style="color: white; margin-top: 20px;">List of Donations</h2>
+        <h2 style="color: white; margin-top: 20px;">@Loc["List of Donations"]</h2>
     <table class="table">
         <thead>
             <tr>
@@ -49,15 +49,15 @@
                     <span>@(sortDirection == SortOrder.Ascending && sortBy == "Id" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Id" ? "↑" : "")</span>
                 </th>
                 <th style="color: white;" @onclick="() => SortByName()">
-                    Item Name
+                    @Loc["Item Name"]
                     <span>@(sortDirection == SortOrder.Ascending && sortBy == "Name" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Name" ? "↑" : "")</span>
                 </th>
                 <th style="color: white;" @onclick="() => SortByQuantity()">
-                    Quantity
+                    @Loc["Quantity"]
                     <span>@(sortDirection == SortOrder.Ascending && sortBy == "Quantity" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Quantity" ? "↑" : "")</span>
                 </th>
                 <th style="color: white;" @onclick="() => SortByDate()">
-                    Date
+                    @Loc["Date"]
                     <span>@(sortDirection == SortOrder.Ascending && sortBy == "Date" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Date" ? "↑" : "")</span>
                 </th>
                 <th style="color: white;" @onclick="() => SortByStatus()">
@@ -80,48 +80,48 @@
             }
         </tbody>
     </table>
-    <button class="btn btn-primary mt-3" @onclick="GenerateReport" disabled="@(!IsAnyDonationSelected)">Generate Report</button>
+    <button class="btn btn-primary mt-3" @onclick="GenerateReport" disabled="@(!IsAnyDonationSelected)">@Loc["Generate Report"]</button>
 }
 }
 @if (!loggedCharity && !loggedDonor)
 {
     @if (whichForm == 3)
     {
-        <h1>Dostęp tylko dla Darczyńców!</h1>
+        <h1>@Loc["Access"]!</h1>
     }
 }
 @if (loggedCharity)
 {
 @if (whichForm == 4)
 {
-    <h2 style="color: white;">List of Donations</h2>
+        <h2 style="color: white;">@Loc["List of Donations"]</h2>
     <table class="table">
         <thead>
             <tr>
-                <th style="color: white;" @onclick="() => SortById()">
-                    ID
-                    <span>@(sortDirection == SortOrder.Ascending && sortBy == "Id" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Id" ? "↑" : "")</span>
-                </th>
-                <th style="color: white;" @onclick="() => SortByName()">
-                    Item Name
-                    <span>@(sortDirection == SortOrder.Ascending && sortBy == "Name" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Name" ? "↑" : "")</span>
-                </th>
-                <th style="color: white;" @onclick="() => SortByQuantity()">
-                    Quantity
-                    <span>@(sortDirection == SortOrder.Ascending && sortBy == "Quantity" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Quantity" ? "↑" : "")</span>
-                </th>
-                <th style="color: white;" @onclick="() => SortByDate()">
-                    Date
-                    <span>@(sortDirection == SortOrder.Ascending && sortBy == "Date" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Date" ? "↑" : "")</span>
-                </th>
-                <th style="color: white;" @onclick="() => SortByStatus()">
-                    Status
-                    <span>@(sortDirection == SortOrder.Ascending && sortBy == "Status" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Status" ? "↑" : "")</span>
-                </th>
-            </tr>
+                    <th style="color: white;" @onclick="() => SortById()">
+                        ID
+                        <span>@(sortDirection == SortOrder.Ascending && sortBy == "Id" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Id" ? "↑" : "")</span>
+                    </th>
+                    <th style="color: white;" @onclick="() => SortByName()">
+                        @Loc["Item Name"]
+                        <span>@(sortDirection == SortOrder.Ascending && sortBy == "Name" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Name" ? "↑" : "")</span>
+                    </th>
+                    <th style="color: white;" @onclick="() => SortByQuantity()">
+                        @Loc["Quantity"]
+                        <span>@(sortDirection == SortOrder.Ascending && sortBy == "Quantity" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Quantity" ? "↑" : "")</span>
+                    </th>
+                    <th style="color: white;" @onclick="() => SortByDate()">
+                        @Loc["Date"]
+                        <span>@(sortDirection == SortOrder.Ascending && sortBy == "Date" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Date" ? "↑" : "")</span>
+                    </th>
+                    <th style="color: white;" @onclick="() => SortByStatus()">
+                        Status
+                        <span>@(sortDirection == SortOrder.Ascending && sortBy == "Status" ? "↓" : sortDirection == SortOrder.Descending && sortBy == "Status" ? "↑" : "")</span>
+                    </th>
+                </tr>
         </thead>
         <tbody>
-            @foreach (var donation in SortedDonations)
+                @foreach (var donation in SortedDonationsForCharity)
             {
                 <tr>
                     <td style="color: white;">@donation.DonationID</td>
@@ -129,11 +129,11 @@
                     <td style="color: white;">@donation.Quantity</td>
                     <td style="color: white;">@donation.Date</td>
                     <td style="color: white;">@donation.DonationStatus</td>
-                    <button class="btn btn-primary" @onclick="()=>ChangeStatus(donation)">Change Status of Donation</button>
+                    <button class="btn btn-primary" @onclick="()=>ChangeStatus(donation)">@Loc["Change Status"]</button>
                 </tr>
             }
             <div style="text-align: center; margin-top: 25px;">
-                <p style="color: white; font-size: 35px;">Choose Status:</p>
+                <p style="color: white; font-size: 35px;">@Loc["Choose Status"]:</p>
                 <select @bind="selectedStatus" style="color: white; font-size: 20px; padding: 10px; width: 200px; margin-top: -15px; border-width:3px">
                     @foreach (var status in statuses)
                     {
@@ -174,16 +174,17 @@
     private string errorMessage = string.Empty;
     private List<Donation> selectedDonations = new List<Donation>();
     private DonationManager donationManager = new DonationManager();
-    private bool IsAnyDonationSelected => donationManager.GetAllDonations().Any(d => d.Selected);
+    private bool IsAnyDonationSelected => donationManager.GetDonationByEmail(selectedEmail).Any(d => d.Selected);
     private string sortBy = "";
     private SortOrder sortDirection = SortOrder.Ascending;
-    private List<Donation> SortedDonations => SortDonations(donationManager.GetAllDonations());
+    private List<Donation> SortedDonations => SortDonations(donationManager.GetDonationByEmail(selectedEmail));
+    private List<Donation> SortedDonationsForCharity => SortDonations(donationManager.GetAllDonations());
     private string selectedItem = string.Empty;
     private List<Resource> items = new List<Resource> {};
     private string selectedEmail = string.Empty;
     private bool loggedCharity = false;
     private bool loggedDonor = false;
-    private List<Status> statuses = new List<Status> {Status.Registered, Status.Accepted, Status.InMagazine, Status.Archived};
+    private List<Status> statuses = new List<Status> {Status.Registered, Status.Accepted, Status.InMagazine, Status.Archived, Status.Unwanted};
     private Status selectedStatus = Status.Registered;
 
     private async Task English()
@@ -222,7 +223,8 @@
         HashSet<string> uniqueNames = new HashSet<string>();
         for (int i = 0; i < requests.Count; i++)
         {
-            List<Resource> resources = requestManager.GetResourcesForRequest(i);
+            int ID = requests[i].Id;
+            List<Resource> resources = requestManager.GetResourcesForRequest(ID);
             foreach (var resource in resources)
             {
                 if (uniqueNames.Add(resource.Name))
@@ -267,7 +269,7 @@
 
     private bool AreAllDonationsSelected()
     {
-        return donationManager.GetAllDonations().All(d => d.Selected);
+        return donationManager.GetDonationByEmail(selectedEmail).All(d => d.Selected);
     }
 
     private bool selectAll
@@ -275,7 +277,7 @@
         get { return AreAllDonationsSelected(); }
         set
         {
-            foreach (var donation in donationManager.GetAllDonations())
+            foreach (var donation in donationManager.GetDonationByEmail(selectedEmail))
             {
                 donation.Selected = value;
             }
@@ -316,7 +318,7 @@
     private void ToggleSelectAll()
     {
         var isSelected = AreAllDonationsSelected();
-        foreach (var donation in donationManager.GetAllDonations())
+        foreach (var donation in donationManager.GetDonationByEmail(selectedEmail))
         {
             donation.Selected = !isSelected;
         }
@@ -326,6 +328,10 @@
     {
         donation.SetDonationStatus(selectedStatus);
         donationManager.UpdateDonationStatus(donation);
+        if (donation.DonationStatus == Status.InMagazine)
+        {
+            donationManager.SendToResources(donation);
+        }
     }
 
     private void GenerateReport()
@@ -368,7 +374,7 @@
           XStringFormats.TopCenter);
 
         yPoint += 40;
-        foreach (var donation in donationManager.GetAllDonations().Where(d => d.Selected))
+        foreach (var donation in donationManager.GetDonationByEmail(selectedEmail).Where(d => d.Selected))
         {
             gfx.DrawString($"ID: {donation.DonationID}", font, XBrushes.Black, 40, yPoint);
             yPoint += 20;

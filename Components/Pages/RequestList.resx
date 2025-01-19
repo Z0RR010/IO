@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!--
     Microsoft ResX Schema
@@ -117,56 +117,36 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Hello" xml:space="preserve">
-    <value>Welcome</value>
-    <comment> </comment>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
+    <comment/>
   </data>
-  <data name="NotReal" xml:space="preserve">
-    <value>This is not a real site.</value>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+    <comment/>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+    <comment/>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Details</value>
+    <comment/>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+    <comment/>
+  </data>
+  <data name="Header" xml:space="preserve">
+    <value>List of requests</value>
+    <comment/>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Title</value>
+    <comment/>
+  </data>
+  <data name="Tit" xml:space="preserve">
+    <value>RequestList</value>
     <comment>a</comment>
-  </data>
-  <data name="NoAuth" xml:space="preserve">
-    <value>Not authorized</value>
-    <comment>s</comment>
-  </data>
-  <data name="Vol" xml:space="preserve">
-    <value>Welcome volunteer</value>
-    <comment>v</comment>
-  </data>
-  <data name="Char" xml:space="preserve">
-    <value>Welcome charity organization</value>
-    <comment>c</comment>
-  </data>
-  <data name="NoReal" xml:space="preserve">
-    <value>You should not enter any of your real information on this site as we do not guarantee information entered will be safe</value>
-    <comment>r</comment>
-  </data>
-  <data name="Proj" xml:space="preserve">
-    <value>This site is created as a college project</value>
-    <comment>p</comment>
-  </data>
-  <data name="Adm" xml:space="preserve">
-    <value>Welcome ourselves</value>
-    <comment>a</comment>
-  </data>
-  <data name="Aff" xml:space="preserve">
-    <value>Welcome affected</value>
-    <comment>a</comment>
-  </data>
-  <data name="NoV" xml:space="preserve">
-    <value>Wait until you are verified by authorities</value>
-    <comment>v</comment>
-  </data>
-  <data name="Don" xml:space="preserve">
-    <value>Welcome donor</value>
-    <comment>d</comment>
-  </data>
-  <data name="Main" xml:space="preserve">
-    <value>Home page</value>
-    <comment>s</comment>
-  </data>
-  <data name="Aut" xml:space="preserve">
-    <value>Welcome authority representative</value>
-    <comment>c</comment>
   </data>
 </root>
