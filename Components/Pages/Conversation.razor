@@ -105,4 +105,4 @@
             filteredChats = userChats.Where(chat => chat.Emails.Any(email => email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))).ToList();
         }
     }
-}}
+}
