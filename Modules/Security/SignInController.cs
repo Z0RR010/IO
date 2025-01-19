@@ -17,6 +17,8 @@ public class SignInController : ControllerBase
     {
         UserExecuter userExecuter = new UserExecuter();
 
+        Console.WriteLine($"Otrzymano dane: {request.Username}, {request.Password}");
+
         if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
         {
             return BadRequest("Nazwa użytkownika i hasło są wymagane.");
@@ -26,7 +28,7 @@ public class SignInController : ControllerBase
         {
             if (attemptInfo.lockoutEnd.HasValue && DateTime.UtcNow < attemptInfo.lockoutEnd.Value)
             {
-                return Unauthorized(new { Message = $"Too many login attempts. Please try again in {(attemptInfo.lockoutEnd.Value - DateTime.UtcNow).ToString(@"mm\:ss")}." });
+                return Unauthorized(new { Message = $"Zbyt wiele nieudanych prób. Spróbuj ponownie za {(attemptInfo.lockoutEnd.Value - DateTime.UtcNow).ToString(@"mm\:ss")}." });
 
             }
         }
@@ -34,7 +36,7 @@ public class SignInController : ControllerBase
         if (!userExecuter.IsUserInDataBase(request.Username))
         {
             RegisterFailedAttempt(request.Username);
-            return Unauthorized(new { Message = "Wrong email or password." });
+            return Unauthorized(new { Message = "Nieprawidłowy login lub hasło." });
         }
 
         if (userExecuter.CustomQuery("SELECT emailVerified FROM users WHERE email=" + "\"" + request.Username + "\"")
@@ -50,7 +52,7 @@ public class SignInController : ControllerBase
         }
 
         RegisterFailedAttempt(request.Username);
-        return Unauthorized(new { Message = "Wrong email or password." });
+        return Unauthorized(new { Message = "Nieprawidłowy login lub hasło." });
     }
 
     private void RegisterFailedAttempt(string username)
@@ -65,6 +67,7 @@ public class SignInController : ControllerBase
                 if (newAttempts >= MaxAttempts)
                 {
                     lockoutEnd = DateTime.UtcNow.Add(LockoutDuration);
+                    Console.WriteLine($"User {username} is locked out until {lockoutEnd}");
                 }
 
                 return (newAttempts, lockoutEnd);

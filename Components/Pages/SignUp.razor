@@ -6,16 +6,14 @@
 @using System.Net
 @using System.Net.Mail;
 @using MailKit.Net.Smtp;
-@using Microsoft.Extensions.Localization
 @using MimeKit;
 @using IO.Modules.Security;
 @using IO.Modules.ResourceManager;
 @using System.Text.RegularExpressions;
 @using System.Security.Cryptography;
 @inject NavigationManager nav
-@inject IStringLocalizer<SignUp> Loc
 
-<h3>@Loc["Register"]</h3>
+<h3>Rejestracja</h3>
 
 @if (errorMessage != null)
 {
@@ -24,41 +22,41 @@
 
 @if (registered)
 {
-	<p class="success-message">@Loc["RegisterOK"]</p>
+	<p class="success-message">Pomyślnie zarejestrowano. Zweryfikuj swój email poprzez przesłany na niego link.</p>
 }
 
 <div class="form-container">
 	<div class="form-group">
-		<label for="userType">@Loc["UserType"]</label>
+		<label for="userType">Typ użytkownika</label>
 		<select id="userType" @bind="userType">
-			<option>@Loc["Donor"]</option>
-			<option>@Loc["Authority"]</option>
-			<option>@Loc["Affected"]</option>
-			<option>@Loc["Volunteer"]</option>
-			<option>@Loc["Charity"]</option>
+			<option>Darczyńca</option>
+			<option>Przedstawiciel władz</option>
+			<option>Poszkodowany</option>
+			<option>Wolontariusz</option>
+			<option>Organizacja pomocowa</option>
 		</select>
 	</div>
-	@if (userType == @Loc["Donor"])
+	@if (userType == "Darczyńca")
 	{
 		<div class="form-group">
-			<label for="donorType">@Loc["DonorType"]</label>
+			<label for="donorType">Typ darczyńcy</label>
 			<select id="donorType" @bind="donorType">
-				<option>@Loc["Individual"]</option>
-				<option>@Loc["Company"]</option>
+				<option>Osoba indywidualna</option>
+				<option>Firma</option>
 			</select>
 		</div>
-		@if (donorType == @Loc["Company"])
+		@if (donorType == "Firma")
 		{
 			<div class="form-group">
-				<label for="companyName">@Loc["CompanyName"]</label>
+				<label for="companyName">Nazwa firmy:</label>
 				<input id="companyName" @bind="companyName" />
 			</div>
 			<div class="form-group">
-				<label for="phoneNumber">@Loc["PhoneNumber"]</label>
+				<label for="phoneNumber">Nr telefonu:</label>
 				<input id="phoneNumber" @bind="phoneNumber" />
 			</div>
 			<div class="form-group">
-				<label for="address">@Loc["PhoneNumber"]</label>
+				<label for="address">Adres firmy:</label>
 				<input id="address" @bind="address" />
 			</div>
 			<div class="form-group">
@@ -66,26 +64,26 @@
 				<input id="NIP" @bind="NIP" />
 			</div>
 		}
-		@if (donorType == @Loc["Individual"])
+		@if (donorType == "Osoba indywidualna")
 		{
 			<div class="form-group">
-				<label for="name">@Loc["Name"]</label>
+				<label for="name">Imie:</label>
 				<input id="name" @bind="name" />
 			</div>
 			<div class="form-group">
-				<label for="surname">@Loc["Surname"]</label>
+				<label for="surname">Nazwisko:</label>
 				<input id="surname" @bind="surname" />
 			</div>
 			<div class="form-group">
-				<label for="phoneNumber">@Loc["PhoneNumber"]</label>
+				<label for="phoneNumber">Nr telefonu:</label>
 				<input id="phoneNumber" @bind="phoneNumber" />
 			</div>
 			<div class="form-group">
-				<label for="address">@Loc["Address"]</label>
+				<label for="address">Adres zamieszkania:</label>
 				<input id="address" @bind="address" />
 			</div>
 			<div class="form-group">
-				<label for="pesel">PESEL</label>
+				<label for="pesel">PESEL:</label>
 				<input id="pesel" @bind="pesel" />
 			</div>
 		}
@@ -95,64 +93,64 @@
 		<input id="email" type="text" @bind="email" />
 	</div>
 	<div class="form-group">
-		<label for="password">@Loc["Password"]</label>
+		<label for="password">Hasło:</label>
 		<input id="password" type="password" @bind="password" />
 	</div>
 	
-	@if (userType == @Loc["Charity"])
+	@if (userType == "Organizacja pomocowa")
 	{
 		<div class="form-group">
-			<label for="name">@Loc["CName"]</label>
+			<label for="name">Nazwa:</label>
 			<input id="name" type="text" @bind="name" />
 		</div>
 	}
-	else if (userType == @Loc["Donor"])
+	else if (userType == "Darczyńca")
 	{
 	}
 	else
 	{
 		<div class="form-group">
-			<label for="name">@Loc["Name"]</label>
+			<label for="name">Imię:</label>
 			<input id="name" type="text" @bind="name" />
 		</div>
 	}
-	@if (userType == @Loc["Authority"] ||
-			userType == @Loc["Affected"] ||
-			userType == @Loc["Volunteer"])
+	@if (userType == "Przedstawiciel władz" ||
+		userType == "Poszkodowany" ||
+		userType == "Wolontariusz")
 	{
 		<div class="form-group">
-			<label for="surname">@Loc["Surname"]</label>
+			<label for="surname">Nazwisko:</label>
 			<input type="text" id="surname" @bind="surname" />
 		</div>
 	}
-	@if (userType != @Loc["Donor"])
+	@if (userType != "Darczyńca")
 	{
 		<div class="form-group">
-			<label for="phoneNumber">@Loc["PhoneNumber"]</label>
+			<label for="phoneNumber">Nr telefonu:</label>
 			<input id="phoneNumber" @bind="phoneNumber" />
 		</div>
 		<div class="form-group">
-			<label for="address">@Loc["Address"]</label>
+			<label for="address">Adres zamieszkania:</label>
 			<input id="address" @bind="address" />
 		</div>
 	}
-	@if (userType == @Loc["Authority"] ||
-			userType == @Loc["Affected"] ||
-			userType == @Loc["Volunteer"])
+	@if (userType == "Przedstawiciel władz" ||
+		userType == "Poszkodowany" ||
+		userType == "Wolontariusz")
 	{
 		<div class="form-group">
 			<label for="pesel">PESEL:</label>
 			<input id="pesel" @bind="pesel" />
 		</div>
 		<div class="form-group">
-			<label for="birthDate">@Loc["BirthDate"]</label>
+			<label for="birthDate">Data urodzenia:</label>
 			<input id="birthDate" type="date" @bind="birthDate" />
 		</div>
 	}
-	@if (userType == @Loc["Charity"])
+	@if (userType == "Organizacja pomocowa")
 	{
 		<div class="form-group">
-			<label for="website">@Loc["Website"]</label>
+			<label for="website">Strona internetowa:</label>
 			<input id="website" @bind="website" />
 		</div>
 		<div class="form-group">
@@ -160,32 +158,26 @@
 			<input id="krs" @bind="krs" />
 		</div>
 	}
-	@if (userType == @Loc["Authority"])
+	@if (userType == "Przedstawiciel władz")
 	{
 		<div class="form-group">
-			<label for="institution">@Loc["Institution"]</label>
+			<label for="institution">Instytucja:</label>
 			<input id="institution" @bind="institution" />
 		</div>
 	}
 	<div class="form-group">
-		<input type="submit" value=@Loc["SignUp"] @onclick="HandleSignUp" />
+		<input type="submit" value="Zarejestruj się" @onclick="HandleSignUp" />
 	</div>
 </div>
-<footer class="footer">
-        <button @onclick="Polish" class="lang">Polski</button>
-        <button @onclick="English" class="lang">English</button>
-</footer>
+
 <style>
-
-	label{color:black}
-
 	.form-container {
 	display: flex;
 	flex-direction: column;
 	gap: 15px; 
 	width: 100%;
 	max-width: 500px;
-	margin: 50px auto; 
+	margin: 0 auto; 
 	padding: 15px;
 	box-sizing: border-box;
 	background-color: #f9f9f9;
@@ -262,40 +254,23 @@ input[type="submit"]:hover {
 	private string hashedPassword;
 	private bool registered = false;
 
-	protected override async Task OnInitializedAsync()
-	{
-		userType = Loc["Donor"];
-		donorType = Loc["Individual"];
-	}
+	/*public Task sendEmailAsync(string email, string message)
+		{
+		var mail = "skph.no-reply@outlook.com";
+		var pw = "meogievwrddtaemx";
 
-	private async Task English()
-	{
-		String newUri = nav.Uri;
-		String oldUri = nav.Uri;
-		if (newUri.Contains("?ui-culture=pl"))
-		{
-			newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
-		}
-		if (!newUri.Contains("?ui-culture=en-US"))
-		{
-			newUri += "?ui-culture=en-US";
-		}
-		nav.NavigateTo(newUri, true);
-	}
+		var smtpClient = new System.Net.Mail.SmtpClient("smtp-mail.outlook.com", 587)
+				{
+				EnableSsl = true,
+				Credentials = new NetworkCredential(mail, pw)
+		};
 
-	private async Task Polish()
-	{
-		String newUri = nav.Uri;
-		if (newUri.Contains("?ui-culture=en-US"))
-		{
-			newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
-		}
-		if (!newUri.Contains("?ui-culture=pl"))
-		{
-			newUri += "?ui-culture=pl";
-		}
-		nav.NavigateTo(newUri, true);
-	}
+		return smtpClient.SendMailAsync(
+		new MailMessage(from: mail,
+						to: email,
+						"Weryfikacja",
+						message));
+	}*/
 
 	private async Task HandleSignUp()
 	{
@@ -303,14 +278,14 @@ input[type="submit"]:hover {
 		!Regex.IsMatch(email, @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"))
 		{
 			registered = false;
-			errorMessage = Loc["WrongEmail"];
+			errorMessage = "Podaj poprawny adres e-mail.";
 			return;
 		}
 
 		if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
 		{
 			registered = false;
-			errorMessage = Loc["WrongPassword"];
+			errorMessage = "Hasło powinno mieć co najmniej 8 znaków.";
 			return;
 		}
 
@@ -318,21 +293,21 @@ input[type="submit"]:hover {
 			!Regex.IsMatch(name, @"^[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż\s]+$"))
 		{
 			registered = false;
-			errorMessage = Loc["WrongName"];
+			errorMessage = "Imię może zawierać tylko litery i spacje.";
 			return;
 		}
 
 		if ((string.IsNullOrWhiteSpace(surname) ||
 			!Regex.IsMatch(surname, @"^[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż\s]+$"))
 			&& (
-				(userType == Loc["Donor"] && donorType == Loc["Individual"]) ||
-				userType == Loc["Authority"] ||
-				userType == Loc["Affected"] ||
-				userType == Loc["Volunteer"]
+				(userType == "Darczyńca" && donorType == "Osoba indywidualna") ||
+				userType == "Przedstawiciel władz" ||
+				userType == "Poszkodowany" ||
+				userType == "Wolontariusz"
 			))
 		{
 			registered = false;
-			errorMessage = Loc["WrongSurname"];
+			errorMessage = "Nazwisko może zawierać tylko litery i spacje.";
 			return;
 		}
 
@@ -340,41 +315,41 @@ input[type="submit"]:hover {
 			!Regex.IsMatch(phoneNumber, @"^\+?[0-9]{9,15}$"))
 		{
 			registered = false;
-			errorMessage = Loc["WrongTel"];
+			errorMessage = "Podaj poprawny numer telefonu (np. +48123123123).";
 			return;
 		}
 
 		if (string.IsNullOrWhiteSpace(address))
 		{
 			registered = false;
-			errorMessage = Loc["WrongAddress"];
+			errorMessage = "Podaj poprawny adres zamieszkania.";
 			return;
 		}
 
 		if ((string.IsNullOrWhiteSpace(pesel) ||
 			!Regex.IsMatch(pesel, @"^\d{11}$")) &&
-			(!(userType == Loc["Donor"] && donorType == Loc["Company"]) &&
-				userType != Loc["Charity"]))
+			(!(userType == "Darczyńca" && donorType == "Firma") &&
+			 userType != "Organizacja pomocowa"))
 		{
 			registered = false;
-			errorMessage = Loc["WrongPESEL"];
+			errorMessage = "Podaj poprawny PESEL (11 cyfr).";
 			return;
 		}
 
 		if (birthDate == default(DateTime) || birthDate > DateTime.Now)
 		{
 			registered = false;
-			errorMessage = Loc["WrongDate"];
+			errorMessage = "Podaj poprawną datę urodzenia.";
 			return;
 		}
 
-		if (userType == Loc["Charity"])
+		if (userType == "Organizacja pomocowa")
 		{
 			if (string.IsNullOrWhiteSpace(website) ||
 				!Regex.IsMatch(website, @"^(http|https):\/\/[a-zA-Z0-9.-]+$"))
 			{
 				registered = false;
-				errorMessage = Loc["WrongWebsite"];
+				errorMessage = "Podaj poprawną stronę internetową (np. https://example.com).";
 				return;
 			}
 
@@ -382,52 +357,76 @@ input[type="submit"]:hover {
 				!Regex.IsMatch(krs, @"^\d{10}$"))
 			{
 				registered = false;
-				errorMessage = Loc["WrongKRS"];
+				errorMessage = "Podaj poprawny numer KRS (10 cyfr).";
 				return;
 			}
 		}
 
-		if (userType == Loc["Authority"] && string.IsNullOrWhiteSpace(institution))
+		if (userType == "Przedstawiciel władz" && string.IsNullOrWhiteSpace(institution))
 		{
-			errorMessage = Loc["WrongInst"];
+			errorMessage = "Podaj nazwę instytucji.";
 			return;
 		}
 
 		errorMessage = null;
 
 		hashedPassword = Security.hashData(password);
+		/*switch (userType)
+		{
+		case "Darczyńca":
+		if (donorType == "Firma")
+			{
+			Donor donor = new Donor(surname, pesel, email, name, phoneNumber, address, true);
+		}
+		if (donorType == "Osoba indywidualna")
+			{
+			Donor donor = new Donor(surname, pesel, email, name, phoneNumber, address, true);
+	}
+	break;
+	case "Przedstawiciel władz":
+		Authority authority = new Authority(institution, surname, pesel, email, name, phoneNumber, address, true);
+	break;
+	case "Poszkodowany":
+		Affected affected = new Affected(surname, pesel, email, name, phoneNumber, address, false);
+	break;
+	case "Wolontariusz":
+		Volunteer volunteer = new Volunteer(surname, pesel, email, name, phoneNumber, address, true);
+	break;
+	case "Organizacja pomocowa":
+		Charity charity = new Charity(website, krs, email, name, phoneNumber, address, true);
+		break;
+	}
+
+	User user = new User(email, name, phoneNumber, address, true);
+	Individual individual = new Individual(surname, pesel, email, name, phoneNumber, address, true);
+	*/
 		
 		Individual individual = new Individual(surname, pesel, email, name, phoneNumber, address, true);
 		string role = "";
 		bool isVerified = true;
 		switch(userType)
 		{
-			case "Donor":
 			case "Darczyńca":
 				{
 					role = "Donor";
 					break;
 				}
-			case "Affected":
 			case "Poszkodowany":
 				{
 					role = "Affected";
 					isVerified = false;
 					break;
 				}
-			case "Charity":
 			case "Organizacja pomocowa":
 				{
 					role = "Charity";
 					break;
 				}
-			case "Authority":
 			case "Przedstawiciel władz":
 				{
 					role = "Authority";
 					break;
 				}
-			case "Volunteer":
 			case "Wolontariusz":
 				{
 					role = "Volunteer";
@@ -437,6 +436,18 @@ input[type="submit"]:hover {
 
 		BasicUser createdUser = new BasicUser(email, name, phoneNumber, address, isVerified, surname, pesel, institution, website, krs, role);
 
+		/*var registerRequest = new RegisterRequest(){Surname = surname, 
+													Pesel = pesel, 
+													Email = email, 
+													Name = name, 
+													PhoneNumber = phoneNumber, 
+													Address = address, 
+													Institution = institution, 
+													IsVerified = isVerified, 
+													Krs = krs, 
+													Role = role, 
+													Website = website};*/
+
 		var registerRequest = new RegisterRequest() { Email = email };
 
 		var handler = new HttpClientHandler();
@@ -445,8 +456,11 @@ input[type="submit"]:hover {
 			try
 			{
 				var cookieContainer = new CookieContainer();
-
+				Console.WriteLine("a");
+				
 				var response = await client.PostAsJsonAsync(nav.BaseUri + "api/SignUp/SignUp", registerRequest);
+				Console.WriteLine("tutaj");
+				Console.WriteLine(response.StatusCode);
 				if (response.IsSuccessStatusCode)
 				{
 					registered = true;
@@ -460,10 +474,24 @@ input[type="submit"]:hover {
 					Guid tokenGUID = Guid.NewGuid();
 					string token = tokenGUID.ToString();
 
+					//userExecuter.SendToDataBase(individual, key, hashedPassword, token);
 					Individual user = new Individual(surname, pesel, email, name, phoneNumber, address, isVerified);
 					var packedUser = JsonSerializer.Serialize(user);
-
+					Console.WriteLine("gdzies indziej");
 					userExecuter.SendToDataBase(individual, key, hashedPassword, token, role, website, krs, institution);
+					/*userExecuter.CustomQuery(@"INSERT INTO users(email, user, encryptionKey, password, emailVerified, token, role, website, krs, institution) 
+											 VALUES("
+											 + email + "," 
+											 + packedUser + "," 
+										     + key + "," 
+											 + hashedPassword + "," 
+									         + "false" + "," 
+											 + token + "," 
+										     + role + "," 
+										     + website + "," 
+											 + krs + "," 
+											 + institution + ","
+											 + ")");*/
 
 					string link = nav.BaseUri + "verify/" + token;
 
@@ -476,9 +504,10 @@ input[type="submit"]:hover {
 					try
 					{
 						response = await client.PostAsJsonAsync(nav.BaseUri + "api/Email/SendEmail", emailDto);
+						Console.WriteLine(response.StatusCode);
 						if (response.IsSuccessStatusCode)
 						{
-							errorMessage = Loc["EmailSent"];
+							errorMessage = "Poprawnie wysłano maila.";
 						}
 						else
 						{
@@ -493,7 +522,7 @@ input[type="submit"]:hover {
 				else
 				{
 					registered = false;
-					errorMessage = Loc["ExistingUser"];
+					errorMessage = "Taki użytkownik już istnieje.";
 				}
 			}
 			catch (Exception ex)

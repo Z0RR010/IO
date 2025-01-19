@@ -94,11 +94,11 @@
         public List<string> GetItemsByCategory(string category)
         {
             List<string> output = new List<string>();
-            foreach (Resource item in _handler.GetAllItemsObjects())
+            foreach (Resource item in _handler.GetAllItems())
             {
                 if (item.Category.ToString().ToLower().Equals(category.ToLower()))
                 {
-                    output.Add(item.Name + " - " + item.Category + " - " + item.Amount);
+                    output.Add(item.Name + " - " + item.Category + " - " + item.Amount + " - " + item.Status);
                 }
             }
             return output;

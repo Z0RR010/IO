@@ -144,9 +144,6 @@
   <data name="Remove" xml:space="preserve">
     <value>Usuń</value>
   </data>
-  <data name="RequestAdded" xml:space="preserve">
-    <value>Zgłoszenie prawidłowo dodane!</value>
-  </data>
   <data name="Street" xml:space="preserve">
     <value>Ulica</value>
   </data>

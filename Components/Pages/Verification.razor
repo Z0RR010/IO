@@ -2,19 +2,14 @@
 @rendermode InteractiveServer
 @using IO.Modules.Security
 @using IO.Modules.ResourceManager
-@using Microsoft.Extensions.Localization
 @inject NavigationManager nav
-@inject IStringLocalizer<Verification> Loc
-
-<AuthorizeView Roles="Authority">
-    <Authorized>
-        <h1>@Loc["Verify"]</h1>
-        <table class="table">
+<h1>Verify affected users</h1>
+<table>
     <thead>
             <tr>
-                <th>@Loc["Name"]</th>
-                <th>@Loc["Surname"]</th>
-                <th>@Loc["Address"]</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Address</th>
                 <th>Pesel</th>
                 <th></th>
             </tr>
@@ -39,20 +34,12 @@
             </td>
             
             
-            <button class="btn-primary" @onclick="() => Verify(user.Email)">@Loc["Ver"]</button>
+            <button class="btn-primary" @onclick="() => Verify(user.Email)">Verify</button>
         </tr>
     }
     </tbody>
 </table>
-    </Authorized>
-</AuthorizeView>
-<title>@Loc["Verify"]</title>
 
-
-<footer class="footer">
-    <button @onclick="Polish" class="lang">Polski</button>
-    <button @onclick="English" class="lang">English</button>
-</footer>
 
 
 
@@ -87,34 +74,7 @@ async Task Verify(string email)
     userX.VerifyUser(email);    
     nav.Refresh(true);
 }
-private async Task English()
-    {
-        String newUri = nav.Uri;
-        String oldUri = nav.Uri;
-        if (newUri.Contains("?ui-culture=pl"))
-        {
-            newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
-        }
-        if (!newUri.Contains("?ui-culture=en-US"))
-        {
-            newUri += "?ui-culture=en-US";
-        }
-        nav.NavigateTo(newUri, true);
-    }
 
-    private async Task Polish()
-    {
-        String newUri = nav.Uri;
-        if (newUri.Contains("?ui-culture=en-US"))
-        {
-            newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
-        }
-        if (!newUri.Contains("?ui-culture=pl"))
-        {
-            newUri += "?ui-culture=pl";
-        }
-        nav.NavigateTo(newUri, true);
-    }
 
 
     @* bool NotVerfiedPredicate(BasicUser user)
@@ -149,6 +109,7 @@ private async Task English()
     .table td {
     padding: 12px 15px;
     border: 1px solid #ddd; /* Linie siatki tabeli */
+    min-width: 20%;
     }
 
     .table th {

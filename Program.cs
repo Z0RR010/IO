@@ -8,6 +8,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.Cookies;
+//using Microsoft.AspNetCore.Components.Authorization;
+//using Microsoft.AspNetCore.Identity;
+//using Microsoft.AspNetCore.Identity.UI.Services;
+//using Microsoft.EntityFrameworkCore;
+//using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace IO
 {
@@ -34,6 +39,18 @@ namespace IO
             builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlite("Data Source=./databases/userDatabase.db"));
             builder.Services.AddControllers();
+
+            /*
+            builder.Services.AddCascadingAuthenticationState();
+            builder.Services.AddScoped<UserAccessor>();
+            builder.Services.AddScoped<IdentityRedirectManager>();
+            builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
+            builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme).AddIdentityCookies();
+            builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddSignInManager()
+                .AddDefaultTokenProviders();
+            */
 
             builder.Services.AddSingleton<Communicator>();
             builder.Services.AddSingleton(provider =>
