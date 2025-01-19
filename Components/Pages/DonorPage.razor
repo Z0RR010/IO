@@ -174,10 +174,10 @@
     private string errorMessage = string.Empty;
     private List<Donation> selectedDonations = new List<Donation>();
     private DonationManager donationManager = new DonationManager();
-    private bool IsAnyDonationSelected => donationManager.GetAllDonations().Any(d => d.Selected);
+    private bool IsAnyDonationSelected => donationManager.GetDonationByEmail(selectedEmail).Any(d => d.Selected);
     private string sortBy = "";
     private SortOrder sortDirection = SortOrder.Ascending;
-    private List<Donation> SortedDonations => SortDonations(donationManager.GetAllDonations());
+    private List<Donation> SortedDonations => SortDonations(donationManager.GetDonationByEmail(selectedEmail));
     private string selectedItem = string.Empty;
     private List<Resource> items = new List<Resource> {};
     private string selectedEmail = string.Empty;
@@ -267,7 +267,7 @@
 
     private bool AreAllDonationsSelected()
     {
-        return donationManager.GetAllDonations().All(d => d.Selected);
+        return donationManager.GetDonationByEmail(selectedEmail).All(d => d.Selected);
     }
 
     private bool selectAll
@@ -275,7 +275,7 @@
         get { return AreAllDonationsSelected(); }
         set
         {
-            foreach (var donation in donationManager.GetAllDonations())
+            foreach (var donation in donationManager.GetDonationByEmail(selectedEmail))
             {
                 donation.Selected = value;
             }
@@ -316,7 +316,7 @@
     private void ToggleSelectAll()
     {
         var isSelected = AreAllDonationsSelected();
-        foreach (var donation in donationManager.GetAllDonations())
+        foreach (var donation in donationManager.GetDonationByEmail(selectedEmail))
         {
             donation.Selected = !isSelected;
         }
@@ -368,7 +368,7 @@
           XStringFormats.TopCenter);
 
         yPoint += 40;
-        foreach (var donation in donationManager.GetAllDonations().Where(d => d.Selected))
+        foreach (var donation in donationManager.GetDonationByEmail(selectedEmail).Where(d => d.Selected))
         {
             gfx.DrawString($"ID: {donation.DonationID}", font, XBrushes.Black, 40, yPoint);
             yPoint += 20;

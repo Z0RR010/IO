@@ -5,7 +5,7 @@ namespace IO.Modules.DonorLibrary
 {
     public class DonationManager
     {
-        private List<Donation> donations;
+        public List<Donation> donations;
 
         public DonationManager()
         {
@@ -32,8 +32,19 @@ namespace IO.Modules.DonorLibrary
 
         private int GetNextId()
         {
-            return donations.Count == 0 ? 0 : donations.Max(d => d.DonationID) + 1;
+            int newId = 0;
+            do
+            {
+                if (!donations.Any(d => d.DonationID == newId))
+                {
+                    break;
+                }
+                newId++;
+            } while (true);
+
+            return newId;
         }
+
         public List<Donation> GetAllDonations()
         {
             return donations;
@@ -55,6 +66,12 @@ namespace IO.Modules.DonorLibrary
             if (donation == null)
                 throw new KeyNotFoundException($"Donation with ID: {donationID} not found.");
             return donation;
+        }
+
+        public List<Donation> GetDonationByEmail(string email)
+        {
+            
+            return donations.Where(d => d.Email == email).ToList();
         }
 
         public IEnumerable<Donation> GetDonationsByDonor(Donor donor)

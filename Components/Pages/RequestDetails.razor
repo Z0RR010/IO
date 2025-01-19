@@ -2,29 +2,35 @@
 @rendermode InteractiveServer
 @using IO.Modules.MapLibrary
 @inject GoogleMapsClient GoogleMaps;
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@inject IStringLocalizer<RequestDetails> Loc
+@inject NavigationManager nav
 
-<h3>Request Details</h3>
+<button class="btn btn-primary" @onclick="GoBack">@Loc["Back"]</button>
+
+<h3>@Loc["Header"]</h3>
 
 @if (isLoading)
 {
-    <p><em>Loading...</em></p>
+    <p><em>@Loc["Loading"]</em></p>
 }
 else if (request == null)
 {
-    <p><em>Request not found.</em></p>
+    <p><em>@Loc["RequestNotFound"]</em></p>
 }
 else
 {
     <div class="container">
         <h4>@request.Title</h4>
-        <p><strong>Description:</strong> @request.Description</p>
-        <p><strong>Status:</strong> @request.Status</p>
-        <p><strong>Created At:</strong> @request.CreatedAt</p>
-        <p><strong>Updated At:</strong> @request.DateUpdated</p>
-        <p><strong>User:</strong> @request.User </p>
+        <p><strong>@Loc["Description"]:</strong> @request.Description</p>
+        <p><strong>@Loc["Status"]:</strong> @request.Status</p>
+        <p><strong>@Loc["CreatedAt"]:</strong> @request.CreatedAt</p>
+        <p><strong>@Loc["UpdatedAt"]:</strong> @request.DateUpdated</p>
+        <p><strong>@Loc["User"]:</strong> @request.User </p>
 
         <div>
-            <strong>Resources Required:</strong>
+            <strong>@Loc["ResourcesRequired"]:</strong>
             <ul class="resources-required">
                 @foreach (var resource in request.ResourcesRequired)
                 {
@@ -33,12 +39,13 @@ else
             </ul>
         </div>
 
-        <p><strong>Is Verified:</strong> @request.IsVerified</p>
+        <p><strong>@Loc["IsVerified"]:</strong> @request.IsVerified</p>
 
-        <p><strong>Address:</strong> @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
+        <p><strong>@Loc["Address"]:</strong> @request.Address.Street, @request.Address.City, @request.Address.StreetNumber, @request.Address.Apartment, @request.Address.ZipCode</p>
         <div id="map01" style="width: 100%; height: 500px; margin-top: 20px;"></div>
 
     </div>
+
 }
 
 <style>
@@ -101,9 +108,9 @@ else
         margin-left: 20px;
     }
 
-    .resources-required li {
-        margin-bottom: 0.5rem;
-    }
+        .resources-required li {
+            margin-bottom: 0.5rem;
+        }
 </style>
 
 @code {
@@ -150,5 +157,42 @@ else
                 Console.WriteLine("Request address is null or incomplete.");
             }
         }
+    }
+
+    private void GoBack()
+    {
+        var uri = nav.ToAbsoluteUri(nav.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        var culture = query.ContainsKey("ui-culture") ? query["ui-culture"].ToString() : "en-US";
+        nav.NavigateTo($"/requests?ui-culture={culture}");
+    }
+
+    private async Task English()
+    {
+        String newUri = nav.Uri;
+        String oldUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=pl"))
+        {
+            newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
+        }
+        if (!newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri += "?ui-culture=en-US";
+        }
+        nav.NavigateTo(newUri, true);
+    }
+
+    private async Task Polish()
+    {
+        String newUri = nav.Uri;
+        if (newUri.Contains("?ui-culture=en-US"))
+        {
+            newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
+        }
+        if (!newUri.Contains("?ui-culture=pl"))
+        {
+            newUri += "?ui-culture=pl";
+        }
+        nav.NavigateTo(newUri, true);
     }
 }
