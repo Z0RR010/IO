@@ -4,9 +4,11 @@
 @using IO.Modules.Volunteer
 @using IO.Modules.ResourceManager;
 @using RequestModule;
+@using IO.Modules.MapLibrary
 
 @inject SessionService sessionService
-
+@inject GoogleMapsClient GoogleMaps;
+@inject Geolocation Geolocation;
 <PageTitle>Volunteer</PageTitle>
 
 @if (whichForm == 0)
@@ -31,20 +33,6 @@
 }
 @if (whichForm == 1)
 {
-    <h1>!!!!GO AWAY!!!!</h1>
-    <h1>!!!!GO AWAY!!!!</h1>
-    <h1>!!!!GO AWAY!!!!</h1>
-    <h1>!!!!GO AWAY!!!!</h1>
-    <h1>!!!!GO AWAY!!!!</h1>
-    <h1>!!!!GO AWAY!!!!</h1>
-    <h1>!!!!GO AWAY!!!!</h1>
-    <h1>!!!!GO AWAY!!!!</h1>
-    <h1>!!!!GO AWAY!!!!</h1>
-    <h1>!!!!GO AWAY!!!!</h1>
-    <h1>!!!!GO AWAY!!!!</h1>
-    <h1>!!!!GO AWAY!!!!</h1>
-    <h1>!!!!GO AWAY!!!!</h1>
-
 }
 @if (whichForm == 2)
 {
@@ -149,13 +137,15 @@
             @foreach (var volunteerTask in volunteerManager.FindTasksByOrganisation(selectedVolunteer.OrganisationID).Where(
                 t => t.TaskStatus == IO.Modules.Volunteer.TaskStatus.New))
             {
-                <li class="list-group-item" style="cursor: pointer;" @onclick="() => ShowTaskDetails(volunteerTask)">
-                    @volunteerTask.Description - @volunteerTask.TaskStatus
+                <li class="list-group-item" style="cursor: pointer;" >
+                    <p @onclick="() => ShowTaskDetails(volunteerTask)">@volunteerTask.Description - @volunteerTask.TaskStatus</p>
+                
                     @if (selectedTask == volunteerTask && showTaskDetails)
                     {
                         <div class="mt-2">
+                            <p>@selectedTask.EndDate.ToString()</p>
                             <p>Address: @selectedTask.Address</p>
-                            <p> @selectedTask.EndDate.ToString()</p>
+                            <div id="map01" style="width: 100%; height: 500px; margin-top: 20px;"></div>
                             <button class="btn btn-primary btn-sm mt-2" @onclick="() => AssignTask()">Assign VolunteerTask</button>
                         </div>
                     }
@@ -163,7 +153,6 @@
                 </li>
             }
         </ul>
-
     }
 
     @if(selectedOption == 2)
@@ -178,8 +167,45 @@
                     @if (selectedTask == volunteerTask && showTaskDetails)
                     {
                         <div class="mt-2">
+                            <p>@selectedTask.EndDate.ToString()</p>
                             <p>Address: @selectedTask.Address</p>
-                            <p> @selectedTask.EndDate.ToString()</p>
+                            <div id="map01" style="width: 100%; height: 500px; margin-top: 20px;"></div>
+                            <div style="display: flex; flex-direction: column-reverse; gap: 10px;">
+                                @for (var index = fieldValues.Count - 1; index >= 0; index--)
+                                {
+                                    Console.WriteLine(index);
+                                    var i = index;
+                                    <div id="textfield-container" style="display: flex; align-items: center; gap: 5px;">
+                                        <input class="form-control" type="text" @bind="fieldValues[i]" placeholder="Enter address or location" style="flex: 1;" />
+
+                                        <div class="d-flex flex-column justify-content-between" style="height: 100%; width: 40px;">
+                                            @if (i != 0)
+                                            {
+                                                <button class="btn btn-primary btn-sm p-0 w-100" style="height: 45%;" @onclick="() => MoveFieldUp(i)">
+                                                    <span class="bi bi-caret-up-fill" style="font-size: 75%;"></span>
+                                                </button>
+                                            }
+                                            @if (i != fieldCount - 1)
+                                            {
+                                                <button class="btn btn-primary btn-sm p-0 w-100" style="height: 45%;" @onclick="() => MoveFieldDown(i)">
+                                                    <span class="bi bi-caret-down-fill" style="font-size: 75%;"></span>
+                                                </button>
+                                            }
+                                        </div>
+
+                                        @if (fieldValues.Count > 1)
+                                        {
+                                            <button class="btn btn-danger" @onclick="() => RemoveField(i)">-</button>
+                                        }
+                                    </div>
+                                }
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn btn-success" @onclick="AddField">+</button>
+                                    <button class="btn btn-primary" @onclick="() => ConfirmFields()">
+                                        Update midpoints
+                                    </button>
+                                </div>
+                            </div>
                             <button class="btn btn-primary btn-sm mt-2" @onclick="() => UpdateTaskStatus(IO.Modules.Volunteer.TaskStatus.Completed)">Complete Task</button>
                         </div>
                     }
@@ -448,9 +474,20 @@
 
     VolunteerManager volunteerManager = new VolunteerManager();
 
+
+    private MapController map01;
+    private int fieldCount = 1;
+    private List<string> fieldValues = new List<string> { "" };
+    private string globalAddress = string.Empty;
+
+
+
+
     protected override async System.Threading.Tasks.Task OnInitializedAsync()
     {
         volunteerManager.Load();
+        map01 = new(GoogleMaps, "map01");
+
         requestList = requestManager.GetAllRequests();
         string sessionUser = await sessionService.GetUserNameAsync();
         CheckUser(sessionUser);
@@ -462,7 +499,14 @@
             }
         }
     }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
 
+        if (firstRender)
+        {
+            await GoogleMaps.InitializeApi();
+        }
+    }
 
     private void CheckUser(string sessionUser)
     {
@@ -471,6 +515,7 @@
 
         if (basicUser != null)
         {
+
             if (basicUser.Role == "Volunteer")
             {
                 if (volunteerManager.VolunteerList.Any(v => v.Email == sessionUser))
@@ -497,6 +542,7 @@
                 {
                     ChangeForm(3);
                 }
+                globalAddress = selectedVolunteer.Address;
             }
             else if (basicUser.Role == "Charity")
             {
@@ -519,12 +565,14 @@
                     selectedOrganisation = org;
                 }
                 ChangeForm(4);
+                globalAddress = selectedOrganisation.Address;
             }
             else if(basicUser.Role == "Affected")
             {
                 selectedAffectedEmail = basicUser.Email;
                 selectedAffectedName = basicUser.Name;
                 ChangeForm(2);
+                globalAddress = basicUser.Address;
             }
 
         }
@@ -615,16 +663,24 @@
         }
     }
 
-    private void ShowTaskDetails(VolunteerTask volunteerTask)
+    private async void ShowTaskDetails(VolunteerTask volunteerTask)
     {
         if (selectedTask == volunteerTask)
         {
             showTaskDetails = !showTaskDetails;
+
         }
         else
         {
             selectedTask = volunteerTask;
+            map01.SetLocation(selectedTask.Address);
             showTaskDetails = true;
+        }
+        if (showTaskDetails == true)
+        {
+
+            await map01.DrawMap();
+
         }
     }
 
@@ -654,5 +710,62 @@
     {
         selectedTaskForRate = volunteerTask;
     }
+
+
+    private void AddField()
+    {
+        fieldValues.Add("");
+    }
+
+    private void RemoveField(int i)
+    {
+        if (fieldValues.Count > 1)
+        {
+            fieldValues.RemoveAt(i);
+        }
+    }
+
+    private void MoveFieldUp(int i)
+    {
+        if (i > 0)
+        {
+            (fieldValues[i], fieldValues[i - 1]) = (fieldValues[i - 1], fieldValues[i]);
+        }
+    }
+
+    private void MoveFieldDown(int i)
+    {
+        if (i < fieldValues.Count - 1)
+        {
+            (fieldValues[i], fieldValues[i + 1]) = (fieldValues[i + 1], fieldValues[i]);
+        }
+    }
+
+    private async void ConfirmFields()
+    {
+        Route rt;
+        Coordinates coordinates = await Geolocation.GetUserLocation();
+        if (coordinates == null)
+        {
+            rt = new Route(new AddressStringWrapper(globalAddress), map01.GetLocation());
+        }
+        else
+        {
+            rt = new Route(new CoordinatesWrapper(coordinates), map01.GetLocation());
+        }
+        foreach (string location in fieldValues)
+        {
+            if (!string.IsNullOrEmpty(location))
+            {
+                rt.AddRouteLocation(new AddressStringWrapper(location));
+            }
+            
+        }
+        map01.SetRoute(rt);
+        await map01.DrawMap();
+    }
+
+
+
 }
 
