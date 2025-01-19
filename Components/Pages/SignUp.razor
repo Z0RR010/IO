@@ -400,6 +400,7 @@ input[type="submit"]:hover {
 	User user = new User(email, name, phoneNumber, address, true);
 	Individual individual = new Individual(surname, pesel, email, name, phoneNumber, address, true);
 	*/
+		
 		Individual individual = new Individual(surname, pesel, email, name, phoneNumber, address, true);
 		string role = "";
 		bool isVerified = true;
@@ -474,7 +475,7 @@ input[type="submit"]:hover {
 					string token = tokenGUID.ToString();
 
 					//userExecuter.SendToDataBase(individual, key, hashedPassword, token);
-					Individual user = new Individual(surname, pesel, email, name, phoneNumber, address, true);
+					Individual user = new Individual(surname, pesel, email, name, phoneNumber, address, isVerified);
 					var packedUser = JsonSerializer.Serialize(user);
 					Console.WriteLine("gdzies indziej");
 					userExecuter.SendToDataBase(individual, key, hashedPassword, token, role, website, krs, institution);
