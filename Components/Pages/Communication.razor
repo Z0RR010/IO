@@ -3,16 +3,18 @@
 
 @using IO.Modules.Communication
 @using IO.Modules.Security
+@using Microsoft.Extensions.Localization
 @inject Communicator CommunicatorService
 @inject NavigationManager nav
 @inject SessionService ses
+@inject IStringLocalizer<Conversation> Loc
 
-<title>Communication</title>
+<title>@Loc["Communication"]</title>
 
 <div class="container">
     @if (!isAuthorized)
     {
-        <p>You do not have permission to view this page.</p>
+        <p>@Loc["You do not have permission to view this content."]</p>
     }
     else
     {
@@ -22,35 +24,35 @@
             <p></p>
         }
 
-        <h3>Aktywne konwersacje:</h3>
+        <h3>@Loc["Active Chats"]</h3>
         <ul>
             @foreach (var chat in CommunicatorService.testServer.ActiveChats) {
                 <li>
-                    <strong>ID Konwersacji:</strong> @chat.ChatId, <strong>Uczestnicy:</strong> @string.Join(", ", chat.Emails)
+                    <strong>@Loc["Chat ID"]</strong> @chat.ChatId, <strong>@Loc["Users"]</strong> @string.Join(", ", chat.Emails)
                 </li>
             }
         </ul>
-        <h2>Archiwizacja konwersacji</h2>
+        <h2>@Loc["Archive Chats"]</h2>
         <div>
-            <label for="chatIdToArchive">ID konwersacji: </label>
+            <label for="chatIdToArchive">@Loc["Chat ID"] </label>
             <input type="number" id="chatIdToArchive" @bind="chatIdToArchive" />
-            <button @onclick="ArchiveConversation">Archiwizuj konwersację</button>
+            <button @onclick="ArchiveConversation">@Loc["Archive Chats"]</button>
         </div>
 
-        <h3>Konwersacje w archiwum:</h3>
+        <h3>@Loc["Chats in Archive"]</h3>
         <ul>
             @foreach (var chat in CommunicatorService.testServer.ArchivalChats) {
                 <li>
-                    <strong>ID Konwersacji:</strong> @chat.ChatId, <strong>Uczestnicy:</strong> @string.Join(", ", chat.Emails)
+                    <strong>@Loc["Chat ID"]</strong> @chat.ChatId, <strong>@Loc["Users"]</strong> @string.Join(", ", chat.Emails)
                 </li>
             }
         </ul>
 
-        <h2>Cofnięcie archiwizacji</h2>
+        <h2>@Loc["Undo Archivization"]</h2>
         <div>
-            <label for="chatIdToBringBack">ID konwersacji: </label>
+            <label for="chatIdToBringBack">@Loc["Chat ID"] </label>
             <input type="number" id="chatIdToBringBack" @bind="chatIdToBringBack" />
-            <button @onclick="BringBackConversation">Cofnij archiwizację</button>
+            <button @onclick="BringBackConversation">@Loc["Undo Archivization"]</button>
         </div>
     }
 </div>
