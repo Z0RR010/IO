@@ -94,6 +94,20 @@ namespace IO.Modules.DonorLibrary
             executor.Dispose();
         }
 
+        public void SendToResources(Donation donation)
+        {
+            var executor = new DonorExecuter();
+
+            if (executor.SendDonationToResource(donation))
+            {
+                Console.WriteLine("Donation added or updated successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to add or update donation.");
+            }
+            executor.Dispose();
+        }
         public void Load()
         {
             var executor = new DonorExecuter();

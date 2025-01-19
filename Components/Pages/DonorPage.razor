@@ -121,7 +121,7 @@
                 </tr>
         </thead>
         <tbody>
-            @foreach (var donation in SortedDonations)
+                @foreach (var donation in SortedDonationsForCharity)
             {
                 <tr>
                     <td style="color: white;">@donation.DonationID</td>
@@ -178,12 +178,13 @@
     private string sortBy = "";
     private SortOrder sortDirection = SortOrder.Ascending;
     private List<Donation> SortedDonations => SortDonations(donationManager.GetDonationByEmail(selectedEmail));
+    private List<Donation> SortedDonationsForCharity => SortDonations(donationManager.GetAllDonations());
     private string selectedItem = string.Empty;
     private List<Resource> items = new List<Resource> {};
     private string selectedEmail = string.Empty;
     private bool loggedCharity = false;
     private bool loggedDonor = false;
-    private List<Status> statuses = new List<Status> {Status.Registered, Status.Accepted, Status.InMagazine, Status.Archived};
+    private List<Status> statuses = new List<Status> {Status.Registered, Status.Accepted, Status.InMagazine, Status.Archived, Status.Unwanted};
     private Status selectedStatus = Status.Registered;
 
     private async Task English()
@@ -326,6 +327,10 @@
     {
         donation.SetDonationStatus(selectedStatus);
         donationManager.UpdateDonationStatus(donation);
+        if (donation.DonationStatus == Status.InMagazine)
+        {
+            donationManager.SendToResources(donation);
+        }
     }
 
     private void GenerateReport()

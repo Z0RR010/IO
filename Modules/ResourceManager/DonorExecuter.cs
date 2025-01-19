@@ -12,6 +12,8 @@ namespace IO.Modules.ResourceManager
     {
         private readonly string _connectionString =
                     "Data Source=./databases/donorDatabase.db;Cache=Shared";
+        private readonly string _connectionStringResources =
+                    "Data Source=./databases/resourceBase.db;Cache=Shared";
 
         public bool SendDonationToDatabase(IO.Modules.DonorLibrary.Donation donation)
         {
@@ -64,13 +66,13 @@ namespace IO.Modules.ResourceManager
                 }
 
                 Console.WriteLine(rowsAffected > 0
-                    ? $"VolunteerTask {donation.DonationID} saved/updated in the database."
-                    : $"Failed to save/update volunteerTask {donation.DonationID} to database.");
+                    ? $"Donation {donation.DonationID} saved/updated in the database."
+                    : $"Failed to save/update donation {donation.DonationID} to database.");
                 return rowsAffected > 0;
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error saving volunteerTask to the database: {e.Message}");
+                Console.WriteLine($"Error saving donation to the database: {e.Message}");
                 return false;
             }
         }
@@ -104,10 +106,68 @@ namespace IO.Modules.ResourceManager
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error loading VolunteerTasks from database: {e.Message}");
+                Console.WriteLine($"Error loading donation from database: {e.Message}");
             }
 
             return donations;
+        }
+
+        public bool SendDonationToResource(IO.Modules.DonorLibrary.Donation donation)
+        {
+            if (donation == null) throw new ArgumentNullException(nameof(donation));
+            try
+            {
+                using var connection = new SqliteConnection(_connectionStringResources);
+                connection.Open();
+
+                string checkQuery = "SELECT amount, hashcode_id FROM resources WHERE name = @name";
+                using var checkCommand = new SqliteCommand(checkQuery, connection);
+                checkCommand.Parameters.AddWithValue("@name", donation.Item);
+
+                using var reader = checkCommand.ExecuteReader();
+                if (reader.Read())
+                {
+                    int? existingAmount = reader.IsDBNull(0) ? 0 : reader.GetInt32(0);
+                    int existingHashcodeId = reader.GetInt32(1); // Correct column index is 1
+
+                    int? newAmount = existingAmount + donation.Quantity;
+
+                    string updateQuery = @"
+UPDATE resources 
+SET amount = @amount
+WHERE hashcode_id = @hashcode_id";
+                    using var updateCommand = new SqliteCommand(updateQuery, connection);
+                    updateCommand.Parameters.AddWithValue("@amount", newAmount);
+                    updateCommand.Parameters.AddWithValue("@hashcode_id", existingHashcodeId);
+
+                    int rowsAffected = updateCommand.ExecuteNonQuery();
+                    Console.WriteLine(rowsAffected > 0
+                        ? $"Donation {donation.Item} updated in the database."
+                        : $"Failed to update donation {donation.Item} in the database.");
+                    return rowsAffected > 0;
+                }
+                else
+                {
+                    // Item does not exist, insert new record
+                    string insertQuery = @"
+INSERT INTO resources (name, amount)
+VALUES (@name, @amount)";
+                    using var insertCommand = new SqliteCommand(insertQuery, connection);
+                    insertCommand.Parameters.AddWithValue("@name", donation.Item);
+                    insertCommand.Parameters.AddWithValue("@amount", donation.Quantity);
+
+                    int rowsAffected = insertCommand.ExecuteNonQuery();
+                    Console.WriteLine(rowsAffected > 0
+                        ? $"Donation {donation.Item} added to the database."
+                        : $"Failed to add donation {donation.Item} to the database.");
+                    return rowsAffected > 0;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error saving donation to the database: {e.Message}");
+                return false;
+            }
         }
 
         public void Dispose()
