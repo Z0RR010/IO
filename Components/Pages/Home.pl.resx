@@ -161,12 +161,4 @@
     <value>Witamy darczyńcę</value>
     <comment>a</comment>
   </data>
-  <data name="Aut" xml:space="preserve">
-    <value>Witamy przedstawiciela władz</value>
-    <comment>d</comment>
-  </data>
-  <data name="Main" xml:space="preserve">
-    <value>Główna strona</value>
-    <comment>s</comment>
-  </data>
 </root>

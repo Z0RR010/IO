@@ -16,7 +16,7 @@
 @inject IStringLocalizer<VolunteerPage> Loc
 @inject NavigationManager nav
 
-<PageTitle>@Loc["Volunteer"]</PageTitle>
+<PageTitle>Volunteer</PageTitle>
 
 @if (whichForm == 0)
 {
@@ -134,7 +134,7 @@
     <button class="btn btn-primary" @onclick="() => ChangeSelect(2)">@Loc["Your Active Tasks"]</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(3)">@Loc["Your Completed Tasks"]</button>
     <button class="btn btn-primary" @onclick="() => ChangeSelect(4)">@Loc["Your Rates"]</button>
-    <button class="btn btn-primary" @onclick="() => ChangeSelect(5)">@Loc["Your profile"]</button>
+    <button class="btn btn-primary" @onclick="() => ChangeSelect(5)">@Loc["Your Profile"]</button>
 
 
     @if (selectedOption == 1)
@@ -387,7 +387,7 @@
                                 v => v.VolunteerID == selectedTask.VolunteerID).LastName @volunteerManager.VolunteerList.FirstOrDefault(
                                 v => v.VolunteerID == selectedTask.VolunteerID).Email
                                 </p>
-                            <p>Request: @requestManager.GetAllRequests().FirstOrDefault(r => r.Id == selectedTask.RequestID).Title</p>
+                            <p>@Loc["Request"]: @requestManager.GetAllRequests().FirstOrDefault(r => r.Id == selectedTask.RequestID).Title</p>
                                 <p>@Loc["Address"]: @selectedTask.Address</p>
                                 <div id="map01" style="width: 100%; height: 500px; margin-top: 20px;"></div>
                             }
@@ -664,6 +664,11 @@
     }
     private void UpdateTaskStatus(IO.Modules.Volunteer.TaskStatus taskStatus)
     {
+        if(taskStatus == IO.Modules.Volunteer.TaskStatus.Completed)
+        {
+            selectedTask.EndDate = DateTime.Today;
+        }
+
         volunteerManager.UpdateTaskStatus(selectedTask, taskStatus);
     }
     private async void ToggleRequestDetails(Request request)
@@ -783,7 +788,7 @@
             {
                 rt.AddRouteLocation(new AddressStringWrapper(location));
             }
-            
+
         }
         map01.SetRoute(rt);
         await map01.DrawMap();
@@ -816,6 +821,7 @@
             newUri += "?ui-culture=pl";
         }
         nav.NavigateTo(newUri, true);
+
     }
 
 }

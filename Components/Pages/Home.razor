@@ -6,7 +6,7 @@
 @rendermode InteractiveServer
 @inject IStringLocalizer<Home> Loc
 @inject NavigationManager nav
-<PageTitle>@Loc["Main"]</PageTitle>
+<PageTitle>Home</PageTitle>
 
 <h1>
     @Loc["Hello"]
@@ -43,13 +43,6 @@
 <AuthorizeView Roles="Donor">
     <Authorized>
         <h4>@Loc["Don"]</h4>
-        <p2>@name</p2>
-    </Authorized>
-</AuthorizeView>
-
-<AuthorizeView Roles="Authority">
-    <Authorized>
-        <h4>@Loc["Aut"]</h4>
         <p2>@name</p2>
     </Authorized>
 </AuthorizeView>
