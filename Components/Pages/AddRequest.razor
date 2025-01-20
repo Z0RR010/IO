@@ -4,6 +4,7 @@
 @using IO.Modules.Security
 @using Microsoft.Extensions.Localization
 @using System.Globalization
+@using IO.Modules.ResourceManager
 @inject IStringLocalizer<AddRequest> Loc
 @inject NavigationManager nav
 <title>@Loc["HeaderAdd"]</title>
@@ -76,6 +77,7 @@
         </div>
 
     }
+    using IO.Modules.ResourceManager;
     <button type="submit" class="btn btn-primary" @onclick="HandleValidSubmit">@Loc["Submit"]</button>
 </div>
 <footer class="footer">
@@ -198,6 +200,15 @@
     {
         await base.OnInitializedAsync();
         email = await sessionService.GetUserNameAsync();
+        UserExecuter userExecuter = new UserExecuter();
+        if (!userExecuter.GetBasicUser(email).IsVerified)
+        {
+            nav.NavigateTo("",true);
+        }
+        if (!(userExecuter.GetBasicUser(email).Role == "Affected"))
+        {
+            nav.NavigateTo("",true);
+        }
         token = userExecuter.GetToken(email);
         selectedResources = new List<IO.Modules.ResourceManager.Resource>();
     }
