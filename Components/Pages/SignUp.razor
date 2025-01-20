@@ -397,7 +397,7 @@ input[type="submit"]:hover {
 
 		hashedPassword = Security.hashData(password);
 		
-		Individual individual = new Individual(surname, pesel, email, name, phoneNumber, address, true);
+		Individual individual = new Individual(surname, pesel, email, name, phoneNumber, address, isVerified);
 		string role = "";
 		bool isVerified = true;
 		switch(userType)
