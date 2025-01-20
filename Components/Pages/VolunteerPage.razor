@@ -551,7 +551,10 @@
 
         if (basicUser != null)
         {
-
+            if (!basicUser.IsVerified)
+            {
+                nav.NavigateTo("",true);
+            }
             if (basicUser.Role == "Volunteer")
             {
                 if (volunteerManager.VolunteerList.Any(v => v.Email == sessionUser))
