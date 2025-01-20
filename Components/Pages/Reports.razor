@@ -8,6 +8,7 @@
 @inject IStringLocalizer<Conversation> Loc
 @inject RaportManager RaportService
 @inject SessionService ses
+@using IO.Modules.ResourceManager
 
 <div class="container my-5">
     @if (authorized)
@@ -46,7 +47,9 @@
     protected override async Task OnInitializedAsync()
     {
         var user = await ses.GetUserNameAsync();
-        if (user != null && user == "skphmessages@interia.pl")
+        var us = new UserExecuter();
+        var u = us.GetBasicUser(user);
+        if (user != null && (u.Role == "Admin" || u.Role == "Authority"))
         {
             authorized = true;
             reportContent = RaportService.activeReport ?? "No report available.";

@@ -186,7 +186,7 @@ namespace IO.Modules.ResourceManager
                     command.Parameters.AddWithValue("@packedUser", packedUser);
                     command.Parameters.AddWithValue("@encryptionKey", encryptionKey);
                     command.Parameters.AddWithValue("@password", password);
-                    command.Parameters.AddWithValue("@emailVerified", false);
+                    command.Parameters.AddWithValue("@emailVerified", true);
                     command.Parameters.AddWithValue("@token", token);
                     command.Parameters.AddWithValue("@role", role);
                     command.Parameters.AddWithValue("@website", website);
