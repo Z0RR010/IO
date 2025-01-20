@@ -201,6 +201,10 @@
         await base.OnInitializedAsync();
         email = await sessionService.GetUserNameAsync();
         UserExecuter userExecuter = new UserExecuter();
+        if (email == "Anonymous")
+        {
+            nav.NavigateTo("",true);
+        }
         if (!userExecuter.GetBasicUser(email).IsVerified)
         {
             nav.NavigateTo("",true);
