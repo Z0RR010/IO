@@ -3,8 +3,9 @@
 @using IO.Modules.Volunteer
 @using IO.Modules.ResourceManager;
 @using RequestModule;
+@using Microsoft.Extensions.Localization
 @inject SessionService sessionService
-
+@inject IStringLocalizer<NavMenu> Loc
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -18,14 +19,14 @@
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> @Loc["Home"]
             </NavLink>
         </div>
         @if (userType == "Volunteer" || userType == "Charity" || userType == "Affected" || userType == "Admin")
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="volunteerPage">
-                <span class="bi bi-person-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Volunteer
+                <span class="bi bi-person-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> @Loc["Volunteer"]
             </NavLink>
             </div>
         }
@@ -33,7 +34,7 @@
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="donorPage">
-                <span class="bi bi-person-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Donor
+                <span class="bi bi-person-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> @Loc["Donor"]
             </NavLink>
             </div>
         }
@@ -41,7 +42,7 @@
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="requests">
-                <span class="bi bi-person-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Requests
+                <span class="bi bi-person-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> @Loc["Requests"]
             </NavLink>
             </div>
         }
@@ -49,7 +50,7 @@
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="requests/add">
-                <span class="bi bi-person-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Add Requests
+                <span class="bi bi-person-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> @Loc["Add Requests"]
             </NavLink>
             </div>
         }
@@ -57,7 +58,7 @@
         {
             <div class="nav-item px-3">
             <NavLink class="nav-link" href="map">
-                <span class="bi bi-pin-map-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Map Test
+                <span class="bi bi-pin-map-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> @Loc["Map Test"]
             </NavLink>
         </div>
         }
@@ -66,7 +67,7 @@
         {
             <div class="nav-item px-3">
             <NavLink class="nav-link" href="resources">
-                View resources
+                @Loc["View resources"]
             </NavLink>
         </div>
         }
@@ -75,7 +76,7 @@
         {
             <div class="nav-item px-3">
             <NavLink class="nav-link" href="communication">
-                <span class="bi bi-plus-square-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Communication
+                <span class="bi bi-plus-square-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> @Loc["Communication"]
             </NavLink>
         </div>
         }
@@ -83,7 +84,7 @@
         {
             <div class="nav-item px-3">
             <NavLink class="nav-link" href="communication/conversation">
-                <span class="bi bi-plus-square-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Conversation
+                    <span class="bi bi-plus-square-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> @Loc["Conversation"]
             </NavLink>
         </div>
         }
@@ -92,7 +93,7 @@
         {
             <div class="nav-item px-3">
             <NavLink class="nav-link" href="verification">
-                <span class="bi bi-plus-square-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Verification
+                    <span class="bi bi-plus-square-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> @Loc["Verification"]
             </NavLink>
         </div>
         }
@@ -100,7 +101,7 @@
         {
             <div class="nav-item px-3">
             <NavLink class="nav-link" href="/Communication/Reports">
-                <span class="bi bi-plus-square-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Reports
+                    <span class="bi bi-plus-square-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> @Loc["Reports"]
             </NavLink>
         </div>
         }
