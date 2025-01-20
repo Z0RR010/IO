@@ -160,4 +160,19 @@
   <data name="Change Status" xml:space="preserve">
     <value>Change Status of Donation</value>
   </data>
+  <data name="InMagazine" xml:space="preserve">
+    <value>In Magazine</value>
+  </data>
+  <data name="Accepted" xml:space="preserve">
+    <value>Accepted</value>
+  </data>
+  <data name="Unwanted" xml:space="preserve">
+    <value>Unwanted</value>
+  </data>
+  <data name="Archived" xml:space="preserve">
+    <value>Archived</value>
+  </data>
+  <data name="Registered" xml:space="preserve">
+    <value>Registered</value>
+  </data>
 </root>

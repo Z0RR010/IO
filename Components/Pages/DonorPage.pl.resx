@@ -160,4 +160,19 @@
   <data name="Change Status" xml:space="preserve">
     <value>Zmień Status Darowizny</value>
   </data>
+  <data name="InMagazine" xml:space="preserve">
+    <value>W Magazynie</value>
+  </data>
+  <data name="Accepted" xml:space="preserve">
+    <value>Zaakceptowany</value>
+  </data>
+  <data name="Unwanted" xml:space="preserve">
+    <value>Niepotrzebna</value>
+  </data>
+  <data name="Archived" xml:space="preserve">
+    <value>Zarchiwizowana</value>
+  </data>
+  <data name="Registered" xml:space="preserve">
+    <value>Zarejestrowana</value>
+  </data>
 </root>
