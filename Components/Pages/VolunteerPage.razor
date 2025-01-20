@@ -124,6 +124,22 @@
     @if (selectedOption == 2)
     {
         <h3>@Loc["Your Rates"]</h3>
+        <ul class="list-group">
+            @foreach (var rate in volunteerManager.RateList.Where(r => r.RateID == volunteerTasksForAffected.FirstOrDefault().RateID).ToList())
+            {
+                <li class="list-group-item" style="cursor: pointer;">
+                    <p @onclick="() => ShowRateDetails(rate)">@Loc["Rate"]: @rate.Description</p>
+
+                    @if (selectedRate == rate && showRateDetails)
+                    {
+                        <div class="mt-2">
+                            <p>@Loc["This rate was for task"] @volunteerTasksForAffected.FirstOrDefault(t => t.RateID == rate.RateID)</p>
+                        </div>
+                    }
+
+                </li>
+            }
+        </ul>
     }        
 }
 
@@ -465,6 +481,7 @@
     private bool showRequestDetails = false;
     private bool showTaskDetails = false;
     private bool showVolunteerDetails = false;
+    private bool showRateDetails = false;
 
 
     private string description = string.Empty;
@@ -484,6 +501,9 @@
     private Organisation selectedOrganisation = new Organisation();
     private VolunteerTask selectedTask = new VolunteerTask();
     private List<Request> requestList = new List<Request>();
+    private List<Request> requestListForAffected = new List<Request>();
+    private List<VolunteerTask> volunteerTasksForAffected = new List<VolunteerTask>();
+
     RequestManager requestManager = new RequestManager();
     private string selectedOrganisationName =>
         volunteerManager.OrganisationList.FirstOrDefault(o => o.OrganisationID == selectedOrganisationID)?.OrganisationName ?? "None";
@@ -589,6 +609,8 @@
                 selectedAffectedName = basicUser.Name;
                 ChangeForm(2);
                 globalAddress = basicUser.Address;
+                requestListForAffected = requestList.Where(r => r.User == selectedAffectedEmail).ToList();
+                volunteerTasksForAffected = volunteerManager.VolunteerTaskList.Where(t => t.RequestID == requestListForAffected.FirstOrDefault().Id).ToList();
             }
 
         }
@@ -709,6 +731,19 @@
 
             await map01.DrawMap();
 
+        }
+    }
+
+    private void ShowRateDetails(Rate rate)
+    {
+        if (selectedRate == rate)
+        {
+            showRateDetails = !showRateDetails;
+        }
+        else
+        {
+            selectedRate = rate;
+            showRateDetails = true;
         }
     }
 
