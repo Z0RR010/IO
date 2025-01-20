@@ -7,6 +7,7 @@
 @using Microsoft.Extensions.Localization
 @inject Communicator CommunicatorService
 @inject SessionService ses
+@inject NavigationManager nav
 
 <div class="container my-4">
 
@@ -61,7 +62,10 @@
         <p class="text-muted">@Loc["No Conversations"]</p>
     }
 </div>
-
+<footer class="footer">
+        <button @onclick="Polish" class="lang">Polski</button>
+        <button @onclick="English" class="lang">English</button>
+    </footer>
 @code {
     private string userEmailToRead;
     private string newChatUser;
@@ -73,6 +77,10 @@
     protected override async Task OnInitializedAsync()
     {
         userEmailToRead = await ses.GetUserNameAsync();
+        if (userEmailToRead == "Anonymous")
+        {
+            nav.NavigateTo("",true);
+        }
         userChats = CommunicatorService.GetUserChats(userEmailToRead);
         FilterChats();
     }
@@ -118,6 +126,35 @@
             filteredChats = userChats.Where(chat => chat.Emails.Any(email => email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))).ToList();
         }
     }
+
+    private async Task English()
+        {
+            String newUri = nav.Uri;
+            String oldUri = nav.Uri;
+            if (newUri.Contains("?ui-culture=pl"))
+            {
+                newUri = newUri.Replace("?ui-culture=pl", "?ui-culture=en-US");
+            }
+            if (!newUri.Contains("?ui-culture=en-US"))
+            {
+                newUri += "?ui-culture=en-US";
+            }
+            nav.NavigateTo(newUri, true);
+        }
+
+        private async Task Polish()
+        {
+            String newUri = nav.Uri;
+            if (newUri.Contains("?ui-culture=en-US"))
+            {
+                newUri = newUri.Replace("?ui-culture=en-US", "?ui-culture=pl");
+            }
+            if (!newUri.Contains("?ui-culture=pl"))
+            {
+                newUri += "?ui-culture=pl";
+            }
+            nav.NavigateTo(newUri, true);
+        }
 }
 <style>
     .container {

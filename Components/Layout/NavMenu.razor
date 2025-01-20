@@ -79,12 +79,15 @@
             </NavLink>
         </div>
         }
-        
-        <div class="nav-item px-3">
+        @if (mail != "Anonymous")
+        {
+            <div class="nav-item px-3">
             <NavLink class="nav-link" href="communication/conversation">
                 <span class="bi bi-plus-square-fill" style="font-size: 1.5rem; margin-top: -25px;" aria-hidden="true"></span> Conversation
             </NavLink>
         </div>
+        }
+        
         @if (userType == "Authority" || userType == "Admin")
         {
             <div class="nav-item px-3">
@@ -110,11 +113,12 @@
 @code{
     string userType = string.Empty;
     bool isVerified = false;
+    string mail = string.Empty;
     protected override async System.Threading.Tasks.Task OnInitializedAsync()
     {
-        string sessionUser = await sessionService.GetUserNameAsync();
+        mail= await sessionService.GetUserNameAsync();
         UserExecuter userExecuter = new UserExecuter();
-        BasicUser basicUser = userExecuter.GetBasicUser(sessionUser);
+        BasicUser basicUser = userExecuter.GetBasicUser(mail);
 
         if (basicUser != null)
         {
