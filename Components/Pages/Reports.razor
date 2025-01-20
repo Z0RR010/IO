@@ -46,7 +46,7 @@
     protected override async Task OnInitializedAsync()
     {
         var user = await ses.GetUserNameAsync();
-        if (user != null && user == "skph@interia.pl")
+        if (user != null && user == "skphmessages@interia.pl")
         {
             authorized = true;
             reportContent = RaportService.activeReport ?? "No report available.";
