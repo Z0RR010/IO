@@ -603,7 +603,7 @@
                 ChangeForm(4);
                 globalAddress = selectedOrganisation.Address;
             }
-            else if(basicUser.Role == "Affected")
+            else if(basicUser.Role == "Affected" && basicUser.IsVerified)
             {
                 selectedAffectedEmail = basicUser.Email;
                 selectedAffectedName = basicUser.Name;
