@@ -39,7 +39,7 @@
             </td>
             
             
-            <button class="btn-primary" @onclick="() => Verify(user.Email)">@Loc["Ver"]</button>
+            <button class="btn-primar" @onclick="() => Verify(user.Email)">@Loc["Ver"]</button>
         </tr>
     }
     </tbody>
@@ -140,8 +140,10 @@ private async Task English()
     border-collapse: collapse;
     margin: 20px 0;
     font-size: 1rem;
-    text-align: left;
-    background-color: #f9f9f9; /* Jasnoszare t�o */
+    text-align: center;
+    align-items: center;
+    color:white;
+    background-color: #232222; /* Jasnoszare t�o */
     border: 1px solid #ddd;
     }
 
@@ -159,15 +161,15 @@ private async Task English()
     }
 
     .table tbody tr:nth-child(odd) {
-    background-color: #f2f2f2; /* Alternatywne kolory wierszy */
+    background-color: #1e1e1e; /* Alternatywne kolory wierszy */
     }
 
     .table tbody tr:nth-child(even) {
-    background-color: #ffffff;
+    background-color: #0c0c0c;
     }
 
     .table tbody tr:hover {
-    background-color: #dff0d8; /* Kolor pod�wietlenia wiersza */
+    background-color: #323530; /* Kolor pod�wietlenia wiersza */
     }
 
     /* Stylowanie dla link�w w kolumnie akcji */
@@ -190,12 +192,12 @@ private async Task English()
     text-transform: uppercase;
     }
 
-    .btn-primary {
-    background-color: #2fec35; /* Czerwony kolor przycisku Delete */
+    .btn-primar {
+    background-color: #2fec35;
     color: #ffffff;
     }
 
-    .btn-primary:hover {
+    .btn-primar:hover {
     background-color: #009f05; /* Ciemniejszy czerwony po najechaniu */
     }
 
