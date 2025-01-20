@@ -31,7 +31,7 @@ else
                 <tr>
                     <td>@request.Title</td>
                     <td>@request.Description</td>
-                    <td>@request.Status</td>
+                    <td>@Loc[$"{request.Status}"]</td>
                     <td>
                         <a href="@GetDetailsUrl(request.Id)">@Loc["Details"]</a>
                         <a href="@GetEditUrl(request.Id)">@Loc["Edit"]</a>
