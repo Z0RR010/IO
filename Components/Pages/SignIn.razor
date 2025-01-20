@@ -94,7 +94,7 @@
                         : "Wystąpił błąd podczas logowania.";
                         if (errorMessage.Contains("Zbyt"))
                         {
-                            var emailDto = new EmailDto() { To = "skph@interia.pl", Subject = "Wielokrotna nieudana próba zalogowania", Body = $@"
+                            var emailDto = new EmailDto() { To = "skphmessages@interia.pl", Subject = "Wielokrotna nieudana próba zalogowania", Body = $@"
 				        <p>Użytkownik {userAccount.Email} przekroczył limit nieudanych prób logowania.</p>" };
 
                             try

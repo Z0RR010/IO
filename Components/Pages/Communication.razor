@@ -78,7 +78,7 @@
     protected override async Task OnInitializedAsync()
     {
         var userEmail = await ses.GetUserNameAsync();
-        if (userEmail == "skph@interia.pl")
+        if (userEmail == "skphmessages@interia.pl")
         {
             isAuthorized = true;
             userEmailToRead = userEmail;
