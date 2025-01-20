@@ -148,6 +148,10 @@ else
         email = await sessionService.GetUserNameAsync();
         UserExecuter userExecuter = new UserExecuter();
         BasicUser basicUser = userExecuter.GetBasicUser(email);
+        if (email == "Anonymous")
+        {
+            nav.NavigateTo("",true);
+        }
         switch (basicUser.Role)
         {
             case "Affected":
